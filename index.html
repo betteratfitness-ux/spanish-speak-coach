@@ -1,0 +1,2346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spanish Speak Coach</title>
+<style>
+:root {
+  --primary: #E85D04;
+  --primary-dark: #9D0208;
+  --gold: #FFB703;
+  --green: #2D9E6B;
+  --red: #D62828;
+  --bg: #F0F4F8;
+  --surface: #FFFFFF;
+  --text: #1A202C;
+  --muted: #718096;
+  --border: #E2E8F0;
+  --radius: 12px;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+
+/* HEADER */
+#app-header {
+  background: var(--primary);
+  color: white;
+  padding: 14px 16px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+#app-header h1 { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.3px; }
+#app-header .tagline { font-size: 0.7rem; opacity: 0.85; margin-top: 2px; }
+#panic-btn {
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.4);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+}
+#panic-btn:hover { background: rgba(255,255,255,0.3); }
+
+/* TAB NAV */
+#tab-nav {
+  display: flex;
+  overflow-x: auto;
+  background: var(--surface);
+  border-bottom: 2px solid var(--border);
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  position: sticky;
+  top: 62px;
+  z-index: 99;
+}
+#tab-nav::-webkit-scrollbar { display: none; }
+.tab-btn {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 10px 14px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+.tab-btn:hover:not(.active) { color: var(--text); }
+
+/* MAIN CONTENT */
+#main-content { padding: 16px; max-width: 680px; margin: 0 auto; }
+
+/* CARDS */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+}
+.card-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.card-heading {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+/* STARS */
+.stars-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin: 10px 0;
+}
+.star-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.star-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  background: var(--border);
+  transition: all 0.3s;
+}
+.star-icon.earned { background: var(--gold); box-shadow: 0 2px 8px rgba(255,183,3,0.4); }
+.star-label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* BUTTONS */
+.btn {
+  display: inline-block;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+  text-align: center;
+}
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: #C94D00; }
+.btn-secondary { background: var(--border); color: var(--text); }
+.btn-secondary:hover { background: #CBD5E0; }
+.btn-green { background: var(--green); color: white; }
+.btn-gold { background: var(--gold); color: var(--text); }
+.btn-sm { padding: 7px 13px; font-size: 0.78rem; }
+.btn-full { width: 100%; display: block; }
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+
+/* PRACTICE OPTIONS */
+.practice-options { display: grid; gap: 8px; }
+.practice-option {
+  background: var(--bg);
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.practice-option:hover { border-color: var(--primary); background: #FFF5EE; }
+.practice-option.featured { border-color: var(--primary); background: #FFF5EE; }
+.practice-option-icon { font-size: 1.4rem; }
+.practice-option-text strong { display: block; font-size: 0.88rem; font-weight: 700; color: var(--text); }
+.practice-option-text span { font-size: 0.75rem; color: var(--muted); }
+.practice-option-duration {
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary);
+  white-space: nowrap;
+}
+
+/* NUDGE */
+.nudge-card {
+  background: linear-gradient(135deg, #1B4332, #2D9E6B);
+  color: white;
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  font-weight: 500;
+}
+.nudge-card strong { display: block; font-size: 0.72rem; opacity: 0.7; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* PROGRESS BAR */
+.progress-wrap { background: var(--border); border-radius: 99px; height: 8px; overflow: hidden; margin: 6px 0; }
+.progress-bar { height: 100%; border-radius: 99px; background: var(--primary); transition: width 0.4s; }
+.progress-bar.green { background: var(--green); }
+.progress-bar.gold { background: var(--gold); }
+
+/* STREAK BADGE */
+.streak-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #FFF5EE;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  border-radius: 99px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+/* DOMAIN BADGES */
+.domain-tag {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 99px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.tag-D1 { background: #EBF8FF; color: #2B6CB0; }
+.tag-D2 { background: #F0FFF4; color: #276749; }
+.tag-D3 { background: #FFFAF0; color: #C05621; }
+.tag-D4 { background: #FAF5FF; color: #6B46C1; }
+.tag-D5 { background: #FFF5F5; color: #C53030; }
+.tag-D6 { background: #FFFFF0; color: #744210; }
+.tag-D7 { background: #E6FFFA; color: #234E52; }
+
+/* MODAL / PANIC */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  padding: 0;
+}
+.modal-overlay.hidden { display: none; }
+.modal-sheet {
+  background: var(--surface);
+  border-radius: 20px 20px 0 0;
+  padding: 20px 16px 32px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+.modal-handle {
+  width: 40px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 99px;
+  margin: 0 auto 16px;
+}
+.modal-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.modal-subtitle { font-size: 0.82rem; color: var(--muted); margin-bottom: 16px; }
+
+/* PANIC SHEET */
+.panic-group { margin-bottom: 16px; }
+.panic-group-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); margin-bottom: 8px; }
+.panic-phrase {
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.panic-phrase:hover { background: #FFF5EE; }
+.panic-phrase .sp { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+.panic-phrase .en { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+.panic-phrase .ph { font-size: 0.72rem; color: var(--primary); margin-top: 2px; font-style: italic; }
+.audio-btn {
+  background: none;
+  border: 1.5px solid var(--primary);
+  color: var(--primary);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+  vertical-align: middle;
+  padding: 0;
+  line-height: 1;
+}
+.audio-btn:hover, .audio-btn.playing { background: var(--primary); color: white; }
+
+/* PLACEHOLDER TABS */
+.placeholder-tab {
+  text-align: center;
+  padding: 48px 16px;
+  color: var(--muted);
+}
+.placeholder-tab .big-icon { font-size: 3rem; margin-bottom: 12px; }
+.placeholder-tab h2 { font-size: 1.2rem; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.placeholder-tab p { font-size: 0.85rem; line-height: 1.6; max-width: 280px; margin: 0 auto; }
+.placeholder-tab .coming { display: inline-block; margin-top: 12px; background: var(--border); color: var(--muted); font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* SECTION DIVIDER */
+.section-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin: 16px 0 8px; }
+
+/* LEARN TAB */
+.domain-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: 2px solid transparent;
+}
+.domain-card:hover { border-color: var(--primary); }
+.domain-icon { font-size: 1.8rem; }
+.domain-info { flex: 1; }
+.domain-info strong { display: block; font-size: 0.92rem; font-weight: 700; }
+.domain-info span { font-size: 0.75rem; color: var(--muted); }
+.domain-count { font-size: 0.75rem; font-weight: 700; color: var(--primary); }
+
+/* SETTINGS */
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+}
+.setting-row:last-child { border-bottom: none; }
+.setting-label strong { display: block; font-size: 0.88rem; font-weight: 600; }
+.setting-label span { font-size: 0.75rem; color: var(--muted); }
+.toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background: var(--border);
+  border-radius: 99px;
+  cursor: pointer;
+  transition: background 0.2s;
+  border: none;
+  flex-shrink: 0;
+}
+.toggle.on { background: var(--green); }
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  transition: left 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.toggle.on::after { left: 23px; }
+
+input[type="text"], select {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+  width: 100%;
+}
+input[type="text"]:focus, select:focus { border-color: var(--primary); }
+
+/* FLUENCY SCORE */
+.fluency-score-ring {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: conic-gradient(var(--primary) 0%, var(--border) 0%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+  position: relative;
+}
+.fluency-score-inner {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.fluency-score-num { font-size: 1.5rem; font-weight: 800; color: var(--text); line-height: 1; }
+.fluency-score-label { font-size: 0.55rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px; }
+
+@media (min-width: 480px) {
+  .stars-grid { gap: 12px; }
+  .star-icon { width: 52px; height: 52px; font-size: 1.5rem; }
+}
+
+/* DIAGNOSTIC */
+#diagnostic-overlay {
+  position: fixed;
+  inset: 0;
+  background: #1A202C;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+#diagnostic-overlay.hidden { display: none; }
+.diag-header {
+  background: var(--primary);
+  padding: 20px 16px;
+  text-align: center;
+  color: white;
+}
+.diag-header h1 { font-size: 1.3rem; font-weight: 800; margin-bottom: 4px; }
+.diag-header p { font-size: 0.82rem; opacity: 0.85; }
+.diag-body { flex: 1; padding: 20px 16px; max-width: 520px; margin: 0 auto; width: 100%; }
+.diag-welcome-icon { font-size: 3.5rem; text-align: center; margin: 16px 0 8px; }
+.diag-card {
+  background: #2D3748;
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 14px;
+  color: white;
+}
+.diag-card h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 6px; }
+.diag-card p { font-size: 0.85rem; color: #A0AEC0; line-height: 1.6; }
+.diag-progress {
+  background: #4A5568;
+  border-radius: 99px;
+  height: 6px;
+  margin: 16px 0;
+  overflow: hidden;
+}
+.diag-progress-bar { height: 100%; background: var(--primary); border-radius: 99px; transition: width 0.35s; }
+.diag-question { color: white; font-size: 1rem; font-weight: 700; margin-bottom: 16px; line-height: 1.4; }
+.diag-options { display: flex; flex-direction: column; gap: 8px; }
+.diag-option {
+  background: #2D3748;
+  border: 2px solid #4A5568;
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: white;
+  font-size: 0.88rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s;
+}
+.diag-option:hover { border-color: var(--primary); background: #1A202C; }
+.diag-option.selected { border-color: var(--primary); background: rgba(232,93,4,0.15); }
+.diag-result-level {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--gold);
+  text-align: center;
+  margin: 12px 0 4px;
+}
+.diag-result-desc { font-size: 0.85rem; color: #A0AEC0; text-align: center; line-height: 1.6; margin-bottom: 16px; }
+.diag-rec {
+  background: #2D3748;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.diag-rec-icon { font-size: 1.3rem; flex-shrink: 0; }
+.diag-rec-text strong { display: block; color: white; font-size: 0.88rem; }
+.diag-rec-text span { color: #A0AEC0; font-size: 0.78rem; }
+</style>
+</head>
+<body>
+
+<!-- DIAGNOSTIC OVERLAY -->
+<div id="diagnostic-overlay" class="hidden">
+  <div class="diag-header">
+    <h1>🇪🇸 Spanish Speak Coach</h1>
+    <p>Let's find your starting point — takes 2 minutes.</p>
+  </div>
+  <div class="diag-body" id="diag-body"></div>
+</div>
+
+<!-- PANIC SHEET MODAL -->
+<div id="panic-overlay" class="modal-overlay hidden" onclick="if(event.target===this)closePanic()">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">⚡ Panic Sheet</div>
+    <div class="modal-subtitle">Real-life Spanish phrases — right now, when you need them. Tap any phrase to hear it.</div>
+
+    <div class="panic-group">
+      <div class="panic-group-title">I Don't Understand</div>
+      <div class="panic-phrase"><div class="sp">No entiendo.</div><div class="en">I don't understand.</div><div class="ph">no en-TYEN-do</div></div>
+      <div class="panic-phrase"><div class="sp">¿Puede repetir, por favor?</div><div class="en">Can you repeat, please?</div><div class="ph">PWEH-deh reh-peh-TEER</div></div>
+      <div class="panic-phrase"><div class="sp">Más despacio, por favor.</div><div class="en">Slower, please.</div><div class="ph">mas des-PAH-syo</div></div>
+      <div class="panic-phrase"><div class="sp">Estoy aprendiendo español.</div><div class="en">I'm learning Spanish.</div><div class="ph">es-TOY ah-pren-DYEN-do</div></div>
+      <div class="panic-phrase"><div class="sp">Un momento, por favor.</div><div class="en">One moment, please.</div><div class="ph">oon mo-MEN-to</div></div>
+    </div>
+
+    <div class="panic-group">
+      <div class="panic-group-title">I Need Help</div>
+      <div class="panic-phrase"><div class="sp">Necesito ayuda.</div><div class="en">I need help.</div><div class="ph">neh-seh-SEE-to ah-YOO-dah</div></div>
+      <div class="panic-phrase"><div class="sp">¿Dónde está el baño?</div><div class="en">Where is the bathroom?</div><div class="ph">DON-deh es-TAH el BAHN-yo</div></div>
+      <div class="panic-phrase"><div class="sp">¿Cuánto cuesta?</div><div class="en">How much does it cost?</div><div class="ph">KWAHN-to KWES-tah</div></div>
+      <div class="panic-phrase"><div class="sp">Llame a la policía.</div><div class="en">Call the police.</div><div class="ph">YAH-meh ah lah po-lee-SEE-ah</div></div>
+      <div class="panic-phrase"><div class="sp">Necesito un médico.</div><div class="en">I need a doctor.</div><div class="ph">neh-seh-SEE-to oon MEH-dee-ko</div></div>
+    </div>
+
+    <div class="panic-group">
+      <div class="panic-group-title">Polite Phrases</div>
+      <div class="panic-phrase"><div class="sp">Gracias por su paciencia.</div><div class="en">Thank you for your patience.</div><div class="ph">GRAH-syas por soo pah-SYEN-syah</div></div>
+      <div class="panic-phrase"><div class="sp">Disculpe.</div><div class="en">Excuse me.</div><div class="ph">dees-KOOL-peh</div></div>
+      <div class="panic-phrase"><div class="sp">¿Habla inglés?</div><div class="en">Do you speak English?</div><div class="ph">AH-blah een-GLES</div></div>
+      <div class="panic-phrase"><div class="sp">Por favor.</div><div class="en">Please.</div><div class="ph">por fah-VOR</div></div>
+    </div>
+
+    <div class="panic-group">
+      <div class="panic-group-title">Ordering Food</div>
+      <div class="panic-phrase"><div class="sp">Quiero ___, por favor.</div><div class="en">I want ___, please.</div><div class="ph">KYEH-ro</div></div>
+      <div class="panic-phrase"><div class="sp">La cuenta, por favor.</div><div class="en">The check, please.</div><div class="ph">lah KWEN-tah</div></div>
+      <div class="panic-phrase"><div class="sp">¿Tiene ___?</div><div class="en">Do you have ___?</div><div class="ph">TYEH-neh</div></div>
+    </div>
+
+    <button class="btn btn-secondary btn-full" onclick="closePanic()">Close</button>
+  </div>
+</div>
+
+<!-- APP -->
+<header id="app-header">
+  <div>
+    <h1>🇪🇸 Spanish Speak Coach</h1>
+    <div class="tagline">Speak a little every day until Spanish starts feeling natural.</div>
+  </div>
+  <button id="panic-btn" onclick="showPanic()">⚡ SOS</button>
+</header>
+
+<nav id="tab-nav">
+  <button class="tab-btn active" data-tab="today">Today</button>
+  <button class="tab-btn" data-tab="learn">Learn</button>
+  <button class="tab-btn" data-tab="speak">Speak</button>
+  <button class="tab-btn" data-tab="review">Review</button>
+  <button class="tab-btn" data-tab="roleplay">Roleplay</button>
+  <button class="tab-btn" data-tab="reallife">Real-Life</button>
+  <button class="tab-btn" data-tab="mastery">Mastery</button>
+  <button class="tab-btn" data-tab="progress">Progress</button>
+  <button class="tab-btn" data-tab="settings">Settings</button>
+</nav>
+
+<main id="main-content"></main>
+
+<script>
+'use strict';
+
+// ===================================================
+// CONTENT DATABASE — 56 starter items
+// ===================================================
+const CONTENT = [
+  // D1 — SURVIVAL SPANISH
+  {id:'D1-001',domain:'D1',level:1,type:'phrase',spanish:'Hola',english:'Hello',pron:'OH-lah',example:'¡Hola! ¿Cómo estás?',exampleEn:'Hello! How are you?',prompt:'How do you say "Hello"?',difficulty:1},
+  {id:'D1-002',domain:'D1',level:1,type:'phrase',spanish:'Buenos días',english:'Good morning',pron:'BWEH-nos DEE-as',example:'Buenos días, señora.',exampleEn:'Good morning, ma\'am.',prompt:'How do you say "Good morning"?',difficulty:1},
+  {id:'D1-003',domain:'D1',level:1,type:'phrase',spanish:'Buenas tardes',english:'Good afternoon',pron:'BWEH-nas TAR-des',example:'Buenas tardes, ¿cómo le va?',exampleEn:'Good afternoon, how is it going?',prompt:'How do you greet someone in the afternoon?',difficulty:1},
+  {id:'D1-004',domain:'D1',level:1,type:'phrase',spanish:'Buenas noches',english:'Good evening / Good night',pron:'BWEH-nas NO-ches',example:'Buenas noches a todos.',exampleEn:'Good night everyone.',prompt:'How do you say "Good night"?',difficulty:1},
+  {id:'D1-005',domain:'D1',level:1,type:'phrase',spanish:'¿Cómo estás?',english:'How are you? (informal)',pron:'KO-mo es-TAS',example:'¡Hola! ¿Cómo estás?',exampleEn:'Hi! How are you?',prompt:'How do you ask "How are you?" informally?',difficulty:1},
+  {id:'D1-006',domain:'D1',level:1,type:'phrase',spanish:'¿Cómo está usted?',english:'How are you? (formal)',pron:'KO-mo es-TA oo-STED',example:'Buenos días. ¿Cómo está usted?',exampleEn:'Good morning. How are you?',prompt:'How do you ask "How are you?" formally?',difficulty:2},
+  {id:'D1-007',domain:'D1',level:1,type:'phrase',spanish:'Bien, gracias.',english:'Fine, thank you.',pron:'BYEN GRA-syas',example:'¿Cómo estás? Bien, gracias.',exampleEn:'How are you? Fine, thank you.',prompt:'How do you say "Fine, thank you"?',difficulty:1},
+  {id:'D1-008',domain:'D1',level:1,type:'phrase',spanish:'Me llamo ___.',english:'My name is ___.',pron:'meh YA-mo',example:'Me llamo María.',exampleEn:'My name is María.',prompt:'How do you introduce your name?',difficulty:1},
+  {id:'D1-009',domain:'D1',level:1,type:'phrase',spanish:'¿Cómo te llamas?',english:'What is your name? (informal)',pron:'KO-mo teh YA-mas',example:'Hola, ¿cómo te llamas?',exampleEn:'Hi, what is your name?',prompt:'How do you ask someone\'s name informally?',difficulty:1},
+  {id:'D1-010',domain:'D1',level:1,type:'phrase',spanish:'Mucho gusto.',english:'Nice to meet you.',pron:'MOO-cho GOOS-to',example:'Mucho gusto en conocerte.',exampleEn:'Nice to meet you.',prompt:'What do you say when meeting someone?',difficulty:1},
+  {id:'D1-011',domain:'D1',level:1,type:'phrase',spanish:'Por favor.',english:'Please.',pron:'por fa-VOR',example:'Un café, por favor.',exampleEn:'A coffee, please.',prompt:'How do you say "please"?',difficulty:1},
+  {id:'D1-012',domain:'D1',level:1,type:'phrase',spanish:'Gracias.',english:'Thank you.',pron:'GRA-syas',example:'Gracias por su ayuda.',exampleEn:'Thank you for your help.',prompt:'How do you say "thank you"?',difficulty:1},
+  {id:'D1-013',domain:'D1',level:1,type:'phrase',spanish:'De nada.',english:'You\'re welcome.',pron:'deh NA-da',example:'Gracias. — De nada.',exampleEn:'Thank you. — You\'re welcome.',prompt:'How do you respond to "gracias"?',difficulty:1},
+  {id:'D1-014',domain:'D1',level:1,type:'phrase',spanish:'Sí / No',english:'Yes / No',pron:'see / no',example:'¿Hablas español? Sí, un poco.',exampleEn:'Do you speak Spanish? Yes, a little.',prompt:'What are the words for yes and no?',difficulty:1},
+  {id:'D1-015',domain:'D1',level:1,type:'phrase',spanish:'No sé.',english:'I don\'t know.',pron:'no seh',example:'¿Dónde está? No sé.',exampleEn:'Where is it? I don\'t know.',prompt:'How do you say "I don\'t know"?',difficulty:1},
+  {id:'D1-016',domain:'D1',level:1,type:'phrase',spanish:'Estoy aprendiendo español.',english:'I\'m learning Spanish.',pron:'es-TOY ah-pren-DYEN-do es-pa-NYOL',example:'Disculpe, estoy aprendiendo español.',exampleEn:'Excuse me, I\'m learning Spanish.',prompt:'How do you tell someone you\'re learning Spanish?',difficulty:2},
+  {id:'D1-017',domain:'D1',level:1,type:'phrase',spanish:'No hablo español bien.',english:'I don\'t speak Spanish well.',pron:'no AH-blo es-pa-NYOL BYEN',example:'Lo siento, no hablo español bien.',exampleEn:'Sorry, I don\'t speak Spanish well.',prompt:'How do you say your Spanish isn\'t great?',difficulty:2},
+  {id:'D1-018',domain:'D1',level:1,type:'phrase',spanish:'¿Puede hablar más despacio?',english:'Can you speak more slowly?',pron:'PWEH-deh ah-BLAR mas des-PA-syo',example:'¿Puede hablar más despacio, por favor?',exampleEn:'Can you speak more slowly, please?',prompt:'How do you ask someone to slow down?',difficulty:2},
+  {id:'D1-019',domain:'D1',level:2,type:'phrase',spanish:'Hasta luego.',english:'Goodbye. / See you later.',pron:'AS-ta LWEH-go',example:'Fue un placer. Hasta luego.',exampleEn:'It was a pleasure. Goodbye.',prompt:'How do you say "goodbye" in Spanish?',difficulty:1},
+  {id:'D1-020',domain:'D1',level:1,type:'phrase',spanish:'Disculpe.',english:'Excuse me. / Sorry.',pron:'dees-KOOL-peh',example:'Disculpe, ¿dónde está la salida?',exampleEn:'Excuse me, where is the exit?',prompt:'How do you say "excuse me"?',difficulty:1},
+
+  // D2 — DAILY LIFE
+  {id:'D2-001',domain:'D2',level:1,type:'phrase',spanish:'Tengo hambre.',english:'I\'m hungry.',pron:'TEN-go AM-breh',example:'Tengo hambre. ¿Comemos?',exampleEn:'I\'m hungry. Shall we eat?',prompt:'How do you say "I\'m hungry"?',difficulty:1},
+  {id:'D2-002',domain:'D2',level:1,type:'phrase',spanish:'Tengo sed.',english:'I\'m thirsty.',pron:'TEN-go SED',example:'Tengo sed. Quiero agua.',exampleEn:'I\'m thirsty. I want water.',prompt:'How do you say "I\'m thirsty"?',difficulty:1},
+  {id:'D2-003',domain:'D2',level:1,type:'phrase',spanish:'¿Quieres agua?',english:'Do you want water?',pron:'KYEH-res AH-gwah',example:'¿Quieres agua o jugo?',exampleEn:'Do you want water or juice?',prompt:'How do you ask if someone wants water?',difficulty:1},
+  {id:'D2-004',domain:'D2',level:1,type:'phrase',spanish:'Vamos.',english:'Let\'s go.',pron:'BAH-mos',example:'¡Vamos! Ya es tarde.',exampleEn:'Let\'s go! It\'s already late.',prompt:'How do you say "Let\'s go"?',difficulty:1},
+  {id:'D2-005',domain:'D2',level:1,type:'vocab',spanish:'la familia',english:'the family',pron:'lah fah-MEE-lyah',example:'Mi familia es grande.',exampleEn:'My family is big.',prompt:'How do you say "the family"?',difficulty:1},
+  {id:'D2-006',domain:'D2',level:1,type:'vocab',spanish:'los niños',english:'the children / the kids',pron:'los NEE-nyos',example:'Los niños están en la escuela.',exampleEn:'The kids are at school.',prompt:'How do you say "the children"?',difficulty:1},
+  {id:'D2-007',domain:'D2',level:1,type:'phrase',spanish:'¿Cómo se dice ___ en español?',english:'How do you say ___ in Spanish?',pron:'KO-mo seh DEE-seh',example:'¿Cómo se dice "apple" en español?',exampleEn:'How do you say "apple" in Spanish?',prompt:'How do you ask how to say something in Spanish?',difficulty:2},
+  {id:'D2-008',domain:'D2',level:1,type:'phrase',spanish:'¿Qué hora es?',english:'What time is it?',pron:'KEH O-rah es',example:'Disculpe, ¿qué hora es?',exampleEn:'Excuse me, what time is it?',prompt:'How do you ask what time it is?',difficulty:1},
+  {id:'D2-009',domain:'D2',level:1,type:'phrase',spanish:'Son las tres.',english:'It\'s three o\'clock.',pron:'son las TRES',example:'Son las tres de la tarde.',exampleEn:'It\'s three in the afternoon.',prompt:'How do you say "It\'s three o\'clock"?',difficulty:2},
+  {id:'D2-010',domain:'D2',level:1,type:'phrase',spanish:'Hace calor / frío.',english:'It\'s hot / cold.',pron:'AH-seh kah-LOR / FREE-o',example:'Hace mucho calor hoy.',exampleEn:'It\'s very hot today.',prompt:'How do you talk about the weather?',difficulty:1},
+
+  // D3 — TRAVEL & PUBLIC
+  {id:'D3-001',domain:'D3',level:1,type:'phrase',spanish:'¿Dónde está ___?',english:'Where is ___?',pron:'DON-deh es-TA',example:'¿Dónde está el baño?',exampleEn:'Where is the bathroom?',prompt:'How do you ask where something is?',difficulty:1},
+  {id:'D3-002',domain:'D3',level:1,type:'phrase',spanish:'A la derecha / izquierda',english:'To the right / left',pron:'ah lah deh-REH-chah / ees-KYEHR-dah',example:'Gire a la derecha.',exampleEn:'Turn to the right.',prompt:'How do you say "right" and "left"?',difficulty:2},
+  {id:'D3-003',domain:'D3',level:1,type:'phrase',spanish:'Recto / Derecho',english:'Straight ahead',pron:'REK-to / deh-REH-cho',example:'Siga recto dos cuadras.',exampleEn:'Go straight two blocks.',prompt:'How do you say "straight ahead"?',difficulty:2},
+  {id:'D3-004',domain:'D3',level:1,type:'phrase',spanish:'La cuenta, por favor.',english:'The check, please.',pron:'lah KWEN-tah',example:'Perdón, la cuenta, por favor.',exampleEn:'Excuse me, the check, please.',prompt:'How do you ask for the check at a restaurant?',difficulty:1},
+  {id:'D3-005',domain:'D3',level:1,type:'phrase',spanish:'¿Cuánto cuesta?',english:'How much does it cost?',pron:'KWAHN-to KWES-tah',example:'¿Cuánto cuesta este libro?',exampleEn:'How much does this book cost?',prompt:'How do you ask the price?',difficulty:1},
+  {id:'D3-006',domain:'D3',level:2,type:'phrase',spanish:'Quiero una mesa para dos.',english:'I want a table for two.',pron:'KYEH-ro OO-nah MEH-sah PAH-rah DOS',example:'Buenas noches. Quiero una mesa para dos.',exampleEn:'Good evening. I want a table for two.',prompt:'How do you ask for a table for two?',difficulty:2},
+  {id:'D3-007',domain:'D3',level:1,type:'phrase',spanish:'¿Tiene ___?',english:'Do you have ___?',pron:'TYEH-neh',example:'¿Tiene habitaciones disponibles?',exampleEn:'Do you have available rooms?',prompt:'How do you ask if they have something?',difficulty:1},
+  {id:'D3-008',domain:'D3',level:2,type:'phrase',spanish:'¿Me puede ayudar?',english:'Can you help me?',pron:'meh PWEH-deh ah-yoo-DAR',example:'Disculpe, ¿me puede ayudar?',exampleEn:'Excuse me, can you help me?',prompt:'How do you ask for help politely?',difficulty:2},
+
+  // D4 — HEALTH & FITNESS
+  {id:'D4-001',domain:'D4',level:1,type:'phrase',spanish:'Me duele ___.',english:'My ___ hurts.',pron:'meh DWEH-leh',example:'Me duele la cabeza.',exampleEn:'My head hurts.',prompt:'How do you say a body part hurts?',difficulty:2},
+  {id:'D4-002',domain:'D4',level:1,type:'vocab',spanish:'la cabeza',english:'the head',pron:'lah kah-BEH-sah',example:'Me duele la cabeza.',exampleEn:'My head hurts.',prompt:'How do you say "head" in Spanish?',difficulty:1},
+  {id:'D4-003',domain:'D4',level:1,type:'vocab',spanish:'la espalda',english:'the back',pron:'lah es-PAL-dah',example:'Tengo dolor de espalda.',exampleEn:'I have back pain.',prompt:'How do you say "back" (body part)?',difficulty:1},
+  {id:'D4-004',domain:'D4',level:1,type:'phrase',spanish:'¡Muy bien!',english:'Very good!',pron:'mwee BYEN',example:'¡Muy bien! Sigue así.',exampleEn:'Very good! Keep it up.',prompt:'How do you say "very good"? (common encouragement)',difficulty:1},
+  {id:'D4-005',domain:'D4',level:2,type:'phrase',spanish:'¿Cuántas repeticiones?',english:'How many repetitions?',pron:'KWAHN-tas reh-peh-tee-SYON-es',example:'¿Cuántas repeticiones hago?',exampleEn:'How many repetitions do I do?',prompt:'How do you ask how many reps to do?',difficulty:2},
+  {id:'D4-006',domain:'D4',level:1,type:'phrase',spanish:'Más despacio.',english:'Slower. / More slowly.',pron:'mas des-PAH-syo',example:'Más despacio. Controla el movimiento.',exampleEn:'Slower. Control the movement.',prompt:'How do you tell someone to slow down?',difficulty:1},
+  {id:'D4-007',domain:'D4',level:2,type:'phrase',spanish:'Respira profundo.',english:'Breathe deeply.',pron:'res-PEE-rah pro-FOON-do',example:'Respira profundo. Relájate.',exampleEn:'Breathe deeply. Relax.',prompt:'How do you say "breathe deeply"?',difficulty:2},
+  {id:'D4-008',domain:'D4',level:1,type:'phrase',spanish:'¡Tú puedes!',english:'You can do it!',pron:'too PWEH-des',example:'¡Tú puedes! ¡Un esfuerzo más!',exampleEn:'You can do it! One more push!',prompt:'How do you encourage someone in Spanish?',difficulty:1},
+
+  // D5 — WORK & SERVICE
+  {id:'D5-001',domain:'D5',level:2,type:'phrase',spanish:'Tengo una cita.',english:'I have an appointment.',pron:'TEN-go OO-nah SEE-tah',example:'Tengo una cita a las dos.',exampleEn:'I have an appointment at two.',prompt:'How do you say "I have an appointment"?',difficulty:2},
+  {id:'D5-002',domain:'D5',level:2,type:'phrase',spanish:'¿Cuánto tiempo tengo que esperar?',english:'How long do I have to wait?',pron:'KWAHN-to TYEM-po TEN-go keh es-peh-RAR',example:'¿Cuánto tiempo tengo que esperar?',exampleEn:'How long do I have to wait?',prompt:'How do you ask how long the wait is?',difficulty:3},
+  {id:'D5-003',domain:'D5',level:2,type:'phrase',spanish:'Quisiera hablar con el gerente.',english:'I\'d like to speak with the manager.',pron:'kee-SYEH-rah ah-BLAR kon el heh-REN-teh',example:'Disculpe, quisiera hablar con el gerente.',exampleEn:'Excuse me, I\'d like to speak with the manager.',prompt:'How do you ask to speak to a manager?',difficulty:3},
+  {id:'D5-004',domain:'D5',level:1,type:'phrase',spanish:'Necesito información sobre ___.',english:'I need information about ___.',pron:'neh-seh-SEE-to een-for-mah-SYON SO-breh',example:'Necesito información sobre este producto.',exampleEn:'I need information about this product.',prompt:'How do you ask for information about something?',difficulty:2},
+
+  // D6 — REAL CONVERSATION
+  {id:'D6-001',domain:'D6',level:2,type:'phrase',spanish:'¿Qué piensas?',english:'What do you think?',pron:'KEH PYEN-sas',example:'Es una buena idea. ¿Qué piensas?',exampleEn:'It\'s a good idea. What do you think?',prompt:'How do you ask "What do you think?"?',difficulty:2},
+  {id:'D6-002',domain:'D6',level:2,type:'phrase',spanish:'Creo que sí / no.',english:'I think so / not.',pron:'KREH-o keh see / no',example:'¿Vas al partido? Creo que sí.',exampleEn:'Are you going to the game? I think so.',prompt:'How do you say "I think so" in Spanish?',difficulty:2},
+  {id:'D6-003',domain:'D6',level:2,type:'phrase',spanish:'Me alegra escuchar eso.',english:'I\'m glad to hear that.',pron:'meh ah-LEH-grah es-koo-CHAR EH-so',example:'¡Me alegra escuchar eso!',exampleEn:'I\'m glad to hear that!',prompt:'How do you say "I\'m glad to hear that"?',difficulty:3},
+  {id:'D6-004',domain:'D6',level:2,type:'phrase',spanish:'¿Y tú, cómo estás?',english:'And you, how are you?',pron:'ee too, KO-mo es-TAS',example:'Estoy bien. ¿Y tú, cómo estás?',exampleEn:'I\'m fine. And you, how are you?',prompt:'How do you ask "And you, how are you?"?',difficulty:2},
+  {id:'D6-005',domain:'D6',level:2,type:'phrase',spanish:'Cuéntame más.',english:'Tell me more.',pron:'KWEN-tah-meh mas',example:'¡Qué interesante! Cuéntame más.',exampleEn:'How interesting! Tell me more.',prompt:'How do you ask someone to tell you more?',difficulty:2},
+
+  // D7 — GRAMMAR THAT HELPS SPEAKING
+  {id:'D7-001',domain:'D7',level:1,type:'verb',spanish:'Yo soy / Yo estoy',english:'I am (permanent) / I am (temporary)',pron:'yo SOY / yo es-TOY',example:'Soy maestro. Estoy cansado.',exampleEn:'I am a teacher. I am tired.',prompt:'What\'s the difference between "soy" and "estoy"?',difficulty:3},
+  {id:'D7-002',domain:'D7',level:1,type:'verb',spanish:'Yo tengo',english:'I have',pron:'yo TEN-go',example:'Tengo dos hijos.',exampleEn:'I have two children.',prompt:'How do you say "I have" in Spanish?',difficulty:1},
+  {id:'D7-003',domain:'D7',level:1,type:'verb',spanish:'Yo quiero ___.',english:'I want ___.',pron:'yo KYEH-ro',example:'Quiero aprender español.',exampleEn:'I want to learn Spanish.',prompt:'How do you say "I want ___"?',difficulty:1},
+  {id:'D7-004',domain:'D7',level:1,type:'verb',spanish:'Yo necesito ___.',english:'I need ___.',pron:'yo neh-seh-SEE-to',example:'Necesito más práctica.',exampleEn:'I need more practice.',prompt:'How do you say "I need ___"?',difficulty:1},
+  {id:'D7-005',domain:'D7',level:2,type:'verb',spanish:'Voy a ___ (+ infinitive).',english:'I\'m going to ___.',pron:'BOY ah',example:'Voy a practicar hoy.',exampleEn:'I\'m going to practice today.',prompt:'How do you say "I\'m going to ___" in Spanish?',difficulty:2},
+  {id:'D7-006',domain:'D7',level:2,type:'verb',spanish:'¿Puedo ___?',english:'Can I ___? / May I ___?',pron:'PWEH-do',example:'¿Puedo hablar con usted?',exampleEn:'Can I speak with you?',prompt:'How do you ask "Can I ___?"?',difficulty:2},
+
+  // TRUE/FALSE items
+  {id:'TF-001',domain:'D1',level:1,type:'true-false',spanish:'"Buenas noches" means "Good morning".',english:'False — it means "Good evening/night".',pron:'',example:'',exampleEn:'',prompt:'True or False: "Buenas noches" means "Good morning".',answer:'false',difficulty:1},
+  {id:'TF-002',domain:'D1',level:1,type:'true-false',spanish:'"Mucho gusto" is used when meeting someone.',english:'True — it means "Nice to meet you".',pron:'',example:'',exampleEn:'',prompt:'True or False: "Mucho gusto" is used when meeting someone.',answer:'true',difficulty:1},
+  {id:'TF-003',domain:'D7',level:2,type:'true-false',spanish:'"Estoy" is used to describe permanent states like profession.',english:'False — "soy" is for permanent states.',pron:'',example:'',exampleEn:'',prompt:'True or False: "Estoy" is used for permanent states like profession.',answer:'false',difficulty:2},
+  {id:'TF-004',domain:'D3',level:1,type:'true-false',spanish:'"La cuenta" means the check at a restaurant.',english:'True.',pron:'',example:'',exampleEn:'',prompt:'True or False: "La cuenta" means the bill/check at a restaurant.',answer:'true',difficulty:1},
+
+  // FILL IN THE BLANK items
+  {id:'FB-001',domain:'D1',level:1,type:'fill-blank',spanish:'___ días. (Good morning)',english:'Buenos',pron:'BWEH-nos',example:'Buenos días, ¿cómo está?',exampleEn:'Good morning, how are you?',prompt:'Complete: "___ días." (Good morning)',answer:'Buenos',difficulty:1},
+  {id:'FB-002',domain:'D1',level:1,type:'fill-blank',spanish:'Me ___ María. (My name is)',english:'llamo',pron:'YA-mo',example:'Me llamo María. ¿Y tú?',exampleEn:'My name is María. And you?',prompt:'Complete: "Me ___ María." (My name is)',answer:'llamo',difficulty:1},
+  {id:'FB-003',domain:'D7',level:1,type:'fill-blank',spanish:'___ aprendiendo español. (I am)',english:'Estoy',pron:'es-TOY',example:'Estoy aprendiendo español poco a poco.',exampleEn:'I\'m learning Spanish little by little.',prompt:'Complete: "___ aprendiendo español."',answer:'Estoy',difficulty:2},
+  {id:'FB-004',domain:'D3',level:1,type:'fill-blank',spanish:'¿___ está el baño? (Where)',english:'Dónde',pron:'DON-deh',example:'Disculpe, ¿dónde está el baño?',exampleEn:'Excuse me, where is the bathroom?',prompt:'Complete: "¿___ está el baño?"',answer:'Dónde',difficulty:1},
+];
+
+// Domain metadata
+const DOMAINS = {
+  D1: { name: 'Survival Spanish', icon: '🆘', desc: 'Greetings, introductions, polite phrases, asking for help' },
+  D2: { name: 'Daily Life', icon: '🏠', desc: 'Food, family, home, time, weather, numbers' },
+  D3: { name: 'Travel & Public', icon: '✈️', desc: 'Directions, restaurants, shopping, transportation' },
+  D4: { name: 'Health & Fitness', icon: '💪', desc: 'Body parts, pain, exercise, coaching phrases' },
+  D5: { name: 'Work & Service', icon: '💼', desc: 'Appointments, scheduling, professional conversation' },
+  D6: { name: 'Real Conversation', icon: '💬', desc: 'Opinions, feelings, keeping conversation going' },
+  D7: { name: 'Grammar That Speaks', icon: '🔑', desc: 'Key verbs and patterns for speaking fluency' },
+};
+
+// ===================================================
+// STATE MANAGEMENT
+// ===================================================
+const LS_KEY = 'ssc_state';
+
+const DEFAULT_STATE = {
+  user: { name: '', level: null, diagnosticDone: false },
+  settings: {
+    practiceLength: 'standard',
+    pronunciationHelper: true,
+    strictMode: false,
+    dailyGoal: 12,
+    nudgeMessages: true,
+    audioEnabled: true,
+    autoPlayAudio: false,
+    audioSpeed: 0.9,
+  },
+  dailyStars: {},    // { 'YYYY-MM-DD': { speak:bool, listen:bool, recall:bool, conversation:bool, comeback:bool } }
+  streak: { current: 0, best: 0, lastDate: null },
+  progress: {},      // { itemId: { correct:0, missed:0, guessed:0, confidence:0, speakConf:0, nextDue:null, lastReviewed:null } }
+  stats: { totalSpeakReps: 0, totalReviewReps: 0, totalRoleplays: 0, comebacks: 0, totalRealLifeReps: 0 },
+  reviewDeck: [],    // array of item ids
+  mastery: {},       // { itemId: { mastered:false, masterDate:null } }
+  roleplayHistory: {},
+  realLife: { scheduled: [], completions: [] },
+};
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return structuredClone(DEFAULT_STATE);
+    return Object.assign(structuredClone(DEFAULT_STATE), JSON.parse(raw));
+  } catch(e) { return structuredClone(DEFAULT_STATE); }
+}
+
+function saveState() {
+  localStorage.setItem(LS_KEY, JSON.stringify(S));
+}
+
+let S = loadState();
+
+// ===================================================
+// UTILITIES
+// ===================================================
+function today() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function getTodayStars() {
+  const d = today();
+  if (!S.dailyStars[d]) S.dailyStars[d] = { speak: false, listen: false, recall: false, conversation: false, comeback: false };
+  return S.dailyStars[d];
+}
+
+function updateStreak() {
+  const d = today();
+  const prev = S.streak.lastDate;
+  if (prev === d) return;
+  if (prev) {
+    const diff = Math.round((new Date(d) - new Date(prev)) / 86400000);
+    if (diff === 1) { S.streak.current += 1; }
+    else if (diff > 1) {
+      if (diff > 1) S.stats.comebacks += 1;
+      S.streak.current = 1;
+    }
+  } else { S.streak.current = 1; }
+  S.streak.best = Math.max(S.streak.best, S.streak.current);
+  S.streak.lastDate = d;
+  saveState();
+}
+
+function awardStar(type) {
+  const stars = getTodayStars();
+  if (stars[type]) return false;
+  stars[type] = true;
+  S.dailyStars[today()] = stars;
+  saveState();
+  return true;
+}
+
+function getItemProgress(id) {
+  if (!S.progress[id]) {
+    S.progress[id] = { correct: 0, missed: 0, guessed: 0, confidence: 0, speakConf: 0, nextDue: null, lastReviewed: null };
+  }
+  return S.progress[id];
+}
+
+function calcNextDue(result, confidence) {
+  const now = Date.now();
+  const day = 86400000;
+  if (result === 'missed') return now;
+  if (result === 'guessed') return now + day;
+  if (confidence <= 2) return now + day;
+  if (confidence === 3) return now + day * 2;
+  if (confidence === 4) return now + day * 4;
+  return now + day * 7;
+}
+
+function addToReviewDeck(id) {
+  if (!S.reviewDeck.includes(id)) {
+    S.reviewDeck.push(id);
+    saveState();
+  }
+}
+
+function getDueReviewItems() {
+  const now = Date.now();
+  return S.reviewDeck.filter(id => {
+    const p = getItemProgress(id);
+    return !p.nextDue || p.nextDue <= now;
+  });
+}
+
+function calcFluencyScore() {
+  const total = CONTENT.length;
+  if (total === 0) return 0;
+
+  const practiced = Object.keys(S.progress).length;
+  const mastered = Object.values(S.mastery).filter(m => m.mastered).length;
+  const avgConf = practiced > 0
+    ? Object.values(S.progress).reduce((a, p) => a + (p.confidence || 0), 0) / practiced / 5
+    : 0;
+
+  const starDays = Object.values(S.dailyStars).length;
+  const streakBonus = Math.min(S.streak.current / 30, 1);
+  const speakRepsBonus = Math.min(S.stats.totalSpeakReps / 100, 1);
+
+  const score = Math.round(
+    (practiced / total) * 25 +
+    (mastered / total) * 25 +
+    avgConf * 20 +
+    Math.min(starDays / 30, 1) * 10 +
+    streakBonus * 10 +
+    speakRepsBonus * 10
+  );
+  return Math.min(score, 100);
+}
+
+function fluencyLevel(score) {
+  if (score <= 20) return 'Starting Point';
+  if (score <= 40) return 'Building Basics';
+  if (score <= 60) return 'Simple Phrases';
+  if (score <= 75) return 'Guided Conversation Ready';
+  if (score <= 89) return 'Strong Everyday Speaker';
+  return 'Fluency Momentum';
+}
+
+function getNudge() {
+  const stars = getTodayStars();
+  const speakReps = S.stats.totalSpeakReps;
+  const streak = S.streak.current;
+  const nudges = [];
+
+  if (!stars.speak) nudges.push("Your mouth needs practice too. Say one phrase out loud today.");
+  if (speakReps === 0) nudges.push("Recognition is not fluency. Speaking is the rep that counts.");
+  if (streak === 0) nudges.push("No starting over. Just returning. Today counts.");
+  if (streak >= 3) nudges.push(`${streak} days in a row. You are stacking proof.`);
+
+  const fallback = [
+    "Do not just recognize the phrase. Speak it.",
+    "Small reps build real confidence.",
+    "Say it out loud. That is the whole point.",
+    "A short Spanish day still counts.",
+    "Awkward is a step. Frozen is the only failure.",
+    "You do not need a perfect day. You need one speaking rep.",
+  ];
+  return nudges.length > 0 ? nudges[0] : fallback[Math.floor(Math.random() * fallback.length)];
+}
+
+// ===================================================
+// RENDERING — TODAY TAB
+// ===================================================
+function renderToday() {
+  updateStreak();
+  const stars = getTodayStars();
+  const dueCount = getDueReviewItems().length;
+  const score = calcFluencyScore();
+  const nudge = getNudge();
+
+  const starDefs = [
+    { key: 'speak',        icon: '🎙️', label: 'Speak' },
+    { key: 'listen',       icon: '👂', label: 'Listen' },
+    { key: 'recall',       icon: '🧠', label: 'Recall' },
+    { key: 'conversation', icon: '💬', label: 'Convo' },
+    { key: 'comeback',     icon: '🔥', label: 'Comeback' },
+  ];
+
+  const starsHTML = starDefs.map(s => `
+    <div class="star-item">
+      <div class="star-icon ${stars[s.key] ? 'earned' : ''}">${s.icon}</div>
+      <div class="star-label">${s.label}</div>
+    </div>`).join('');
+
+  const earnedCount = Object.values(stars).filter(Boolean).length;
+
+  return `
+    <div class="section-label">📅 ${new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})}</div>
+
+    <div class="nudge-card">
+      <strong>Coach Says</strong>
+      ${nudge}
+    </div>
+
+    <div class="card">
+      <div class="card-title">Daily Spanish Stars — ${earnedCount}/5 earned today</div>
+      <div class="stars-grid">${starsHTML}</div>
+      <div style="font-size:0.75rem;color:var(--muted);margin-top:6px;">A perfect day is not the goal. A real rep is the goal.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Today's Practice Plan</div>
+      <div class="practice-options">
+        <div class="practice-option featured" onclick="switchTab('speak')">
+          <div class="practice-option-icon">🎙️</div>
+          <div class="practice-option-text">
+            <strong>Standard Practice</strong>
+            <span>Speak, listen, recall, review</span>
+          </div>
+          <div class="practice-option-duration">12 min</div>
+        </div>
+        <div class="practice-option" onclick="startEmergencyDay()">
+          <div class="practice-option-icon">⚡</div>
+          <div class="practice-option-text">
+            <strong>Emergency Spanish Day</strong>
+            <span>3 phrases · 3 cards · 1 roleplay turn</span>
+          </div>
+          <div class="practice-option-duration">6 min</div>
+        </div>
+        <div class="practice-option" onclick="switchTab('speak')">
+          <div class="practice-option-icon">🌅</div>
+          <div class="practice-option-text">
+            <strong>Morning Split</strong>
+            <span>Listen & repeat · pronunciation warm-up</span>
+          </div>
+          <div class="practice-option-duration">6 min</div>
+        </div>
+        <div class="practice-option" onclick="switchTab('speak')">
+          <div class="practice-option-icon">🌙</div>
+          <div class="practice-option-text">
+            <strong>Deep Practice</strong>
+            <span>All modes · roleplay · mastery verify</span>
+          </div>
+          <div class="practice-option-duration">24 min</div>
+        </div>
+      </div>
+    </div>
+
+    ${dueCount > 0 ? `
+    <div class="card" style="border-left:4px solid var(--primary);">
+      <div class="card-title">Review Due</div>
+      <div style="font-size:1.1rem;font-weight:700;color:var(--primary);">${dueCount} item${dueCount !== 1 ? 's' : ''} ready for review</div>
+      <div style="font-size:0.8rem;color:var(--muted);margin:4px 0 10px;">These phrases need your attention to stick.</div>
+      <button class="btn btn-primary btn-sm" onclick="switchTab('review')">Open Review Deck</button>
+    </div>` : ''}
+
+    <div class="card">
+      <div class="card-title">Fluency Readiness Score</div>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="text-align:center;">
+          <div style="font-size:2.2rem;font-weight:800;color:var(--primary);">${score}</div>
+          <div style="font-size:0.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;">/ 100</div>
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:0.9rem;font-weight:700;color:var(--text);">${fluencyLevel(score)}</div>
+          <div class="progress-wrap" style="margin:6px 0;">
+            <div class="progress-bar" style="width:${score}%"></div>
+          </div>
+          <div style="font-size:0.72rem;color:var(--muted);">Streak: ${S.streak.current} day${S.streak.current !== 1 ? 's' : ''} &nbsp;·&nbsp; Speak reps: ${S.stats.totalSpeakReps}</div>
+        </div>
+      </div>
+    </div>
+
+    ${S.streak.current >= 1 ? `<div style="text-align:center;margin-bottom:14px;"><span class="streak-badge">🔥 ${S.streak.current}-day streak</span></div>` : ''}
+  `;
+}
+
+// ===================================================
+// RENDERING — LEARN TAB
+// ===================================================
+function renderLearn() {
+  const domainRows = Object.entries(DOMAINS).map(([key, d]) => {
+    const items = CONTENT.filter(c => c.domain === key);
+    const practiced = items.filter(c => S.progress[c.id] && S.progress[c.id].lastReviewed).length;
+    const pct = items.length > 0 ? Math.round(practiced / items.length * 100) : 0;
+    return `
+      <div class="domain-card" onclick="openDomain('${key}')">
+        <div class="domain-icon">${d.icon}</div>
+        <div class="domain-info">
+          <strong>${key}: ${d.name}</strong>
+          <span>${d.desc}</span>
+          <div class="progress-wrap" style="margin-top:6px;height:5px;">
+            <div class="progress-bar" style="width:${pct}%"></div>
+          </div>
+        </div>
+        <div class="domain-count">${practiced}/${items.length}</div>
+      </div>`;
+  }).join('');
+
+  return `
+    <div class="section-label">Learning Domains</div>
+    <div class="nudge-card">
+      <strong>How to Learn Here</strong>
+      Browse a domain. Study a phrase. Then go to Speak tab and say it out loud.
+    </div>
+    ${domainRows}
+  `;
+}
+
+function openDomain(key) {
+  const d = DOMAINS[key];
+  const items = CONTENT.filter(c => c.domain === key);
+  const html = `
+    <div style="margin-bottom:12px;">
+      <button class="btn btn-secondary btn-sm" onclick="switchTab('learn')">← Back to Domains</button>
+    </div>
+    <div class="card">
+      <div style="font-size:1.5rem;margin-bottom:4px;">${d.icon}</div>
+      <div class="card-heading">${key}: ${d.name}</div>
+      <div style="font-size:0.82rem;color:var(--muted);margin-bottom:12px;">${d.desc}</div>
+      <button class="btn btn-primary btn-sm" onclick="startDrillDomain('${key}')">Practice This Domain</button>
+    </div>
+    ${items.map(item => renderLearnItem(item)).join('')}
+  `;
+  document.getElementById('main-content').innerHTML = html;
+}
+
+function renderLearnItem(item) {
+  const prog = getItemProgress(item.id);
+  const showPron = S.settings.pronunciationHelper;
+  return `
+    <div class="card" style="border-left:3px solid var(--border);">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">
+        <span class="domain-tag tag-${item.domain}">${item.domain}</span>
+        ${prog.lastReviewed ? '<span style="font-size:0.7rem;color:var(--green);font-weight:700;">✓ Practiced</span>' : ''}
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+        <div style="font-size:1.2rem;font-weight:800;color:var(--text);">${item.spanish}</div>
+        <button class="audio-btn" onclick="speakSpanish(${JSON.stringify(item.spanish)},this)" title="Hear pronunciation">🔊</button>
+      </div>
+      <div style="font-size:0.9rem;color:var(--muted);margin-bottom:4px;">${item.english}</div>
+      ${showPron && item.pron ? `<div style="font-size:0.75rem;color:var(--primary);font-style:italic;margin-bottom:8px;">${item.pron}</div>` : ''}
+      ${item.example ? `<div style="background:var(--bg);border-radius:8px;padding:8px 10px;font-size:0.82rem;">
+        <div style="font-weight:600;">${item.example}</div>
+        <div style="color:var(--muted);margin-top:2px;">${item.exampleEn}</div>
+      </div>` : ''}
+      <div class="btn-row" style="margin-top:10px;">
+        <button class="btn btn-primary btn-sm" onclick="quickSpeak('${item.id}')">🎙️ Say It Out Loud</button>
+        <button class="btn btn-secondary btn-sm" onclick="addToReviewDeck('${item.id}');this.textContent='✓ Added'">+ Review Deck</button>
+      </div>
+    </div>`;
+}
+
+// ===================================================
+// RENDERING — SPEAK TAB
+// ===================================================
+function renderSpeak() {
+  return `
+    <div class="section-label">Speaking Modes</div>
+    <div class="nudge-card">
+      <strong>Speaking = Fluency</strong>
+      These modes force active speaking. Say it out loud every time. Your mouth needs the reps.
+    </div>
+    <div class="practice-options">
+      <div class="practice-option" onclick="startMode('listen-repeat')">
+        <div class="practice-option-icon">👂</div>
+        <div class="practice-option-text">
+          <strong>Listen → Repeat</strong>
+          <span>See a phrase. Say it out loud. Rate your confidence.</span>
+        </div>
+      </div>
+      <div class="practice-option" onclick="startMode('en-to-es')">
+        <div class="practice-option-icon">🧠</div>
+        <div class="practice-option-text">
+          <strong>English → Spanish Recall</strong>
+          <span>See English. Say Spanish out loud. Reveal answer.</span>
+        </div>
+      </div>
+      <div class="practice-option" onclick="startMode('es-to-en')">
+        <div class="practice-option-icon">🔄</div>
+        <div class="practice-option-text">
+          <strong>Spanish → English</strong>
+          <span>See Spanish. Say the meaning. Check yourself.</span>
+        </div>
+      </div>
+      <div class="practice-option" onclick="startMode('speak-memory')">
+        <div class="practice-option-icon">🎯</div>
+        <div class="practice-option-text">
+          <strong>Speak From Memory</strong>
+          <span>No hints. Say it from memory. Highest-value drill.</span>
+        </div>
+      </div>
+      <div class="practice-option" onclick="startMode('speed-round')">
+        <div class="practice-option-icon">⚡</div>
+        <div class="practice-option-text">
+          <strong>Speed Round</strong>
+          <span>10 prompts fast. Go. Build response instincts.</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ===================================================
+// PRACTICE MODE ENGINE
+// ===================================================
+let modeState = null;
+
+// Smart item selection: surface weak/due/unlearned items first
+function getModeItems(count = 10, domainFilter = null) {
+  let pool = domainFilter ? CONTENT.filter(c => c.domain === domainFilter) : [...CONTENT];
+
+  // Score each item — higher = higher priority
+  const scored = pool.map(item => {
+    const p = S.progress[item.id];
+    let score = Math.random(); // base randomness
+    if (!p || !p.lastReviewed) score += 3;          // never practiced = high priority
+    else {
+      if (S.reviewDeck.includes(item.id)) score += 2; // in review deck
+      if ((p.speakConf || 0) <= 2) score += 2;        // low speaking confidence
+      if ((p.confidence || 0) <= 2) score += 1;       // low overall confidence
+      if (p.missed > p.correct) score += 1;           // more misses than correct
+    }
+    return { item, score };
+  });
+
+  return scored.sort((a, b) => b.score - a.score).slice(0, count).map(s => s.item);
+}
+
+function startMode(mode, domainFilter = null, backTab = 'speak') {
+  const items = getModeItems(10, domainFilter);
+  modeState = { mode, items, index: 0, results: [], revealed: false, showHint: false, backTab };
+  renderModeCard();
+}
+
+function startDrillDomain(domainKey) {
+  const items = CONTENT.filter(c => c.domain === domainKey).sort(() => Math.random() - 0.5).slice(0, 10);
+  modeState = { mode: 'listen-repeat', items, index: 0, results: [], revealed: false, showHint: false, backTab: 'learn' };
+  renderModeCard();
+}
+
+function quickSpeak(itemId) {
+  const item = CONTENT.find(c => c.id === itemId);
+  if (!item) return;
+  modeState = { mode: 'listen-repeat', items: [item], index: 0, results: [], revealed: false, showHint: false, backTab: 'learn' };
+  renderModeCard();
+}
+
+// ── Mode card shell ──────────────────────────────────
+function modeShell(index, total, inner) {
+  const pct = Math.round((index / total) * 100);
+  const backTab = modeState?.backTab || 'speak';
+  const backLabel = backTab === 'learn' ? '← Learn' : '← Speak';
+  return `
+    <div style="margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+      <button class="btn btn-secondary btn-sm" onclick="switchTab('${backTab}')">${backLabel}</button>
+      <div style="flex:1;background:var(--border);border-radius:99px;height:6px;overflow:hidden;">
+        <div style="width:${pct}%;height:100%;background:var(--primary);border-radius:99px;transition:width 0.3s;"></div>
+      </div>
+      <span style="font-size:0.72rem;color:var(--muted);font-weight:700;white-space:nowrap;">${index+1}/${total}</span>
+    </div>
+    <div class="card">${inner}</div>`;
+}
+
+// ── Confidence buttons (vertical, mobile-safe) ────────
+function confButtons() {
+  const opts = [
+    { label:'1 — I froze',        result:'missed',  conf:1, bg:'#FED7D7', color:'#9B2C2C' },
+    { label:'2 — I struggled',    result:'guessed', conf:2, bg:'#FEEBC8', color:'#7B341E' },
+    { label:'3 — Got through it', result:'correct', conf:3, bg:'#EBF8FF', color:'#2B6CB0' },
+    { label:'4 — Sounded okay',   result:'correct', conf:4, bg:'#C6F6D5', color:'#22543D' },
+    { label:'5 — Felt natural',   result:'correct', conf:5, bg:'#9AE6B4', color:'#1C4532' },
+  ];
+  return `
+    <div style="margin-top:14px;">
+      <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:8px;text-align:center;letter-spacing:0.6px;">How did it sound?</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        ${opts.map(o => `<button class="btn" style="background:${o.bg};color:${o.color};text-align:left;padding:10px 14px;font-weight:600;" onclick="recordResult('${o.result}',${o.conf})">${o.label}</button>`).join('')}
+      </div>
+    </div>`;
+}
+
+// ── After-reveal result buttons ───────────────────────
+function resultButtons(showAddReview = true) {
+  return `
+    <div style="margin-top:12px;">
+      <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:8px;text-align:center;letter-spacing:0.6px;">How did you do?</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <button class="btn btn-green" style="text-align:left;padding:10px 14px;" onclick="recordResult('correct',4)">✓ Got it — said it confidently</button>
+        <button class="btn" style="background:#FEEBC8;color:#7B341E;text-align:left;padding:10px 14px;" onclick="recordResult('guessed',2)">~ I guessed or wasn't sure</button>
+        <button class="btn" style="background:#FED7D7;color:#9B2C2C;text-align:left;padding:10px 14px;" onclick="recordResult('missed',1)">✗ I didn't know it</button>
+      </div>
+      ${showAddReview ? `<button class="btn btn-secondary btn-sm" style="margin-top:8px;width:100%;" onclick="addToReviewDeck(modeState.items[modeState.index].id);this.textContent='✓ Added to Review Deck';this.disabled=true;">+ Add to Review Deck</button>` : ''}
+    </div>`;
+}
+
+// ── Answer reveal box ─────────────────────────────────
+function answerBox(item, showPron) {
+  return `
+    <div style="background:#FFF5EE;border:2px solid var(--primary);border-radius:12px;padding:16px;margin:12px 0;text-align:center;">
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:4px;">
+        <div style="font-size:1.6rem;font-weight:800;color:var(--text);">${item.spanish}</div>
+        <button class="audio-btn" onclick="speakSpanish(${JSON.stringify(item.spanish)},this)" title="Hear it">🔊</button>
+      </div>
+      ${showPron && item.pron ? `<div style="font-size:0.82rem;color:var(--primary);font-style:italic;margin-bottom:4px;">${item.pron}</div>` : ''}
+      <div style="font-size:0.85rem;color:var(--muted);">${item.english}</div>
+    </div>`;
+}
+
+// ── First-letter hint ─────────────────────────────────
+function firstLetterHint(spanish) {
+  return spanish.split(' ').map(w => {
+    const clean = w.replace(/[¿¡.,?!;:]/g,'');
+    return clean.length > 0 ? clean[0].toUpperCase() + '_'.repeat(Math.max(0,clean.length-1)) : w;
+  }).join(' ');
+}
+
+function renderModeCard() {
+  if (!modeState || modeState.index >= modeState.items.length) {
+    renderModeComplete();
+    return;
+  }
+
+  const item = modeState.items[modeState.index];
+  const showPron = S.settings.pronunciationHelper;
+  const { mode, index, items, revealed } = modeState;
+  const total = items.length;
+  const prog = getItemProgress(item.id);
+  const missCount = prog.missed || 0;
+  const domainLabel = DOMAINS[item.domain]?.name || item.domain;
+
+  // Weak-item badge
+  const weakBadge = missCount >= 2
+    ? `<div style="display:inline-block;background:#FED7D7;color:#9B2C2C;font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:99px;margin-bottom:8px;">⚠ Missed ${missCount}x — priority item</div>`
+    : '';
+
+  let inner = '';
+
+  // ── LISTEN → REPEAT ──────────────────────────────────
+  if (mode === 'listen-repeat') {
+    inner = `
+      <div class="card-title">👂 Listen → Repeat</div>
+      ${weakBadge}
+      <div style="text-align:center;padding:16px 0 8px;">
+        <span class="domain-tag tag-${item.domain}">${domainLabel}</span>
+        <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin:12px 0 6px;">
+          <div style="font-size:2rem;font-weight:800;color:var(--text);">${item.spanish}</div>
+          <button class="audio-btn" style="width:34px;height:34px;font-size:0.9rem;" onclick="speakSpanish(${JSON.stringify(item.spanish)},this)" title="Hear it">🔊</button>
+        </div>
+        ${showPron && item.pron ? `<div style="font-size:0.88rem;color:var(--primary);font-style:italic;margin-bottom:6px;">${item.pron}</div>` : ''}
+        <div style="font-size:0.9rem;color:var(--muted);margin-bottom:10px;">${item.english}</div>
+        ${item.example ? `<div style="background:var(--bg);border-radius:8px;padding:10px 12px;font-size:0.82rem;text-align:left;margin-bottom:8px;"><strong>${item.example}</strong><br><span style="color:var(--muted);">${item.exampleEn}</span></div>` : ''}
+      </div>
+      <div style="background:#FFF5EE;border-radius:8px;padding:10px 12px;font-size:0.85rem;color:var(--primary);font-weight:600;text-align:center;margin-bottom:4px;">
+        🎙️ Say it out loud. Then rate how it sounded.
+      </div>
+      ${confButtons()}`;
+
+  // ── ENGLISH → SPANISH ─────────────────────────────────
+  } else if (mode === 'en-to-es') {
+    inner = `
+      <div class="card-title">🧠 English → Spanish</div>
+      ${weakBadge}
+      <div style="text-align:center;padding:16px 0 4px;">
+        <span class="domain-tag tag-${item.domain}">${domainLabel}</span>
+        <div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin:10px 0 6px;">Say this in Spanish — out loud:</div>
+        <div style="font-size:1.7rem;font-weight:800;color:var(--text);margin-bottom:6px;">${item.english}</div>
+        ${item.example ? `<div style="font-size:0.78rem;color:var(--muted);margin-bottom:12px;">Context: ${item.exampleEn}</div>` : ''}
+      </div>
+      ${!revealed ? `
+        <div style="background:var(--bg);border-radius:8px;padding:10px 12px;font-size:0.82rem;color:var(--muted);text-align:center;margin-bottom:10px;">
+          🎙️ Speak it first — then reveal to check yourself.
+        </div>
+        <button class="btn btn-primary btn-full" onclick="revealAnswer()">I Spoke It → Reveal Answer</button>
+      ` : `
+        ${answerBox(item, showPron)}
+        ${item.example ? `<div style="font-size:0.8rem;text-align:center;color:var(--muted);margin-bottom:8px;">In context: <em>${item.example}</em></div>` : ''}
+        ${resultButtons()}
+      `}`;
+
+  // ── SPANISH → ENGLISH ─────────────────────────────────
+  } else if (mode === 'es-to-en') {
+    inner = `
+      <div class="card-title">🔄 Spanish → English</div>
+      ${weakBadge}
+      <div style="text-align:center;padding:16px 0 4px;">
+        <span class="domain-tag tag-${item.domain}">${domainLabel}</span>
+        <div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin:10px 0 6px;">What does this mean? Say it in English:</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;">
+          <div style="font-size:1.9rem;font-weight:800;color:var(--text);">${item.spanish}</div>
+          <button class="audio-btn" style="width:34px;height:34px;font-size:0.9rem;" onclick="speakSpanish(${JSON.stringify(item.spanish)},this)" title="Hear it">🔊</button>
+        </div>
+      </div>
+      ${!revealed ? `
+        <button class="btn btn-primary btn-full" onclick="revealAnswer()">Reveal Meaning</button>
+      ` : `
+        <div style="background:#FFF5EE;border:2px solid var(--primary);border-radius:12px;padding:14px;text-align:center;margin:8px 0;">
+          <div style="font-size:1.2rem;font-weight:700;color:var(--text);">${item.english}</div>
+          ${showPron && item.pron ? `<div style="font-size:0.8rem;color:var(--primary);font-style:italic;margin-top:4px;">🔊 ${item.pron}</div>` : ''}
+          ${item.example ? `<div style="font-size:0.8rem;color:var(--muted);margin-top:6px;">${item.example}</div>` : ''}
+        </div>
+        <div style="background:#F0FFF4;border-radius:8px;padding:10px 12px;font-size:0.82rem;color:var(--green);font-weight:600;text-align:center;margin:8px 0;">
+          🎙️ Now say the Spanish out loud once before rating.
+        </div>
+        ${resultButtons()}
+      `}`;
+
+  // ── SPEAK FROM MEMORY ─────────────────────────────────
+  } else if (mode === 'speak-memory') {
+    const hint1 = firstLetterHint(item.spanish);
+    inner = `
+      <div class="card-title">🎯 Speak From Memory</div>
+      ${weakBadge}
+      <div style="text-align:center;padding:16px 0 4px;">
+        <span class="domain-tag tag-${item.domain}">${domainLabel}</span>
+        <div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin:10px 0 6px;">Say this in Spanish — no hints:</div>
+        <div style="font-size:1.5rem;font-weight:800;color:var(--text);margin-bottom:4px;">${item.english}</div>
+        <div style="font-size:0.8rem;color:var(--muted);margin-bottom:16px;">${item.prompt}</div>
+      </div>
+      ${!revealed ? `
+        ${modeState.showHint === 2 ? `
+          <div style="background:#EBF8FF;border-radius:8px;padding:10px 12px;font-size:1rem;font-weight:700;color:#2B6CB0;text-align:center;margin-bottom:10px;letter-spacing:3px;">${hint1}</div>
+        ` : modeState.showHint === 1 ? `
+          <div style="background:#EBF8FF;border-radius:8px;padding:10px 12px;font-size:0.82rem;color:#2B6CB0;text-align:center;margin-bottom:10px;">Pronunciation: <em>${item.pron || '...'}</em></div>
+        ` : ''}
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <button class="btn btn-primary" onclick="revealAnswer()">I Spoke It → Reveal</button>
+          ${modeState.showHint !== 1 ? `<button class="btn btn-secondary" onclick="modeState.showHint=1;renderModeCard()">Hint 1: Pronunciation</button>` : ''}
+          ${modeState.showHint === 1 ? `<button class="btn btn-secondary" onclick="modeState.showHint=2;renderModeCard()">Hint 2: First Letters</button>` : ''}
+        </div>
+      ` : `
+        ${answerBox(item, showPron)}
+        ${confButtons()}
+      `}`;
+
+  // ── SPEED ROUND ───────────────────────────────────────
+  } else if (mode === 'speed-round') {
+    inner = `
+      <div class="card-title">⚡ Speed Round</div>
+      <div style="text-align:center;padding:16px 0 4px;">
+        <div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Say in Spanish — fast:</div>
+        <div style="font-size:1.6rem;font-weight:800;color:var(--text);margin-bottom:16px;">${item.english}</div>
+        <span class="domain-tag tag-${item.domain}">${domainLabel}</span>
+      </div>
+      ${!revealed ? `
+        <button class="btn btn-primary btn-full" style="margin-top:16px;" onclick="revealAnswer()">I Said It → Check</button>
+      ` : `
+        <div style="text-align:center;background:#FFF5EE;border-radius:10px;padding:12px;margin:10px 0;">
+          <div style="display:flex;align-items:center;justify-content:center;gap:8px;">
+            <div style="font-size:1.4rem;font-weight:800;color:var(--primary);">${item.spanish}</div>
+            <button class="audio-btn" onclick="speakSpanish(${JSON.stringify(item.spanish)},this)" title="Hear it">🔊</button>
+          </div>
+          ${showPron && item.pron ? `<div style="font-size:0.78rem;color:var(--muted);margin-top:4px;">${item.pron}</div>` : ''}
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button class="btn btn-green" style="flex:1;" onclick="recordResult('correct',4)">✓ Got It</button>
+          <button class="btn" style="flex:1;background:#FEEBC8;color:#7B341E;" onclick="recordResult('guessed',2)">~ Shaky</button>
+          <button class="btn" style="flex:1;background:#FED7D7;color:#9B2C2C;" onclick="recordResult('missed',1)">✗ Missed</button>
+        </div>
+      `}`;
+  }
+
+  document.getElementById('main-content').innerHTML = modeShell(index, total, inner);
+
+  // Auto-play the Spanish phrase when card loads in listen-repeat mode
+  if (mode === 'listen-repeat' && S.settings.autoPlayAudio && !modeState.revealed) {
+    setTimeout(() => speakSpanish(item.spanish), 200);
+  }
+}
+
+function revealAnswer() {
+  modeState.revealed = true;
+  renderModeCard();
+}
+
+function recordResult(result, confidence) {
+  if (!modeState) return;
+  const item = modeState.items[modeState.index];
+  const prog = getItemProgress(item.id);
+
+  prog.lastReviewed = Date.now();
+  prog.nextDue = calcNextDue(result, confidence);
+  prog.confidence = confidence;
+
+  // Track speaking confidence on ALL active speaking modes
+  const speakingModes = ['listen-repeat','en-to-es','es-to-en','speak-memory','speed-round'];
+  if (speakingModes.includes(modeState.mode)) {
+    prog.speakConf = confidence;
+    S.stats.totalSpeakReps += 1;
+    awardStar('speak');
+  }
+  // Listen star specifically for listen-repeat
+  if (modeState.mode === 'listen-repeat') awardStar('listen');
+
+  // Tally result
+  if (result === 'correct') { prog.correct += 1; }
+  if (result === 'missed')  { prog.missed  += 1; addToReviewDeck(item.id); }
+  if (result === 'guessed') { prog.guessed += 1; addToReviewDeck(item.id); }
+  // Auto-add to review if speaking confidence is shaky (conf ≤ 2), even if "correct"
+  if (confidence <= 2) addToReviewDeck(item.id);
+
+  modeState.results.push({ id: item.id, result, confidence });
+  modeState.index += 1;
+  modeState.revealed = false;
+  modeState.showHint = false;
+  saveState();
+  renderModeCard();
+}
+
+function renderModeComplete() {
+  const { results, mode } = modeState;
+  const correct  = results.filter(r => r.result === 'correct').length;
+  const missed   = results.filter(r => r.result === 'missed').length;
+  const guessed  = results.filter(r => r.result === 'guessed').length;
+  const total    = results.length;
+  const avgConf  = total > 0 ? (results.reduce((a,r) => a + r.confidence, 0) / total).toFixed(1) : 0;
+  const addedToReview = results.filter(r => r.result !== 'correct' || r.confidence <= 2).length;
+
+  // Weak items for follow-up display
+  const weakItems = results
+    .filter(r => r.result === 'missed' || r.confidence <= 2)
+    .map(r => CONTENT.find(c => c.id === r.id))
+    .filter(Boolean).slice(0, 3);
+
+  const emoji = correct === total ? '🌟' : correct > total / 2 ? '✅' : '💪';
+  const modeLabel = { 'listen-repeat':'Listen → Repeat','en-to-es':'English → Spanish','es-to-en':'Spanish → English','speak-memory':'Speak From Memory','speed-round':'Speed Round' }[mode] || mode;
+
+  document.getElementById('main-content').innerHTML = `
+    <div class="card" style="text-align:center;">
+      <div style="font-size:2.5rem;margin-bottom:6px;">${emoji}</div>
+      <div class="card-heading">Session Complete</div>
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:14px;">${modeLabel} · ${total} item${total !== 1 ? 's' : ''}</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;">
+        <div style="background:var(--bg);border-radius:8px;padding:8px;">
+          <div style="font-size:1.2rem;font-weight:800;color:var(--green);">${correct}</div>
+          <div style="font-size:0.65rem;color:var(--muted);">Got It</div>
+        </div>
+        <div style="background:var(--bg);border-radius:8px;padding:8px;">
+          <div style="font-size:1.2rem;font-weight:800;color:#D69E2E;">${guessed}</div>
+          <div style="font-size:0.65rem;color:var(--muted);">Guessed</div>
+        </div>
+        <div style="background:var(--bg);border-radius:8px;padding:8px;">
+          <div style="font-size:1.2rem;font-weight:800;color:var(--red);">${missed}</div>
+          <div style="font-size:0.65rem;color:var(--muted);">Missed</div>
+        </div>
+        <div style="background:var(--bg);border-radius:8px;padding:8px;">
+          <div style="font-size:1.2rem;font-weight:800;color:var(--primary);">${avgConf}</div>
+          <div style="font-size:0.65rem;color:var(--muted);">Avg Conf</div>
+        </div>
+      </div>
+      ${addedToReview > 0 ? `<div style="background:#FFF5EE;border-radius:8px;padding:8px 12px;font-size:0.8rem;color:var(--primary);margin-bottom:10px;">📚 ${addedToReview} item${addedToReview !== 1?'s':''} added to your Review Deck for spaced repetition.</div>` : `<div style="background:#F0FFF4;border-radius:8px;padding:8px 12px;font-size:0.8rem;color:var(--green);margin-bottom:10px;">✓ All items answered confidently.</div>`}
+    </div>
+
+    ${weakItems.length > 0 ? `
+    <div class="card">
+      <div class="card-title">Items to Watch</div>
+      ${weakItems.map(item => `
+        <div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-weight:700;font-size:0.9rem;">${item.spanish}</div>
+            <div style="font-size:0.75rem;color:var(--muted);">${item.english}</div>
+          </div>
+          <span class="domain-tag tag-${item.domain}">${item.domain}</span>
+        </div>`).join('')}
+      <div style="font-size:0.75rem;color:var(--muted);margin-top:8px;">These are queued for review. The app will bring them back.</div>
+    </div>` : ''}
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="startMode('${mode}')">Go Again</button>
+      <button class="btn btn-secondary" onclick="switchTab('speak')">Speak Hub</button>
+      <button class="btn btn-secondary" onclick="switchTab('review')">Review Deck</button>
+    </div>
+  `;
+}
+
+// ===================================================
+// RENDERING — REVIEW TAB
+// ===================================================
+function renderReview() {
+  const due = getDueReviewItems();
+  const all = S.reviewDeck;
+
+  if (all.length === 0) {
+    return `
+      <div class="placeholder-tab">
+        <div class="big-icon">📚</div>
+        <h2>Review Deck is Empty</h2>
+        <p>As you practice and miss items, they'll appear here for spaced repetition review.</p>
+        <div class="btn-row" style="justify-content:center;margin-top:16px;">
+          <button class="btn btn-primary" onclick="switchTab('speak')">Start Speaking Practice</button>
+        </div>
+      </div>`;
+  }
+
+  if (due.length === 0) {
+    return `
+      <div class="card" style="text-align:center;">
+        <div style="font-size:2rem;margin-bottom:8px;">✅</div>
+        <div class="card-heading">All caught up!</div>
+        <div style="font-size:0.85rem;color:var(--muted);">No items due right now. Check back later or practice new content.</div>
+        <div style="font-size:0.75rem;color:var(--muted);margin-top:8px;">${all.length} total in deck</div>
+      </div>`;
+  }
+
+  return `
+    <div class="card">
+      <div class="card-title">Review Deck</div>
+      <div style="display:flex;gap:12px;margin-bottom:12px;">
+        <div style="flex:1;text-align:center;background:var(--bg);border-radius:8px;padding:10px;">
+          <div style="font-size:1.3rem;font-weight:800;color:var(--primary);">${due.length}</div>
+          <div style="font-size:0.7rem;color:var(--muted);">Due Now</div>
+        </div>
+        <div style="flex:1;text-align:center;background:var(--bg);border-radius:8px;padding:10px;">
+          <div style="font-size:1.3rem;font-weight:800;">${all.length}</div>
+          <div style="font-size:0.7rem;color:var(--muted);">In Deck</div>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="startReviewSession()">Start Review (${due.length} due)</button>
+    </div>
+    <div class="section-label">Items in Deck</div>
+    ${all.map(id => {
+      const item = CONTENT.find(c => c.id === id);
+      if (!item) return '';
+      const prog = getItemProgress(id);
+      const isDue = !prog.nextDue || prog.nextDue <= Date.now();
+      return `
+        <div class="card" style="padding:12px;border-left:3px solid ${isDue ? 'var(--primary)' : 'var(--border)'};">
+          <div style="display:flex;justify-content:space-between;align-items:start;">
+            <div>
+              <div style="font-weight:700;font-size:0.95rem;">${item.spanish}</div>
+              <div style="font-size:0.78rem;color:var(--muted);">${item.english}</div>
+            </div>
+            <div style="text-align:right;flex-shrink:0;">
+              ${isDue ? '<span style="font-size:0.7rem;font-weight:700;color:var(--primary);">DUE</span>' : '<span style="font-size:0.7rem;color:var(--muted);">Later</span>'}
+              <div style="font-size:0.7rem;color:var(--muted);">✓${prog.correct} ✗${prog.missed}</div>
+            </div>
+          </div>
+        </div>`;
+    }).join('')}
+  `;
+}
+
+let reviewSession = null;
+
+function startReviewSession() {
+  const due = getDueReviewItems();
+  const items = due.map(id => CONTENT.find(c => c.id === id)).filter(Boolean);
+  reviewSession = { items: items.slice(0, 15), index: 0, revealed: false, results: [] };
+  renderReviewCard();
+}
+
+function renderReviewCard() {
+  if (!reviewSession || reviewSession.index >= reviewSession.items.length) {
+    const done = reviewSession?.results.length || 0;
+    const correct = reviewSession?.results.filter(r => r === 'correct').length || 0;
+    awardStar('recall');
+    S.stats.totalReviewReps += done;
+    saveState();
+    document.getElementById('main-content').innerHTML = `
+      <div class="card" style="text-align:center;">
+        <div style="font-size:2rem;margin-bottom:8px;">🧠</div>
+        <div class="card-heading">Review Done!</div>
+        <div style="font-size:0.85rem;color:var(--muted);margin-bottom:12px;">${correct}/${done} correct · Recall Star earned!</div>
+        <div class="btn-row" style="justify-content:center;">
+          <button class="btn btn-primary" onclick="switchTab('review')">Back to Deck</button>
+          <button class="btn btn-secondary" onclick="switchTab('today')">Today</button>
+        </div>
+      </div>`;
+    return;
+  }
+
+  const item = reviewSession.items[reviewSession.index];
+  const { revealed } = reviewSession;
+  const showPron = S.settings.pronunciationHelper;
+  const total = reviewSession.items.length;
+  const idx = reviewSession.index;
+
+  document.getElementById('main-content').innerHTML = `
+    <div style="margin-bottom:10px;">
+      <button class="btn btn-secondary btn-sm" onclick="switchTab('review')">← Review Deck</button>
+    </div>
+    <div style="background:var(--border);border-radius:99px;height:5px;margin-bottom:14px;overflow:hidden;">
+      <div style="width:${(idx/total)*100}%;height:100%;background:var(--primary);transition:width 0.3s;border-radius:99px;"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Review ${idx+1} of ${total}</div>
+      <div style="text-align:center;padding:16px 0;">
+        <span class="domain-tag tag-${item.domain}">${DOMAINS[item.domain]?.name || item.domain}</span>
+        <div style="font-size:0.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin:12px 0 4px;">What does this mean?</div>
+        <div style="font-size:1.8rem;font-weight:800;color:var(--text);margin-bottom:16px;">${item.spanish}</div>
+        ${!revealed ? `
+          <button class="btn btn-primary btn-full" onclick="revealReview()">Reveal</button>
+        ` : `
+          <div style="background:#FFF5EE;border-radius:10px;padding:14px;margin-bottom:12px;">
+            <div style="font-size:1.2rem;font-weight:700;">${item.english}</div>
+            ${showPron && item.pron ? `<div style="font-size:0.8rem;color:var(--primary);font-style:italic;margin-top:4px;">🔊 ${item.pron}</div>` : ''}
+          </div>
+          <div class="btn-row" style="justify-content:center;">
+            <button class="btn btn-green btn-sm" onclick="recordReview('correct',4)">✓ Got It</button>
+            <button class="btn btn-sm" style="background:#FEEBC8;color:#7B341E;" onclick="recordReview('guessed',2)">~ Guessed</button>
+            <button class="btn btn-sm" style="background:#FED7D7;color:#9B2C2C;" onclick="recordReview('missed',1)">✗ Missed</button>
+          </div>
+        `}
+      </div>
+    </div>`;
+}
+
+function revealReview() { reviewSession.revealed = true; renderReviewCard(); }
+
+function recordReview(result, confidence) {
+  const item = reviewSession.items[reviewSession.index];
+  const prog = getItemProgress(item.id);
+  prog.lastReviewed = Date.now();
+  prog.nextDue = calcNextDue(result, confidence);
+  prog.confidence = confidence;
+  if (result === 'correct') prog.correct += 1;
+  if (result === 'missed') prog.missed += 1;
+  if (result === 'guessed') prog.guessed += 1;
+  reviewSession.results.push(result);
+  reviewSession.index += 1;
+  reviewSession.revealed = false;
+  saveState();
+  renderReviewCard();
+}
+
+// ===================================================
+// RENDERING — ROLEPLAY, REAL-LIFE, MASTERY, PROGRESS, SETTINGS
+// ===================================================
+function renderRoleplay() {
+  return `
+    <div class="placeholder-tab">
+      <div class="big-icon">🎭</div>
+      <h2>Roleplay Scenarios</h2>
+      <p>Real-life Spanish conversations: ordering food, asking directions, meeting someone, scheduling appointments, and more.</p>
+      <span class="coming">Phase 2</span>
+    </div>
+    <div class="card">
+      <div class="card-title">Coming in Phase 2</div>
+      <div style="font-size:0.85rem;color:var(--muted);line-height:1.6;">15 scenarios including:<br>
+      Greeting Someone · Ordering Food · Asking Directions · Meeting a New Person · Talking About Family · Scheduling · Travel Emergency · Small Talk</div>
+    </div>`;
+}
+
+function renderRealLife() {
+  return `
+    <div class="placeholder-tab">
+      <div class="big-icon">🏡</div>
+      <h2>Real-Life Practice</h2>
+      <p>Spanish becomes real when you use it with real people. Practice with your kids, partner, friends — or solo missions.</p>
+      <span class="coming">Phase 2</span>
+    </div>
+    <div class="nudge-card">
+      One phrase with a real person builds more courage than ten silent flashcards.
+    </div>
+    <div class="card">
+      <div class="card-title">Coming in Phase 2</div>
+      <div style="font-size:0.85rem;color:var(--muted);line-height:1.6;">Practice with kids · Partner quizzes · Solo missions · Family badges · Real-life confidence tracking</div>
+    </div>`;
+}
+
+function renderMastery() {
+  const score = calcFluencyScore();
+  const level = fluencyLevel(score);
+  const masteredCount = Object.values(S.mastery).filter(m => m.mastered).length;
+  const practicedCount = Object.keys(S.progress).length;
+
+  return `
+    <div class="card" style="text-align:center;">
+      <div class="card-title">Fluency Readiness Score</div>
+      <div style="font-size:3rem;font-weight:800;color:var(--primary);margin:8px 0;">${score}</div>
+      <div style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:4px;">${level}</div>
+      <div class="progress-wrap"><div class="progress-bar" style="width:${score}%"></div></div>
+      <div style="font-size:0.75rem;color:var(--muted);margin-top:6px;">0 = Starting Point → 100 = Fluency Momentum</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+      <div class="card" style="text-align:center;padding:14px;">
+        <div style="font-size:1.5rem;font-weight:800;color:var(--green);">${masteredCount}</div>
+        <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;font-weight:700;">Mastered</div>
+      </div>
+      <div class="card" style="text-align:center;padding:14px;">
+        <div style="font-size:1.5rem;font-weight:800;color:var(--primary);">${practicedCount}</div>
+        <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;font-weight:700;">Practiced</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Readiness Levels</div>
+      ${[
+        [0,20,'Starting Point','Begin with Survival Spanish. One phrase at a time.'],
+        [21,40,'Building Basics','Core greetings and survival phrases taking shape.'],
+        [41,60,'Simple Phrases','Can handle basic daily situations.'],
+        [61,75,'Guided Conversation','Ready for guided real-life conversations.'],
+        [76,89,'Strong Everyday Speaker','Confident in most daily situations.'],
+        [90,100,'Fluency Momentum','Consistent speaking confidence across domains.'],
+      ].map(([min,max,name,desc]) => `
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+          <div style="font-size:0.7rem;font-weight:700;color:var(--muted);width:50px;text-align:center;">${min}–${max}</div>
+          <div>
+            <div style="font-size:0.85rem;font-weight:700;color:${score >= min && score <= max ? 'var(--primary)' : 'var(--text)'};">${score >= min && score <= max ? '▶ ' : ''}${name}</div>
+            <div style="font-size:0.72rem;color:var(--muted);">${desc}</div>
+          </div>
+        </div>`).join('')}
+    </div>
+
+    <div class="placeholder-tab" style="padding:24px 0;">
+      <span class="coming">Mastery Verify + Fluency Checks — Phase 3</span>
+    </div>
+  `;
+}
+
+function renderProgress() {
+  const score = calcFluencyScore();
+  const starDays = Object.entries(S.dailyStars);
+  const totalStars = starDays.reduce((acc, [,s]) => acc + Object.values(s).filter(Boolean).length, 0);
+
+  const domainProgress = Object.entries(DOMAINS).map(([key, d]) => {
+    const items = CONTENT.filter(c => c.domain === key);
+    const practiced = items.filter(c => S.progress[c.id]?.lastReviewed).length;
+    const mastered = items.filter(c => S.mastery[c.id]?.mastered).length;
+    const pct = items.length > 0 ? Math.round(practiced / items.length * 100) : 0;
+    return { key, d, items: items.length, practiced, mastered, pct };
+  });
+
+  return `
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px;">
+      ${[
+        ['🔥','Streak',`${S.streak.current} days`],
+        ['⭐','Stars Earned',totalStars],
+        ['🎙️','Speak Reps',S.stats.totalSpeakReps],
+        ['📚','Review Reps',S.stats.totalReviewReps],
+        ['🔄','Comebacks',S.stats.comebacks],
+        ['🎯','Fluency Score',score],
+      ].map(([icon, label, val]) => `
+        <div class="card" style="text-align:center;padding:14px;">
+          <div style="font-size:1.4rem;">${icon}</div>
+          <div style="font-size:1.3rem;font-weight:800;color:var(--primary);">${val}</div>
+          <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;font-weight:700;">${label}</div>
+        </div>`).join('')}
+    </div>
+
+    <div class="section-label">Domain Coverage Map</div>
+    ${domainProgress.map(dp => `
+      <div class="card" style="padding:12px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span style="font-size:1.1rem;">${dp.d.icon}</span>
+          <span style="font-weight:700;font-size:0.85rem;">${dp.key}: ${dp.d.name}</span>
+          <span style="margin-left:auto;font-size:0.75rem;color:var(--primary);font-weight:700;">${dp.practiced}/${dp.items}</span>
+        </div>
+        <div class="progress-wrap"><div class="progress-bar" style="width:${dp.pct}%"></div></div>
+        <div style="font-size:0.7rem;color:var(--muted);margin-top:4px;">${dp.pct}% practiced · ${dp.mastered} mastered</div>
+      </div>`).join('')}
+
+    <div class="section-label">Daily Stars History</div>
+    <div class="card">
+      ${starDays.length === 0 ? '<div style="font-size:0.85rem;color:var(--muted);">No star history yet. Start practicing!</div>' :
+        starDays.slice(-14).reverse().map(([date, stars]) => {
+          const count = Object.values(stars).filter(Boolean).length;
+          return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);">
+            <span style="font-size:0.75rem;color:var(--muted);width:90px;">${date}</span>
+            <span>${'⭐'.repeat(count)}${'☆'.repeat(5 - count)}</span>
+            <span style="font-size:0.75rem;color:var(--muted);margin-left:auto;">${count}/5</span>
+          </div>`;
+        }).join('')}
+    </div>
+  `;
+}
+
+function renderSettings() {
+  const u = S.user;
+  const cfg = S.settings;
+  return `
+    <div class="section-label">Profile</div>
+    <div class="card">
+      <div class="setting-row">
+        <div class="setting-label"><strong>Your Name</strong><span>Used in coaching messages</span></div>
+        <input type="text" id="set-name" value="${u.name}" placeholder="Your name" style="width:130px;" onchange="S.user.name=this.value;saveState()">
+      </div>
+      <div class="setting-row">
+        <div class="setting-label"><strong>Daily Goal</strong><span>Minutes per day</span></div>
+        <select id="set-goal" onchange="S.settings.dailyGoal=+this.value;saveState()" style="width:100px;">
+          <option value="6" ${cfg.dailyGoal===6?'selected':''}>6 min</option>
+          <option value="12" ${cfg.dailyGoal===12?'selected':''}>12 min</option>
+          <option value="24" ${cfg.dailyGoal===24?'selected':''}>24 min</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="section-label">Practice Settings</div>
+    <div class="card">
+      <div class="setting-row">
+        <div class="setting-label"><strong>Pronunciation Helper</strong><span>Show phonetic spelling</span></div>
+        <button class="toggle ${cfg.pronunciationHelper?'on':''}" id="tog-pron" onclick="toggleSetting('pronunciationHelper','tog-pron')"></button>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label"><strong>Strict Mode</strong><span>No hints until you attempt</span></div>
+        <button class="toggle ${cfg.strictMode?'on':''}" id="tog-strict" onclick="toggleSetting('strictMode','tog-strict')"></button>
+      </div>
+    </div>
+
+    <div class="section-label">Audio Pronunciation</div>
+    <div class="card">
+      <div class="setting-row">
+        <div class="setting-label"><strong>Audio Enabled</strong><span>Hear Spanish phrases spoken aloud (uses device voice)</span></div>
+        <button class="toggle ${cfg.audioEnabled?'on':''}" id="tog-audio" onclick="toggleSetting('audioEnabled','tog-audio')"></button>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label"><strong>Auto-Play in Listen Mode</strong><span>Phrase plays automatically when each card loads</span></div>
+        <button class="toggle ${cfg.autoPlayAudio?'on':''}" id="tog-autoplay" onclick="toggleSetting('autoPlayAudio','tog-autoplay')"></button>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label"><strong>Playback Speed</strong><span>Slower is easier to follow when starting out</span></div>
+        <select onchange="S.settings.audioSpeed=+this.value;saveState()" style="width:120px;">
+          <option value="0.7" ${cfg.audioSpeed===0.7?'selected':''}>Slow (0.7×)</option>
+          <option value="0.9" ${(cfg.audioSpeed||0.9)===0.9?'selected':''}>Normal (0.9×)</option>
+          <option value="1.1" ${cfg.audioSpeed===1.1?'selected':''}>Fast (1.1×)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="section-label">Data</div>
+    <div class="card">
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="exportData()">📥 Export Backup</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('import-input').click()">📤 Import</button>
+      </div>
+      <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(event)">
+    </div>
+
+    <div class="section-label">Reset</div>
+    <div class="card">
+      <div style="font-size:0.82rem;color:var(--muted);margin-bottom:10px;">This will erase all progress. This cannot be undone.</div>
+      <button class="btn btn-sm" style="background:#FED7D7;color:var(--red);" onclick="resetApp()">Reset All Progress</button>
+    </div>
+  `;
+}
+
+function toggleSetting(key, toggleId) {
+  S.settings[key] = !S.settings[key];
+  document.getElementById(toggleId).classList.toggle('on', S.settings[key]);
+  saveState();
+}
+
+// ===================================================
+// EMERGENCY DAY
+// ===================================================
+function startEmergencyDay() {
+  const phrases = CONTENT.filter(c => c.domain === 'D1').sort(() => Math.random() - 0.5).slice(0, 3);
+  modeState = { mode: 'listen-repeat', items: phrases, index: 0, results: [], revealed: false, isEmergency: true };
+  renderModeCard();
+}
+
+// ===================================================
+// DATA — EXPORT / IMPORT / RESET
+// ===================================================
+function exportData() {
+  const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `spanish-speak-coach-backup-${today()}.json`;
+  a.click();
+}
+
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      S = Object.assign(structuredClone(DEFAULT_STATE), data);
+      saveState();
+      alert('Data imported! Refreshing...');
+      location.reload();
+    } catch {
+      alert('Error: Invalid backup file.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function resetApp() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  localStorage.removeItem(LS_KEY);
+  location.reload();
+}
+
+// ===================================================
+// PANIC SHEET
+// ===================================================
+function showPanic() { document.getElementById('panic-overlay').classList.remove('hidden'); }
+function closePanic() { document.getElementById('panic-overlay').classList.add('hidden'); }
+
+// ===================================================
+// AUDIO — Web Speech API
+// ===================================================
+let _spanishVoice = null;
+
+function initTTS() {
+  if (!window.speechSynthesis) return;
+  const load = () => {
+    const voices = speechSynthesis.getVoices();
+    _spanishVoice =
+      voices.find(v => v.lang === 'es-MX') ||
+      voices.find(v => v.lang === 'es-US') ||
+      voices.find(v => v.lang === 'es-ES') ||
+      voices.find(v => v.lang.startsWith('es')) ||
+      null;
+  };
+  load();
+  speechSynthesis.onvoiceschanged = load;
+}
+
+function speakSpanish(text, btnEl) {
+  if (!window.speechSynthesis) return;
+  if (!S.settings.audioEnabled) return;
+  if (typeof text === 'string' && text.includes('___')) return;
+  speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang = 'es-ES';
+  utt.rate = S.settings.audioSpeed || 0.9;
+  utt.pitch = 1;
+  utt.volume = 1;
+  if (_spanishVoice) utt.voice = _spanishVoice;
+  if (btnEl) {
+    btnEl.classList.add('playing');
+    utt.onend = () => btnEl.classList.remove('playing');
+    utt.onerror = () => btnEl.classList.remove('playing');
+  }
+  speechSynthesis.speak(utt);
+}
+
+// Tap any panic phrase to hear it spoken
+document.getElementById('panic-overlay').addEventListener('click', e => {
+  const phrase = e.target.closest('.panic-phrase');
+  if (!phrase) return;
+  const sp = phrase.querySelector('.sp');
+  if (sp) speakSpanish(sp.textContent);
+});
+
+// ===================================================
+// TAB NAVIGATION
+// ===================================================
+const TAB_RENDERERS = {
+  today:    renderToday,
+  learn:    renderLearn,
+  speak:    renderSpeak,
+  review:   renderReview,
+  roleplay: renderRoleplay,
+  reallife: renderRealLife,
+  mastery:  renderMastery,
+  progress: renderProgress,
+  settings: renderSettings,
+};
+
+let activeTab = 'today';
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  const renderer = TAB_RENDERERS[tab];
+  document.getElementById('main-content').innerHTML = renderer ? renderer() : '';
+  window.scrollTo(0, 0);
+}
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+
+// ===================================================
+// DIAGNOSTIC MODE
+// ===================================================
+const DIAG_QUESTIONS = [
+  {
+    q: 'Have you studied Spanish before?',
+    type: 'choice',
+    opts: [
+      { text: 'Never — total beginner', pts: 0 },
+      { text: 'A little, but I forgot most of it', pts: 2 },
+      { text: 'Some classes or self-study', pts: 4 },
+      { text: 'I use it occasionally', pts: 6 },
+    ]
+  },
+  {
+    q: 'How would you greet someone in the morning in Spanish?',
+    type: 'choice',
+    opts: [
+      { text: "I don't know", pts: 0 },
+      { text: '"Hola"', pts: 1 },
+      { text: '"Buenos días"', pts: 2 },
+      { text: '"Buenos días, ¿cómo está usted?"', pts: 3 },
+    ]
+  },
+  {
+    q: 'Can you say "I need help" in Spanish right now?',
+    type: 'speak',
+    answer: 'Necesito ayuda.',
+    opts: [
+      { text: "No idea", pts: 0 },
+      { text: 'I think so, but not sure', pts: 1 },
+      { text: 'Yes — "Necesito ayuda"', pts: 2 },
+    ]
+  },
+  {
+    q: 'What does "¿Dónde está el baño?" mean?',
+    type: 'choice',
+    opts: [
+      { text: "I don't know", pts: 0 },
+      { text: 'Something about help', pts: 0 },
+      { text: 'Where is the bathroom?', pts: 2 },
+      { text: 'Where is the exit?', pts: 1 },
+    ]
+  },
+  {
+    q: 'Can you say "My name is ___" in Spanish?',
+    type: 'speak',
+    answer: 'Me llamo ___.',
+    opts: [
+      { text: "I can't", pts: 0 },
+      { text: 'I think it\'s "Me llamo ___"', pts: 2 },
+      { text: 'Yes — and I can say it naturally', pts: 3 },
+    ]
+  },
+  {
+    q: 'If someone says "¿Cómo estás?" — what do you say back?',
+    type: 'choice',
+    opts: [
+      { text: "I'd freeze", pts: 0 },
+      { text: '"Gracias"', pts: 1 },
+      { text: '"Bien, gracias. ¿Y tú?"', pts: 3 },
+      { text: '"Muy bien, ¿y usted?"', pts: 3 },
+    ]
+  },
+  {
+    q: 'How do you say "I want water, please" in Spanish?',
+    type: 'speak',
+    answer: 'Quiero agua, por favor.',
+    opts: [
+      { text: "No idea", pts: 0 },
+      { text: 'Something with "agua"', pts: 1 },
+      { text: '"Quiero agua, por favor"', pts: 3 },
+    ]
+  },
+  {
+    q: 'What is the difference between "soy" and "estoy"?',
+    type: 'choice',
+    opts: [
+      { text: "I don't know", pts: 0 },
+      { text: 'They mean the same thing', pts: 0 },
+      { text: '"Soy" is permanent, "estoy" is temporary', pts: 3 },
+      { text: '"Soy" is formal, "estoy" is informal', pts: 1 },
+    ]
+  },
+  {
+    q: 'Could you order food in Spanish if you had to right now?',
+    type: 'confidence',
+    opts: [
+      { text: 'No — I would point and hope', pts: 0 },
+      { text: 'Maybe with "quiero" and a word', pts: 1 },
+      { text: 'Yes — I can say a basic order', pts: 3 },
+      { text: 'Yes — and I could ask questions too', pts: 4 },
+    ]
+  },
+  {
+    q: 'Can you say "I\'m going to practice today" in Spanish?',
+    type: 'speak',
+    answer: 'Voy a practicar hoy.',
+    opts: [
+      { text: "No idea", pts: 0 },
+      { text: 'Something with "voy a"', pts: 1 },
+      { text: '"Voy a practicar hoy"', pts: 3 },
+    ]
+  },
+  {
+    q: 'If a Spanish speaker talked too fast, what would you say?',
+    type: 'choice',
+    opts: [
+      { text: "I'd just smile and nod", pts: 0 },
+      { text: '"No entiendo"', pts: 2 },
+      { text: '"Más despacio, por favor"', pts: 3 },
+      { text: '"¿Puede repetir más despacio, por favor?"', pts: 4 },
+    ]
+  },
+  {
+    q: 'How often do you currently practice or use Spanish?',
+    type: 'choice',
+    opts: [
+      { text: 'Never', pts: 0 },
+      { text: 'Rarely — maybe once a month', pts: 1 },
+      { text: 'Sometimes — a few times a month', pts: 2 },
+      { text: 'Often — weekly or more', pts: 3 },
+    ]
+  },
+  {
+    q: 'What is your biggest challenge with Spanish right now?',
+    type: 'choice',
+    pts_override: 0,
+    opts: [
+      { text: 'I freeze when I try to speak', tag: 'freeze' },
+      { text: 'I forget words mid-sentence', tag: 'recall' },
+      { text: 'I understand some but can\'t respond', tag: 'output' },
+      { text: 'I never know where to start', tag: 'start' },
+    ]
+  },
+  {
+    q: 'Can you use "tener" in a sentence? (to have)',
+    type: 'speak',
+    answer: 'Tengo hambre / Tengo dos hijos.',
+    opts: [
+      { text: "No — I don't know that word", pts: 0 },
+      { text: 'I know it means "to have" but can\'t make a sentence', pts: 1 },
+      { text: 'Yes — like "Tengo hambre" (I\'m hungry)', pts: 3 },
+    ]
+  },
+  {
+    q: 'Honestly — how confident do you feel speaking Spanish out loud right now?',
+    type: 'confidence',
+    opts: [
+      { text: '1 — Not at all confident', pts: 0 },
+      { text: '2 — Very shaky', pts: 1 },
+      { text: '3 — I can try but I struggle', pts: 2 },
+      { text: '4 — Okay in simple situations', pts: 3 },
+    ]
+  },
+];
+
+const LEVEL_CONFIG = {
+  'True Beginner': {
+    range: [0, 12],
+    desc: 'You are starting fresh. That is the best place to begin. No pressure, no shame — just small reps.',
+    firstLesson: 'D1',
+    firstMode: 'listen-repeat',
+    firstRoleplay: 'Greeting Someone',
+    tip: 'Start with Survival Spanish. Learn 3 phrases. Say them out loud. That is Day 1.',
+  },
+  'Restart Beginner': {
+    range: [13, 22],
+    desc: 'You\'ve been here before — and that memory is still in there. We\'ll bring it back fast.',
+    firstLesson: 'D1',
+    firstMode: 'listen-repeat',
+    firstRoleplay: 'Greeting Someone',
+    tip: 'Your brain already has some Spanish wiring. Listen → Repeat will wake it up quickly.',
+  },
+  'Basic Phrase Speaker': {
+    range: [23, 32],
+    desc: 'You know the essentials. Now we train you to say them faster, clearer, and with more confidence.',
+    firstLesson: 'D2',
+    firstMode: 'en-to-es',
+    firstRoleplay: 'Ordering Food',
+    tip: 'You have the pieces. English → Spanish recall will push you from recognition to real speaking.',
+  },
+  'Guided Conversation Builder': {
+    range: [33, 42],
+    desc: 'You can handle basic situations. The goal now is to reduce the freeze and build real response speed.',
+    firstLesson: 'D3',
+    firstMode: 'speak-memory',
+    firstRoleplay: 'Asking for Directions',
+    tip: 'Speak From Memory mode is your best tool right now. No hints. Train your mouth to respond.',
+  },
+  'Everyday Conversation Builder': {
+    range: [43, 999],
+    desc: 'You have real Spanish skills. Let\'s build consistency, reduce hesitation, and expand your domains.',
+    firstLesson: 'D6',
+    firstMode: 'speed-round',
+    firstRoleplay: 'Small Talk',
+    tip: 'Speed Round and Roleplay will close the gap between knowing and saying.',
+  },
+};
+
+let diagState = { index: 0, score: 0, answers: [], challenge: null, locked: false };
+
+function getStartingLevel(score) {
+  return Object.entries(LEVEL_CONFIG).find(([, cfg]) => score >= cfg.range[0] && score <= cfg.range[1])?.[0] || 'True Beginner';
+}
+
+function showDiagnostic() {
+  document.getElementById('diagnostic-overlay').classList.remove('hidden');
+  diagState = { index: 0, score: 0, answers: [], challenge: null, locked: false };
+  renderDiagScreen();
+}
+
+function hideDiagnostic() {
+  document.getElementById('diagnostic-overlay').classList.add('hidden');
+}
+
+function renderDiagScreen() {
+  const body = document.getElementById('diag-body');
+
+  if (diagState.index === -1) {
+    // Welcome screen
+    body.innerHTML = `
+      <div class="diag-welcome-icon">🎙️</div>
+      <div class="diag-card">
+        <h2>Find Your Starting Point</h2>
+        <p>15 quick questions. No wrong answers. Your results tell us exactly where to start you so you don't waste time on stuff you already know — or stuff that's too far ahead.</p>
+      </div>
+      <div class="diag-card">
+        <h2>Your starting point is not a judgment.</h2>
+        <p>It is your map.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+        <button class="btn btn-primary btn-full" onclick="diagState.index=0;renderDiagScreen()">Start Diagnostic</button>
+        <button class="btn btn-secondary btn-full" onclick="skipDiagnostic()">Skip — I'll set my own level</button>
+      </div>
+    `;
+    return;
+  }
+
+  if (diagState.index >= DIAG_QUESTIONS.length) {
+    renderDiagResults();
+    return;
+  }
+
+  const q = DIAG_QUESTIONS[diagState.index];
+  const pct = Math.round((diagState.index / DIAG_QUESTIONS.length) * 100);
+
+  body.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+      <span style="font-size:0.72rem;font-weight:700;color:#A0AEC0;text-transform:uppercase;">Question ${diagState.index + 1} of ${DIAG_QUESTIONS.length}</span>
+      ${q.type === 'speak' ? '<span style="font-size:0.7rem;color:var(--gold);font-weight:700;">🎙️ Say it out loud first</span>' : ''}
+      ${q.type === 'confidence' ? '<span style="font-size:0.7rem;color:#76E4F7;font-weight:700;">💭 Honest answer</span>' : ''}
+    </div>
+    <div class="diag-progress"><div class="diag-progress-bar" style="width:${pct}%"></div></div>
+    ${q.type === 'speak' && q.answer ? `<div style="background:rgba(232,93,4,0.15);border:1px solid var(--primary);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:0.82rem;color:#FEB2B2;">Say this out loud before picking: <strong style="color:white;">${q.answer}</strong></div>` : ''}
+    <div class="diag-question">${q.q}</div>
+    <div class="diag-options">
+      ${q.opts.map((o, i) => `<button class="diag-option" onclick="diagAnswer(${i})">${o.text}</button>`).join('')}
+    </div>
+  `;
+}
+
+function diagAnswer(optIndex) {
+  // Guard: block ghost taps, double-fire from touch+click, and fast re-taps
+  if (diagState.locked) return;
+  diagState.locked = true;
+
+  const q = DIAG_QUESTIONS[diagState.index];
+  const opt = q.opts[optIndex];
+
+  // Visual feedback: highlight chosen, disable all
+  document.querySelectorAll('.diag-option').forEach((el, i) => {
+    el.classList.toggle('selected', i === optIndex);
+    el.disabled = true;
+  });
+
+  if (q.pts_override !== undefined) {
+    if (opt.tag) diagState.challenge = opt.tag;
+  } else {
+    diagState.score += (opt.pts || 0);
+  }
+  diagState.answers.push(optIndex);
+
+  setTimeout(() => {
+    diagState.index += 1;
+    renderDiagScreen();
+    // Unlock AFTER render so any touch events during render hit disabled buttons
+    diagState.locked = false;
+  }, 280);
+}
+
+function renderDiagResults() {
+  const level = getStartingLevel(diagState.score);
+  const cfg = LEVEL_CONFIG[level];
+
+  // Save to state
+  S.user.diagnosticDone = true;
+  S.user.level = level;
+  S.user.challenge = diagState.challenge;
+  saveState();
+
+  const firstLesson = DOMAINS[cfg.firstLesson];
+  const body = document.getElementById('diag-body');
+
+  body.innerHTML = `
+    <div style="text-align:center;padding:16px 0 8px;">
+      <div style="font-size:0.78rem;font-weight:700;color:#A0AEC0;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">Your Starting Level</div>
+      <div class="diag-result-level">${level}</div>
+      <div class="diag-result-desc">${cfg.desc}</div>
+    </div>
+
+    <div class="diag-card" style="background:rgba(232,93,4,0.15);border:1px solid var(--primary);margin-bottom:16px;">
+      <p style="color:#FEB2B2;font-size:0.85rem;font-weight:600;">💡 ${cfg.tip}</p>
+    </div>
+
+    <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;color:#A0AEC0;letter-spacing:0.6px;margin-bottom:8px;">Your Recommended First Steps</div>
+
+    <div class="diag-rec">
+      <div class="diag-rec-icon">${firstLesson.icon}</div>
+      <div class="diag-rec-text">
+        <strong>First Lesson: ${cfg.firstLesson} — ${firstLesson.name}</strong>
+        <span>${firstLesson.desc}</span>
+      </div>
+    </div>
+
+    <div class="diag-rec">
+      <div class="diag-rec-icon">🎙️</div>
+      <div class="diag-rec-text">
+        <strong>First Speaking Drill: ${cfg.firstMode === 'listen-repeat' ? 'Listen → Repeat' : cfg.firstMode === 'en-to-es' ? 'English → Spanish Recall' : cfg.firstMode === 'speak-memory' ? 'Speak From Memory' : 'Speed Round'}</strong>
+        <span>The speaking mode that fits where you are right now.</span>
+      </div>
+    </div>
+
+    <div class="diag-rec">
+      <div class="diag-rec-icon">🎭</div>
+      <div class="diag-rec-text">
+        <strong>First Roleplay: ${cfg.firstRoleplay}</strong>
+        <span>A real-life scenario matched to your level.</span>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;display:flex;flex-direction:column;gap:8px;">
+      <button class="btn btn-primary btn-full" onclick="finishDiagnostic('${cfg.firstMode}','${cfg.firstLesson}')">Start My First Practice →</button>
+      <button class="btn btn-secondary btn-full" onclick="finishDiagnostic(null,null)">Go to Dashboard</button>
+    </div>
+    <div style="height:20px;"></div>
+  `;
+}
+
+function finishDiagnostic(mode, domain) {
+  hideDiagnostic();
+  updateStreak();
+  if (mode && domain) {
+    // Go directly to Speak tab and start the recommended mode
+    switchTab('speak');
+    startMode(mode);
+  } else {
+    switchTab('today');
+  }
+}
+
+function skipDiagnostic() {
+  S.user.diagnosticDone = true;
+  S.user.level = 'Basic Phrase Speaker';
+  saveState();
+  hideDiagnostic();
+  switchTab('today');
+}
+
+// ===================================================
+// INIT
+// ===================================================
+updateStreak();
+initTTS();
+if (!S.user.diagnosticDone) {
+  // Show diagnostic on first visit
+  document.getElementById('diagnostic-overlay').classList.remove('hidden');
+  diagState.index = -1;
+  renderDiagScreen();
+} else {
+  switchTab('today');
+}
+</script>
+</body>
+</html>
