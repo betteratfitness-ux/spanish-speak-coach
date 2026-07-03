@@ -1910,21 +1910,33 @@ function initTTS() {
 
 function speakSpanish(text, btnEl) {
   if (!window.speechSynthesis) return;
-  if (!S.settings.audioEnabled) return;
+  if (S.settings.audioEnabled === false) return;
   if (typeof text === 'string' && text.includes('___')) return;
-  speechSynthesis.cancel();
-  const utt = new SpeechSynthesisUtterance(text);
-  utt.lang = 'es-ES';
-  utt.rate = S.settings.audioSpeed || 0.9;
-  utt.pitch = 1;
-  utt.volume = 1;
-  if (_spanishVoice) utt.voice = _spanishVoice;
-  if (btnEl) {
-    btnEl.classList.add('playing');
-    utt.onend = () => btnEl.classList.remove('playing');
-    utt.onerror = () => btnEl.classList.remove('playing');
+
+  const doSpeak = () => {
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.lang = 'es-ES';
+    utt.rate = S.settings.audioSpeed || 0.9;
+    utt.pitch = 1;
+    utt.volume = 1;
+    if (_spanishVoice) utt.voice = _spanishVoice;
+    if (btnEl) {
+      btnEl.classList.add('playing');
+      utt.onend = () => btnEl.classList.remove('playing');
+      utt.onerror = () => btnEl.classList.remove('playing');
+    }
+    // iOS fix: resume if stuck in paused state
+    if (speechSynthesis.paused) speechSynthesis.resume();
+    speechSynthesis.speak(utt);
+  };
+
+  // iOS fix: cancel() + immediate speak() silently fails — delay after cancel
+  if (speechSynthesis.speaking || speechSynthesis.pending) {
+    speechSynthesis.cancel();
+    setTimeout(doSpeak, 80);
+  } else {
+    doSpeak();
   }
-  speechSynthesis.speak(utt);
 }
 
 // Tap any panic phrase to hear it spoken
