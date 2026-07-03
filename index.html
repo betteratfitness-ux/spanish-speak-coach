@@ -1915,7 +1915,8 @@ function initTTS() {
 function speakSpanish(text, btnEl) {
   if (!window.speechSynthesis) return;
   if (S.settings.audioEnabled === false) return;
-  if (typeof text === 'string' && text.includes('___')) return;
+  // Strip fill-in-the-blank underscores so the rest of the phrase still plays
+  if (typeof text === 'string') text = text.replace(/_{2,}/g, '').replace(/\s{2,}/g, ' ').trim();
 
   const doSpeak = () => {
     const utt = new SpeechSynthesisUtterance(text);
