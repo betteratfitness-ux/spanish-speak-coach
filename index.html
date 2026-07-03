@@ -1034,7 +1034,7 @@ function renderLearnItem(item) {
       </div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
         <div style="font-size:1.2rem;font-weight:800;color:var(--text);">${item.spanish}</div>
-        <button class="audio-btn" onclick="speakSpanish(${JSON.stringify(item.spanish)},this)" title="Hear pronunciation">🔊</button>
+        <button class="audio-btn" data-speak="${esc(item.spanish)}" onclick="speakSpanish(this.dataset.speak,this)" title="Hear pronunciation">🔊</button>
       </div>
       <div style="font-size:0.9rem;color:var(--muted);margin-bottom:4px;">${item.english}</div>
       ${showPron && item.pron ? `<div style="font-size:0.75rem;color:var(--primary);font-style:italic;margin-bottom:8px;">${item.pron}</div>` : ''}
@@ -1197,7 +1197,7 @@ function answerBox(item, showPron) {
     <div style="background:#FFF5EE;border:2px solid var(--primary);border-radius:12px;padding:16px;margin:12px 0;text-align:center;">
       <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:4px;">
         <div style="font-size:1.6rem;font-weight:800;color:var(--text);">${item.spanish}</div>
-        <button class="audio-btn" onclick="speakSpanish(${JSON.stringify(item.spanish)},this)" title="Hear it">🔊</button>
+        <button class="audio-btn" data-speak="${esc(item.spanish)}" onclick="speakSpanish(this.dataset.speak,this)" title="Hear it">🔊</button>
       </div>
       ${showPron && item.pron ? `<div style="font-size:0.82rem;color:var(--primary);font-style:italic;margin-bottom:4px;">${item.pron}</div>` : ''}
       <div style="font-size:0.85rem;color:var(--muted);">${item.english}</div>
@@ -1242,7 +1242,7 @@ function renderModeCard() {
         <span class="domain-tag tag-${item.domain}">${domainLabel}</span>
         <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin:12px 0 6px;">
           <div style="font-size:2rem;font-weight:800;color:var(--text);">${item.spanish}</div>
-          <button class="audio-btn" style="width:34px;height:34px;font-size:0.9rem;" onclick="speakSpanish(${JSON.stringify(item.spanish)},this)" title="Hear it">🔊</button>
+          <button class="audio-btn" style="width:34px;height:34px;font-size:0.9rem;" data-speak="${esc(item.spanish)}" onclick="speakSpanish(this.dataset.speak,this)" title="Hear it">🔊</button>
         </div>
         ${showPron && item.pron ? `<div style="font-size:0.88rem;color:var(--primary);font-style:italic;margin-bottom:6px;">${item.pron}</div>` : ''}
         <div style="font-size:0.9rem;color:var(--muted);margin-bottom:10px;">${item.english}</div>
@@ -1285,7 +1285,7 @@ function renderModeCard() {
         <div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin:10px 0 6px;">What does this mean? Say it in English:</div>
         <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;">
           <div style="font-size:1.9rem;font-weight:800;color:var(--text);">${item.spanish}</div>
-          <button class="audio-btn" style="width:34px;height:34px;font-size:0.9rem;" onclick="speakSpanish(${JSON.stringify(item.spanish)},this)" title="Hear it">🔊</button>
+          <button class="audio-btn" style="width:34px;height:34px;font-size:0.9rem;" data-speak="${esc(item.spanish)}" onclick="speakSpanish(this.dataset.speak,this)" title="Hear it">🔊</button>
         </div>
       </div>
       ${!revealed ? `
@@ -1345,7 +1345,7 @@ function renderModeCard() {
         <div style="text-align:center;background:#FFF5EE;border-radius:10px;padding:12px;margin:10px 0;">
           <div style="display:flex;align-items:center;justify-content:center;gap:8px;">
             <div style="font-size:1.4rem;font-weight:800;color:var(--primary);">${item.spanish}</div>
-            <button class="audio-btn" onclick="speakSpanish(${JSON.stringify(item.spanish)},this)" title="Hear it">🔊</button>
+            <button class="audio-btn" data-speak="${esc(item.spanish)}" onclick="speakSpanish(this.dataset.speak,this)" title="Hear it">🔊</button>
           </div>
           ${showPron && item.pron ? `<div style="font-size:0.78rem;color:var(--muted);margin-top:4px;">${item.pron}</div>` : ''}
         </div>
@@ -1891,6 +1891,10 @@ function closePanic() { document.getElementById('panic-overlay').classList.add('
 // ===================================================
 // AUDIO — Web Speech API
 // ===================================================
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
 let _spanishVoice = null;
 
 function initTTS() {
