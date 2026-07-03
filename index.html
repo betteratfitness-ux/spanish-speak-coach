@@ -2005,13 +2005,14 @@ const DIAG_QUESTIONS = [
     ]
   },
   {
-    q: 'Can you say "I need help" in Spanish right now?',
+    q: 'Say this phrase out loud right now. How did it go?',
     type: 'speak',
     answer: 'Necesito ayuda.',
+    answerEn: 'I need help.',
     opts: [
-      { text: "No idea", pts: 0 },
-      { text: 'I think so, but not sure', pts: 1 },
-      { text: 'Yes — "Necesito ayuda"', pts: 2 },
+      { text: "Couldn't say it", pts: 0 },
+      { text: 'Stumbled through it', pts: 1 },
+      { text: 'Said it comfortably', pts: 2 },
     ]
   },
   {
@@ -2025,13 +2026,14 @@ const DIAG_QUESTIONS = [
     ]
   },
   {
-    q: 'Can you say "My name is ___" in Spanish?',
+    q: 'Say this phrase out loud right now. How did it go?',
     type: 'speak',
     answer: 'Me llamo ___.',
+    answerEn: 'My name is ___.',
     opts: [
-      { text: "I can't", pts: 0 },
-      { text: 'I think it\'s "Me llamo ___"', pts: 2 },
-      { text: 'Yes — and I can say it naturally', pts: 3 },
+      { text: "Couldn't say it", pts: 0 },
+      { text: 'Got through it but shaky', pts: 2 },
+      { text: 'Said it naturally', pts: 3 },
     ]
   },
   {
@@ -2045,13 +2047,14 @@ const DIAG_QUESTIONS = [
     ]
   },
   {
-    q: 'How do you say "I want water, please" in Spanish?',
+    q: 'Say this phrase out loud right now. How did it go?',
     type: 'speak',
     answer: 'Quiero agua, por favor.',
+    answerEn: 'I want water, please.',
     opts: [
-      { text: "No idea", pts: 0 },
-      { text: 'Something with "agua"', pts: 1 },
-      { text: '"Quiero agua, por favor"', pts: 3 },
+      { text: "Couldn't say it", pts: 0 },
+      { text: 'Got part of it', pts: 1 },
+      { text: 'Said the whole thing correctly', pts: 3 },
     ]
   },
   {
@@ -2075,13 +2078,14 @@ const DIAG_QUESTIONS = [
     ]
   },
   {
-    q: 'Can you say "I\'m going to practice today" in Spanish?',
+    q: 'Say this phrase out loud right now. How did it go?',
     type: 'speak',
     answer: 'Voy a practicar hoy.',
+    answerEn: "I'm going to practice today.",
     opts: [
-      { text: "No idea", pts: 0 },
-      { text: 'Something with "voy a"', pts: 1 },
-      { text: '"Voy a practicar hoy"', pts: 3 },
+      { text: "Couldn't say it", pts: 0 },
+      { text: 'Got part of it', pts: 1 },
+      { text: 'Said the whole thing correctly', pts: 3 },
     ]
   },
   {
@@ -2116,13 +2120,14 @@ const DIAG_QUESTIONS = [
     ]
   },
   {
-    q: 'Can you use "tener" in a sentence? (to have)',
+    q: 'Say one of these out loud right now. How did it go?',
     type: 'speak',
-    answer: 'Tengo hambre / Tengo dos hijos.',
+    answer: 'Tengo hambre. / Tengo dos hijos.',
+    answerEn: "I'm hungry. / I have two kids.",
     opts: [
-      { text: "No — I don't know that word", pts: 0 },
-      { text: 'I know it means "to have" but can\'t make a sentence', pts: 1 },
-      { text: 'Yes — like "Tengo hambre" (I\'m hungry)', pts: 3 },
+      { text: "I don't know this word at all", pts: 0 },
+      { text: 'I know what it means but froze trying to use it', pts: 1 },
+      { text: 'Said a sentence with it', pts: 3 },
     ]
   },
   {
@@ -2234,7 +2239,14 @@ function renderDiagScreen() {
       ${q.type === 'confidence' ? '<span style="font-size:0.7rem;color:#76E4F7;font-weight:700;">💭 Honest answer</span>' : ''}
     </div>
     <div class="diag-progress"><div class="diag-progress-bar" style="width:${pct}%"></div></div>
-    ${q.type === 'speak' && q.answer ? `<div style="background:rgba(232,93,4,0.15);border:1px solid var(--primary);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:0.82rem;color:#FEB2B2;">Say this out loud before picking: <strong style="color:white;">${q.answer}</strong></div>` : ''}
+    ${q.type === 'speak' && q.answer ? `
+      <div style="background:rgba(232,93,4,0.15);border:2px solid var(--primary);border-radius:10px;padding:14px 16px;margin-bottom:14px;text-align:center;">
+        <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#FEB2B2;letter-spacing:0.6px;margin-bottom:8px;">🎙️ Say this out loud first:</div>
+        <div style="font-size:1.4rem;font-weight:800;color:white;margin-bottom:4px;">${q.answer}</div>
+        ${q.answerEn ? `<div style="font-size:0.8rem;color:#A0AEC0;">${q.answerEn}</div>` : ''}
+      </div>
+      <div style="font-size:0.78rem;color:#A0AEC0;text-align:center;margin-bottom:10px;">Then pick how it went:</div>
+    ` : ''}
     <div class="diag-question">${q.q}</div>
     <div class="diag-options">
       ${q.opts.map((o, i) => `<button class="diag-option" onclick="diagAnswer(${i})">${o.text}</button>`).join('')}
