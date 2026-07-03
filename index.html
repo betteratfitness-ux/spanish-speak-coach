@@ -723,7 +723,12 @@ function loadState() {
   try {
     const raw = localStorage.getItem(LS_KEY);
     if (!raw) return structuredClone(DEFAULT_STATE);
-    return Object.assign(structuredClone(DEFAULT_STATE), JSON.parse(raw));
+    const saved = JSON.parse(raw);
+    const state = structuredClone(DEFAULT_STATE);
+    Object.assign(state, saved);
+    // Deep-merge settings so newly added keys always get their defaults
+    state.settings = Object.assign(structuredClone(DEFAULT_STATE.settings), saved.settings || {});
+    return state;
   } catch(e) { return structuredClone(DEFAULT_STATE); }
 }
 
