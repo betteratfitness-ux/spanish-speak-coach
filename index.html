@@ -526,9 +526,135 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
 .diag-rec-icon { font-size: 1.3rem; flex-shrink: 0; }
 .diag-rec-text strong { display: block; color: white; font-size: 0.88rem; }
 .diag-rec-text span { color: #A0AEC0; font-size: 0.78rem; }
+
+/* GOALS ONBOARDING OVERLAY */
+#goals-overlay {
+  position: fixed; inset: 0; background: #1A202C; z-index: 1000;
+  display: flex; flex-direction: column; overflow-y: auto;
+}
+#goals-overlay.hidden { display: none; }
+.goals-header {
+  background: var(--primary); padding: 24px 20px 20px;
+  text-align: center; color: white;
+}
+.goals-header h1 { font-size: 1.3rem; font-weight: 800; margin-bottom: 4px; }
+.goals-header p { font-size: 0.82rem; opacity: 0.88; }
+.goals-body { flex: 1; padding: 20px 16px 40px; max-width: 480px; margin: 0 auto; width: 100%; }
+.goals-step-label {
+  font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.8px; color: #A0AEC0; margin-bottom: 8px;
+}
+.goals-progress { background: #4A5568; border-radius: 99px; height: 4px; margin-bottom: 20px; overflow: hidden; }
+.goals-progress-bar { height: 100%; background: var(--primary); border-radius: 99px; transition: width 0.4s; }
+.goals-question { color: white; font-size: 1.1rem; font-weight: 700; margin-bottom: 6px; line-height: 1.4; }
+.goals-sub { color: #A0AEC0; font-size: 0.82rem; margin-bottom: 20px; }
+.goals-opts { display: flex; flex-direction: column; gap: 8px; }
+.goals-opt {
+  background: #2D3748; border: 2px solid #4A5568; border-radius: 10px;
+  padding: 14px 16px; color: white; font-size: 0.9rem; cursor: pointer;
+  text-align: left; display: flex; align-items: center; gap: 10px;
+  transition: all 0.15s;
+}
+.goals-opt:hover { border-color: var(--primary); background: #1A202C; }
+.goals-opt .opt-icon { font-size: 1.3rem; flex-shrink: 0; }
+.goals-opt .opt-text strong { display: block; font-weight: 700; }
+.goals-opt .opt-text span { font-size: 0.75rem; color: #A0AEC0; }
+
+/* LESSON FLOW */
+.lesson-phase-label {
+  font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+  color: var(--primary); letter-spacing: 0.6px; margin-bottom: 6px;
+}
+.lesson-phrase-card {
+  background: var(--surface); border-radius: var(--radius);
+  padding: 24px 16px; margin-bottom: 14px; text-align: center;
+  box-shadow: var(--shadow);
+}
+.lesson-phrase-spanish { font-size: 2rem; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+.lesson-phrase-pron { font-size: 0.9rem; color: var(--primary); font-style: italic; margin-bottom: 4px; }
+.lesson-phrase-english { font-size: 1rem; color: var(--muted); margin-bottom: 12px; }
+.lesson-phrase-example { background: var(--bg); border-radius: 8px; padding: 10px 12px; font-size: 0.82rem; margin-bottom: 12px; text-align: left; }
+
+.lesson-step-bar {
+  display: flex; gap: 4px; margin-bottom: 14px;
+}
+.lesson-step-dot {
+  flex: 1; height: 4px; border-radius: 99px; background: var(--border);
+  transition: background 0.3s;
+}
+.lesson-step-dot.done { background: var(--primary); }
+.lesson-step-dot.active { background: var(--gold); }
+
+.convo-bubble-app {
+  background: var(--primary); color: white; border-radius: 16px 16px 16px 4px;
+  padding: 12px 16px; margin-bottom: 6px; display: inline-block; max-width: 85%;
+  font-size: 0.95rem; font-weight: 600;
+}
+.convo-bubble-sub { font-size: 0.75rem; opacity: 0.82; margin-top: 2px; }
+.convo-opts { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.convo-opt {
+  background: var(--bg); border: 2px solid var(--border); border-radius: 10px;
+  padding: 12px 14px; font-size: 0.9rem; cursor: pointer; text-align: left;
+  transition: all 0.15s; font-weight: 600;
+}
+.convo-opt:hover { border-color: var(--primary); background: #FFF5EE; }
+.convo-opt.correct { border-color: var(--green); background: #F0FFF4; color: var(--green); }
+.convo-opt.wrong { border-color: var(--red); background: #FFF5F5; color: var(--red); }
+
+/* TODAY TAB — LESSON CTA */
+.daily-lesson-card {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  border-radius: var(--radius); padding: 20px; margin-bottom: 14px;
+  color: white; position: relative; overflow: hidden;
+}
+.daily-lesson-card::before {
+  content: ''; position: absolute; top: -20px; right: -20px;
+  width: 100px; height: 100px; background: rgba(255,255,255,0.08);
+  border-radius: 50%;
+}
+.daily-lesson-day { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; opacity: 0.85; margin-bottom: 4px; }
+.daily-lesson-topic { font-size: 1.3rem; font-weight: 800; margin-bottom: 4px; }
+.daily-lesson-desc { font-size: 0.82rem; opacity: 0.88; margin-bottom: 16px; line-height: 1.4; }
+.daily-lesson-btn {
+  background: white; color: var(--primary); border: none;
+  border-radius: 10px; padding: 12px 20px; font-size: 0.95rem;
+  font-weight: 800; cursor: pointer; width: 100%; transition: opacity 0.2s;
+}
+.daily-lesson-btn:hover { opacity: 0.9; }
+.daily-lesson-done {
+  background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);
+  border-radius: 10px; padding: 10px 16px; font-size: 0.88rem; text-align: center;
+  margin-top: 8px; font-weight: 600;
+}
+
+/* PRACTICE HUB */
+.practice-hub-option {
+  background: var(--surface); border-radius: var(--radius);
+  padding: 16px; margin-bottom: 10px; display: flex; align-items: center;
+  gap: 14px; cursor: pointer; border: 2px solid var(--border);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.practice-hub-option:hover { border-color: var(--primary); box-shadow: var(--shadow); }
+.practice-hub-icon { font-size: 1.6rem; flex-shrink: 0; }
+.practice-hub-text strong { display: block; font-weight: 700; font-size: 0.95rem; }
+.practice-hub-text span { font-size: 0.78rem; color: var(--muted); }
+.practice-hub-badge {
+  margin-left: auto; background: var(--primary); color: white;
+  font-size: 0.68rem; font-weight: 700; padding: 3px 8px;
+  border-radius: 99px; white-space: nowrap; flex-shrink: 0;
+}
 </style>
 </head>
 <body>
+
+<!-- GOALS ONBOARDING OVERLAY -->
+<div id="goals-overlay" class="hidden">
+  <div class="goals-header">
+    <h1>🇪🇸 Spanish Speak Coach</h1>
+    <p>Let's personalize your learning path — 3 quick questions.</p>
+  </div>
+  <div class="goals-body" id="goals-body"></div>
+</div>
 
 <!-- DIAGNOSTIC OVERLAY -->
 <div id="diagnostic-overlay" class="hidden">
@@ -593,16 +719,11 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
 </header>
 
 <nav id="tab-nav">
-  <button class="tab-btn active" data-tab="today">Today</button>
-  <button class="tab-btn" data-tab="learn">Learn</button>
-  <button class="tab-btn" data-tab="speak">Speak</button>
-  <button class="tab-btn" data-tab="review">Review</button>
-  <button class="tab-btn" data-tab="stories">Stories</button>
-  <button class="tab-btn" data-tab="roleplay">Roleplay</button>
-  <button class="tab-btn" data-tab="reallife">Real-Life</button>
-  <button class="tab-btn" data-tab="mastery">Mastery</button>
-  <button class="tab-btn" data-tab="progress">Progress</button>
-  <button class="tab-btn" data-tab="settings">Settings</button>
+  <button class="tab-btn active" data-tab="today">📅 Today</button>
+  <button class="tab-btn" data-tab="learn">📖 Learn</button>
+  <button class="tab-btn" data-tab="practice">🎙️ Practice</button>
+  <button class="tab-btn" data-tab="stories">📚 Stories</button>
+  <button class="tab-btn" data-tab="progress">📊 Progress</button>
 </nav>
 
 <main id="main-content"></main>
@@ -855,12 +976,118 @@ const GRAMMAR = [
 ];
 
 // ===================================================
+// DAILY LESSONS — 10-lesson curriculum
+// ===================================================
+const LESSONS = [
+  {
+    id:'L01', day:1, topic:'First Greetings', icon:'👋', domain:'D1',
+    desc:'The phrases you say every single day — hello, good morning, how are you.',
+    itemIds:['D1-001','D1-002','D1-003','D1-004','D1-005'],
+    convo:[
+      {app:'¡Hola! ¿Cómo estás?',appEn:'Hello! How are you?',opts:['Bien, gracias.','No sé.','La cuenta, por favor.'],correct:0},
+      {app:'¿Cómo te llamas?',appEn:'What is your name?',opts:['Me llamo ___. ¿Y tú?','Tengo hambre.','Disculpe.'],correct:0},
+      {app:'Mucho gusto en conocerte.',appEn:'Nice to meet you.',opts:['Mucho gusto.','Sí / No.','Hasta luego.'],correct:0},
+    ]
+  },
+  {
+    id:'L02', day:2, topic:'Introducing Yourself', icon:'🙋', domain:'D1',
+    desc:'Say your name, ask others, and make a great first impression.',
+    itemIds:['D1-008','D1-009','D1-010','D1-016','D1-019'],
+    convo:[
+      {app:'Hola, ¿cómo te llamas?',appEn:'Hi, what is your name?',opts:['Me llamo ___. ¿Y tú?','No sé.','Más despacio.'],correct:0},
+      {app:'¿Hablas español?',appEn:'Do you speak Spanish?',opts:['Estoy aprendiendo español.','Tengo hambre.','La cuenta.'],correct:0},
+      {app:'Encantado de conocerte.',appEn:'Nice to meet you.',opts:['Mucho gusto también.','Por favor.','Vamos.'],correct:0},
+    ]
+  },
+  {
+    id:'L03', day:3, topic:'Please, Thank You & Politeness', icon:'🙏', domain:'D1',
+    desc:'The magic words that open every door in any Spanish-speaking place.',
+    itemIds:['D1-011','D1-012','D1-013','D1-014','D1-020'],
+    convo:[
+      {app:'¿Me puedes ayudar?',appEn:'Can you help me?',opts:['Sí, con mucho gusto.','Buenas noches.','A ver...'],correct:0},
+      {app:'Gracias por tu ayuda.',appEn:'Thank you for your help.',opts:['De nada.','No sé.','Tengo sed.'],correct:0},
+      {app:'Disculpe, ¿dónde está la salida?',appEn:'Excuse me, where is the exit?',opts:['No sé, lo siento.','De nada.','¡Muy bien!'],correct:0},
+    ]
+  },
+  {
+    id:'L04', day:4, topic:'Asking for Help', icon:'🆘', domain:'D1',
+    desc:'What to say when you need help, or when you do not understand.',
+    itemIds:['D1-015','D1-017','D1-018','D3-008','D5-004'],
+    convo:[
+      {app:'¿Entiende usted?',appEn:'Do you understand?',opts:['No, más despacio, por favor.','Sí, la cuenta.','Tengo hambre.'],correct:0},
+      {app:'¿Necesita algo más?',appEn:'Do you need anything else?',opts:['No, gracias. Estoy bien.','Buenas noches.','Soy americano.'],correct:0},
+      {app:'Habla usted muy rápido.',appEn:'You speak very fast.',opts:['¿Puede hablar más despacio?','De nada.','Hasta luego.'],correct:0},
+    ]
+  },
+  {
+    id:'L05', day:5, topic:'Food & Ordering', icon:'🍽️', domain:'D3',
+    desc:'Survive any restaurant — order food, ask for the check, ask what they have.',
+    itemIds:['D3-004','D3-005','D3-006','D3-007','D2-001'],
+    convo:[
+      {app:'Buenas noches. ¿Para cuántas personas?',appEn:'Good evening. For how many people?',opts:['Quiero una mesa para dos.','De nada.','No sé.'],correct:0},
+      {app:'¿Qué desea ordenar?',appEn:'What would you like to order?',opts:['Quiero el pollo, por favor.','¿Cuánto cuesta eso?','Tengo hambre.'],correct:0},
+      {app:'¿Algo más?',appEn:'Anything else?',opts:['La cuenta, por favor.','Sí, por favor.','No entiendo.'],correct:0},
+    ]
+  },
+  {
+    id:'L06', day:6, topic:'Directions & Getting Around', icon:'🗺️', domain:'D3',
+    desc:'Ask where things are and understand the basic answer.',
+    itemIds:['D3-001','D3-002','D3-003','D1-020','D1-015'],
+    convo:[
+      {app:'Disculpe, ¿dónde está la farmacia?',appEn:'Excuse me, where is the pharmacy?',opts:['No sé, lo siento.','Sí, gracias.','La cuenta.'],correct:0},
+      {app:'¿Sigue recto o dobla aquí?',appEn:'Go straight or turn here?',opts:['Siga recto dos cuadras.','Tengo hambre.','De nada.'],correct:0},
+      {app:'¿A la derecha o a la izquierda?',appEn:'To the right or to the left?',opts:['A la derecha, gracias.','No entiendo nada.','Mucho gusto.'],correct:0},
+    ]
+  },
+  {
+    id:'L07', day:7, topic:'Daily Life & Time', icon:'🕐', domain:'D2',
+    desc:'Ask the time, talk about weather, and handle everyday moments.',
+    itemIds:['D2-007','D2-008','D2-009','D2-010','D2-003'],
+    convo:[
+      {app:'Disculpe, ¿qué hora es?',appEn:'Excuse me, what time is it?',opts:['Son las tres.','Tengo hambre.','Mucho gusto.'],correct:0},
+      {app:'Hoy hace mucho calor, ¿verdad?',appEn:"It's very hot today, right?",opts:['Sí, hace mucho calor.','No sé.','De nada.'],correct:0},
+      {app:'¿Quieres agua o café?',appEn:'Do you want water or coffee?',opts:['Quiero agua, por favor.','Sí gracias.','Hasta luego.'],correct:0},
+    ]
+  },
+  {
+    id:'L08', day:8, topic:'Health & Feelings', icon:'💊', domain:'D4',
+    desc:'Say what hurts and handle basic health conversations.',
+    itemIds:['D4-001','D4-002','D4-003','D4-004','D4-008'],
+    convo:[
+      {app:'¿Cómo se siente hoy?',appEn:'How do you feel today?',opts:['Me duele la cabeza.','Vamos.','De nada.'],correct:0},
+      {app:'¿Le duele algo más?',appEn:'Does anything else hurt?',opts:['También me duele la espalda.','No sé.','Hasta luego.'],correct:0},
+      {app:'¡Ánimo! ¡Tú puedes!',appEn:'Cheer up! You can do it!',opts:['¡Gracias! Lo voy a intentar.','No quiero.','La cuenta.'],correct:0},
+    ]
+  },
+  {
+    id:'L09', day:9, topic:'Family & Home', icon:'👨‍👩‍👧', domain:'D2',
+    desc:"Talk about your family and home life — the topics people actually want to know.",
+    itemIds:['D2-004','D2-005','D2-006','D7-002','D6-004'],
+    convo:[
+      {app:'¿Tienes familia aquí?',appEn:'Do you have family here?',opts:['Sí, tengo dos hijos.','No sé.','La cuenta.'],correct:0},
+      {app:'¿Cuántos niños tienes?',appEn:'How many kids do you have?',opts:['Tengo tres niños.','Vamos.','De nada.'],correct:0},
+      {app:'¿Cómo está tu familia?',appEn:'How is your family?',opts:['Bien, gracias. ¿Y tú?','No quiero.','Mucho gusto.'],correct:0},
+    ]
+  },
+  {
+    id:'L10', day:10, topic:'Starting Real Conversations', icon:'💬', domain:'D6',
+    desc:'Open conversations, share opinions, and keep talking beyond hello.',
+    itemIds:['D6-001','D6-002','D6-003','D6-004','D6-005'],
+    convo:[
+      {app:'¿Qué piensas de esta ciudad?',appEn:'What do you think of this city?',opts:['Creo que es muy bonita.','De nada.','No quiero.'],correct:0},
+      {app:'¡Me alegra escuchar eso!',appEn:"I'm glad to hear that!",opts:['Gracias. ¿Y tú, cómo estás?','La cuenta.','No sé.'],correct:0},
+      {app:'Cuéntame más sobre ti.',appEn:'Tell me more about yourself.',opts:['Estoy aprendiendo español. Es divertido.','Mucho gusto.','Hasta luego.'],correct:0},
+    ]
+  },
+];
+
+// ===================================================
 // STATE MANAGEMENT
 // ===================================================
 const LS_KEY = 'ssc_state';
 
 const DEFAULT_STATE = {
-  user: { name: '', level: null, diagnosticDone: false },
+  user: { name: '', level: null, diagnosticDone: false, goalsDone: false, why: '', timePerDay: 10, useCase: '', currentLesson: 1, lessonDates: {} },
   settings: {
     practiceLength: 'standard',
     pronunciationHelper: true,
@@ -893,6 +1120,7 @@ function loadState() {
     // Deep-merge so newly added keys always get their defaults
     state.settings = Object.assign(structuredClone(DEFAULT_STATE.settings), saved.settings || {});
     state.stats    = Object.assign(structuredClone(DEFAULT_STATE.stats),    saved.stats    || {});
+    state.user     = Object.assign(structuredClone(DEFAULT_STATE.user),     saved.user     || {});
     return state;
   } catch(e) { return structuredClone(DEFAULT_STATE); }
 }
@@ -1040,102 +1268,98 @@ function renderToday() {
   const dueCount = getDueReviewItems().length;
   const score = calcFluencyScore();
   const nudge = getNudge();
+  const lesson = getCurrentLesson();
+  const lessonDone = isTodayLessonDone();
+  const earnedCount = Object.values(stars).filter(Boolean).length;
+  const xp = S.stats.xp || 0;
+  const xpLevel = Math.floor(xp / 100) + 1;
 
   const starDefs = [
-    { key: 'speak',        icon: '🎙️', label: 'Speak' },
-    { key: 'listen',       icon: '👂', label: 'Listen' },
-    { key: 'recall',       icon: '🧠', label: 'Recall' },
+    { key: 'speak', icon: '🎙️', label: 'Speak' },
+    { key: 'listen', icon: '👂', label: 'Listen' },
+    { key: 'recall', icon: '🧠', label: 'Recall' },
     { key: 'conversation', icon: '💬', label: 'Convo' },
-    { key: 'comeback',     icon: '🔥', label: 'Comeback' },
+    { key: 'comeback', icon: '🔥', label: 'Comeback' },
   ];
+  const starsHTML = starDefs.map(s =>
+    '<div class="star-item">' +
+      '<div class="star-icon ' + (stars[s.key] ? 'earned' : '') + '">' + s.icon + '</div>' +
+      '<div class="star-label">' + s.label + '</div>' +
+    '</div>'
+  ).join('');
 
-  const starsHTML = starDefs.map(s => `
-    <div class="star-item">
-      <div class="star-icon ${stars[s.key] ? 'earned' : ''}">${s.icon}</div>
-      <div class="star-label">${s.label}</div>
-    </div>`).join('');
+  // Daily lesson card
+  const lessonCard = lessonDone
+    ? '<div class="daily-lesson-card">' +
+        '<div class="daily-lesson-day">Day ' + lesson.day + ' — ' + lesson.topic + '</div>' +
+        '<div class="daily-lesson-topic">' + lesson.icon + ' Lesson Complete!</div>' +
+        '<div class="daily-lesson-done">✓ You finished today\'s lesson. Great work.</div>' +
+        '<button class="daily-lesson-btn" style="margin-top:10px;background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.4);" onclick="switchTab(\'practice\')">More Practice →</button>' +
+      '</div>'
+    : '<div class="daily-lesson-card">' +
+        '<div class="daily-lesson-day">📅 Today — Day ' + lesson.day + ' of ' + LESSONS.length + '</div>' +
+        '<div class="daily-lesson-topic">' + lesson.icon + ' ' + lesson.topic + '</div>' +
+        '<div class="daily-lesson-desc">' + lesson.desc + '</div>' +
+        '<button class="daily-lesson-btn" onclick="startLesson(\'' + lesson.id + '\')">▶ Start Today\'s Spanish</button>' +
+      '</div>';
 
-  const earnedCount = Object.values(stars).filter(Boolean).length;
+  // Quick stats row
+  const statsRow =
+    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">' +
+      '<div class="card" style="text-align:center;padding:12px;margin-bottom:0;">' +
+        '<div style="font-size:1.4rem;font-weight:800;color:var(--primary);">' + S.streak.current + '</div>' +
+        '<div style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;font-weight:700;">Day Streak</div>' +
+      '</div>' +
+      '<div class="card" style="text-align:center;padding:12px;margin-bottom:0;">' +
+        '<div style="font-size:1.4rem;font-weight:800;color:var(--gold);">Lv ' + xpLevel + '</div>' +
+        '<div style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;font-weight:700;">' + xp + ' XP</div>' +
+      '</div>' +
+      '<div class="card" style="text-align:center;padding:12px;margin-bottom:0;">' +
+        '<div style="font-size:1.4rem;font-weight:800;color:var(--green);">' + score + '</div>' +
+        '<div style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;font-weight:700;">Fluency</div>' +
+      '</div>' +
+    '</div>';
 
-  return `
-    <div class="section-label">📅 ${new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})}</div>
+  // Review due card
+  const reviewCard = dueCount > 0
+    ? '<div class="card" style="border-left:4px solid var(--gold);margin-bottom:14px;">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;">' +
+          '<div>' +
+            '<div style="font-weight:700;font-size:0.95rem;">📚 Review Old Phrases</div>' +
+            '<div style="font-size:0.78rem;color:var(--muted);margin-top:2px;">' + dueCount + ' phrase' + (dueCount !== 1 ? 's' : '') + ' due — keep them from fading</div>' +
+          '</div>' +
+          '<button class="btn btn-primary btn-sm" onclick="startReviewSession()">Review</button>' +
+        '</div>' +
+      '</div>'
+    : '';
 
-    <div class="nudge-card">
-      <strong>Coach Says</strong>
-      ${nudge}
-    </div>
+  // Stars card
+  const starsCard =
+    '<div class="card" style="margin-bottom:14px;">' +
+      '<div class="card-title">Daily Stars — ' + earnedCount + '/5 earned</div>' +
+      '<div class="stars-grid">' + starsHTML + '</div>' +
+      '<div style="font-size:0.72rem;color:var(--muted);margin-top:6px;">Each star = one type of practice. Go for all 5.</div>' +
+    '</div>';
 
-    <div class="card">
-      <div class="card-title">Daily Spanish Stars — ${earnedCount}/5 earned today</div>
-      <div class="stars-grid">${starsHTML}</div>
-      <div style="font-size:0.75rem;color:var(--muted);margin-top:6px;">A perfect day is not the goal. A real rep is the goal.</div>
-    </div>
+  // Nudge
+  const nudgeCard =
+    '<div class="nudge-card" style="margin-bottom:14px;">' +
+      '<strong>Coach Says</strong> ' + nudge +
+    '</div>';
 
-    <div class="card">
-      <div class="card-title">Today's Practice Plan</div>
-      <div class="practice-options">
-        <div class="practice-option featured" onclick="switchTab('speak')">
-          <div class="practice-option-icon">🎙️</div>
-          <div class="practice-option-text">
-            <strong>Standard Practice</strong>
-            <span>Speak, listen, recall, review</span>
-          </div>
-          <div class="practice-option-duration">12 min</div>
-        </div>
-        <div class="practice-option" onclick="startEmergencyDay()">
-          <div class="practice-option-icon">⚡</div>
-          <div class="practice-option-text">
-            <strong>Emergency Spanish Day</strong>
-            <span>3 phrases · 3 cards · 1 roleplay turn</span>
-          </div>
-          <div class="practice-option-duration">6 min</div>
-        </div>
-        <div class="practice-option" onclick="switchTab('speak')">
-          <div class="practice-option-icon">🌅</div>
-          <div class="practice-option-text">
-            <strong>Morning Split</strong>
-            <span>Listen & repeat · pronunciation warm-up</span>
-          </div>
-          <div class="practice-option-duration">6 min</div>
-        </div>
-        <div class="practice-option" onclick="switchTab('speak')">
-          <div class="practice-option-icon">🌙</div>
-          <div class="practice-option-text">
-            <strong>Deep Practice</strong>
-            <span>All modes · roleplay · mastery verify</span>
-          </div>
-          <div class="practice-option-duration">24 min</div>
-        </div>
-      </div>
-    </div>
+  // Emergency option
+  const emergencyCard =
+    '<div style="text-align:center;margin-bottom:14px;">' +
+      '<button class="btn btn-secondary btn-sm" onclick="startEmergencyDay()">⚡ Only have 3 min? Emergency Day Mode</button>' +
+    '</div>';
 
-    ${dueCount > 0 ? `
-    <div class="card" style="border-left:4px solid var(--primary);">
-      <div class="card-title">Review Due</div>
-      <div style="font-size:1.1rem;font-weight:700;color:var(--primary);">${dueCount} item${dueCount !== 1 ? 's' : ''} ready for review</div>
-      <div style="font-size:0.8rem;color:var(--muted);margin:4px 0 10px;">These phrases need your attention to stick.</div>
-      <button class="btn btn-primary btn-sm" onclick="switchTab('review')">Open Review Deck</button>
-    </div>` : ''}
-
-    <div class="card">
-      <div class="card-title">Fluency Readiness Score</div>
-      <div style="display:flex;align-items:center;gap:16px;">
-        <div style="text-align:center;">
-          <div style="font-size:2.2rem;font-weight:800;color:var(--primary);">${score}</div>
-          <div style="font-size:0.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;">/ 100</div>
-        </div>
-        <div style="flex:1;">
-          <div style="font-size:0.9rem;font-weight:700;color:var(--text);">${fluencyLevel(score)}</div>
-          <div class="progress-wrap" style="margin:6px 0;">
-            <div class="progress-bar" style="width:${score}%"></div>
-          </div>
-          <div style="font-size:0.72rem;color:var(--muted);">Streak: ${S.streak.current} day${S.streak.current !== 1 ? 's' : ''} &nbsp;·&nbsp; Speak reps: ${S.stats.totalSpeakReps}</div>
-        </div>
-      </div>
-    </div>
-
-    ${S.streak.current >= 1 ? `<div style="text-align:center;margin-bottom:14px;"><span class="streak-badge">🔥 ${S.streak.current}-day streak</span></div>` : ''}
-  `;
+  return '<div class="section-label">📅 ' + new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}) + '</div>' +
+    lessonCard +
+    statsRow +
+    reviewCard +
+    starsCard +
+    nudgeCard +
+    emergencyCard;
 }
 
 // ===================================================
@@ -2521,11 +2745,68 @@ function checkStoryAnswer(storyId, optIndex) {
 }
 
 // ===================================================
+// RENDERING — PRACTICE HUB
+// ===================================================
+function renderPractice() {
+  const dueCount = getDueReviewItems().length;
+  const dueBadge = dueCount > 0 ? '<span class="practice-hub-badge">' + dueCount + ' due</span>' : '';
+  return '<div class="section-label">Practice Modes</div>' +
+    '<div class="nudge-card">Your mouth needs reps, not just eyes. Pick a mode and speak every single card.</div>' +
+
+    '<div class="practice-hub-option" onclick="startMode(\'listen-repeat\')">' +
+      '<span class="practice-hub-icon">👂</span>' +
+      '<span class="practice-hub-text"><strong>Listen → Repeat</strong><span>See a phrase · hear it · say it · rate confidence</span></span>' +
+    '</div>' +
+
+    '<div class="practice-hub-option" onclick="startMode(\'en-to-es\')">' +
+      '<span class="practice-hub-icon">🧠</span>' +
+      '<span class="practice-hub-text"><strong>English → Spanish</strong><span>See English · produce Spanish out loud · check yourself</span></span>' +
+    '</div>' +
+
+    '<div class="practice-hub-option" onclick="startMode(\'es-to-en\')">' +
+      '<span class="practice-hub-icon">🔄</span>' +
+      '<span class="practice-hub-text"><strong>Spanish → English</strong><span>See Spanish · say the meaning · then say the Spanish again</span></span>' +
+    '</div>' +
+
+    '<div class="practice-hub-option" onclick="startMode(\'speak-memory\')">' +
+      '<span class="practice-hub-icon">🎯</span>' +
+      '<span class="practice-hub-text"><strong>Speak From Memory</strong><span>No hints. Produce from memory. Highest-value drill.</span></span>' +
+    '</div>' +
+
+    '<div class="practice-hub-option" onclick="startMode(\'speed-round\')">' +
+      '<span class="practice-hub-icon">⚡</span>' +
+      '<span class="practice-hub-text"><strong>Speed Round</strong><span>10 fast prompts. Build instinct-level response speed.</span></span>' +
+    '</div>' +
+
+    '<div class="section-label" style="margin-top:20px;">Review & Spaced Repetition</div>' +
+
+    '<div class="practice-hub-option" onclick="' + (dueCount > 0 ? 'startReviewSession()' : 'switchTab(\'practice\')') + '">' +
+      '<span class="practice-hub-icon">📚</span>' +
+      '<span class="practice-hub-text"><strong>Review Deck</strong><span>Phrases you missed — brought back at the right time to stick</span></span>' +
+      dueBadge +
+    '</div>' +
+
+    '<div class="section-label" style="margin-top:20px;">Lessons by Topic</div>' +
+
+    '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">' +
+      LESSONS.slice(0, 6).map(function(l) {
+        var done = S.user.lessonDates && S.user.lessonDates[l.id];
+        return '<div class="card" style="padding:12px;cursor:pointer;border:2px solid ' + (done ? 'var(--green)' : 'var(--border)') + ';" onclick="startLesson(\'' + l.id + '\')">' +
+          '<div style="font-size:1.3rem;margin-bottom:4px;">' + l.icon + (done ? ' ✓' : '') + '</div>' +
+          '<div style="font-size:0.78rem;font-weight:700;">Day ' + l.day + '</div>' +
+          '<div style="font-size:0.72rem;color:var(--muted);">' + l.topic + '</div>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+}
+
+// ===================================================
 // TAB NAVIGATION
 // ===================================================
 const TAB_RENDERERS = {
   today:    renderToday,
   learn:    renderLearn,
+  practice: renderPractice,
   speak:    renderSpeak,
   review:   renderReview,
   stories:  renderStories,
@@ -2549,6 +2830,415 @@ function switchTab(tab) {
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => switchTab(btn.dataset.tab));
 });
+
+// ===================================================
+// GOALS ONBOARDING
+// ===================================================
+const GOALS_STEPS = [
+  {
+    label: 'Step 1 of 3', pct: 33,
+    question: 'Why do you want to learn Spanish?',
+    sub: 'This helps us personalize your daily lessons.',
+    field: 'why',
+    opts: [
+      { icon:'💼', label:'Work & Career', sub:'Help clients, coworkers, or customers', val:'work' },
+      { icon:'✈️', label:'Travel', sub:'Survive and thrive abroad', val:'travel' },
+      { icon:'👨‍👩‍👧', label:'Family & Community', sub:'Connect with Spanish-speaking family or neighbors', val:'family' },
+      { icon:'📚', label:'Personal Growth', sub:'Challenge myself and love the language', val:'personal' },
+    ]
+  },
+  {
+    label: 'Step 2 of 3', pct: 66,
+    question: 'How much time can you practice daily?',
+    sub: "We'll build your lessons around your real schedule.",
+    field: 'timePerDay',
+    opts: [
+      { icon:'⚡', label:'5 minutes', sub:'A micro-habit that sticks', val:5 },
+      { icon:'🎯', label:'10 minutes', sub:'One focused session — recommended', val:10 },
+      { icon:'💪', label:'15 minutes', sub:'Deeper daily practice', val:15 },
+      { icon:'🚀', label:'20+ minutes', sub:'Serious commitment', val:20 },
+    ]
+  },
+  {
+    label: 'Step 3 of 3', pct: 99,
+    question: 'What situation do you most want to handle in Spanish?',
+    sub: "Your first lessons will be built around this.",
+    field: 'useCase',
+    opts: [
+      { icon:'🍽️', label:'Ordering food', sub:'Restaurants, cafés, food trucks', val:'food' },
+      { icon:'🏥', label:'Medical & Health', sub:'Doctors, pharmacies, emergencies', val:'health' },
+      { icon:'🏠', label:'Daily conversations', sub:'Neighbors, school, everyday life', val:'daily' },
+      { icon:'🌎', label:'Travel & navigation', sub:'Hotels, directions, transportation', val:'travel' },
+    ]
+  },
+];
+
+let goalsStep = 0;
+
+function showGoals() {
+  document.getElementById('goals-overlay').classList.remove('hidden');
+  goalsStep = 0;
+  renderGoalsScreen();
+}
+
+function hideGoals() {
+  document.getElementById('goals-overlay').classList.add('hidden');
+}
+
+function renderGoalsScreen() {
+  const step = GOALS_STEPS[goalsStep];
+  var optsHtml = step.opts.map(function(o) {
+    return '<button class="goals-opt" onclick="goalsAnswer(\'' + o.field + '\',\'' + o.val + '\')">' +
+      '<span class="opt-icon">' + o.icon + '</span>' +
+      '<span class="opt-text"><strong>' + o.label + '</strong><span>' + o.sub + '</span></span>' +
+      '</button>';
+  }).join('');
+
+  document.getElementById('goals-body').innerHTML =
+    '<div class="goals-step-label">' + step.label + '</div>' +
+    '<div class="goals-progress"><div class="goals-progress-bar" style="width:' + step.pct + '%"></div></div>' +
+    '<div class="goals-question">' + step.question + '</div>' +
+    '<div class="goals-sub">' + step.sub + '</div>' +
+    '<div class="goals-opts">' + optsHtml + '</div>';
+}
+
+function goalsAnswer(field, val) {
+  S.user[field] = val;
+  goalsStep += 1;
+  if (goalsStep >= GOALS_STEPS.length) {
+    S.user.goalsDone = true;
+    saveState();
+    hideGoals();
+    if (!S.user.diagnosticDone) {
+      document.getElementById('diagnostic-overlay').classList.remove('hidden');
+      diagState.index = -1;
+      renderDiagScreen();
+    } else {
+      switchTab('today');
+    }
+  } else {
+    GOALS_STEPS[goalsStep].field = GOALS_STEPS[goalsStep].field;
+    renderGoalsScreen();
+  }
+}
+
+// ===================================================
+// LESSON FLOW ENGINE
+// ===================================================
+let lessonState = null;
+
+function getCurrentLesson() {
+  const idx = Math.min((S.user.currentLesson || 1) - 1, LESSONS.length - 1);
+  return LESSONS[Math.max(0, idx)];
+}
+
+function isTodayLessonDone() {
+  const lesson = getCurrentLesson();
+  const done = S.user.lessonDates || {};
+  return done[lesson.id] === today();
+}
+
+function startLesson(lessonId) {
+  const lesson = LESSONS.find(function(l) { return l.id === lessonId; });
+  if (!lesson) return;
+  const items = lessonId ? lesson.itemIds.map(function(id) { return CONTENT.find(function(c) { return c.id === id; }); }).filter(Boolean) : [];
+  lessonState = {
+    lesson: lesson,
+    phase: 'learn',
+    phaseIndex: 0,
+    items: items,
+    practiceItems: items.slice(0, 3),
+    speakItems: items.slice(0, 3),
+    convoIndex: 0,
+    convoCorrect: 0,
+    xpEarned: 0,
+  };
+  renderLessonStep();
+}
+
+function renderLessonStep() {
+  if (!lessonState) return switchTab('today');
+  var ls = lessonState;
+  var phases = ['learn','practice','speak','convo','complete'];
+  var phaseIdx = phases.indexOf(ls.phase);
+
+  var dotsHtml = phases.slice(0,4).map(function(p, i) {
+    var cls = i < phaseIdx ? 'done' : i === phaseIdx ? 'active' : '';
+    return '<div class="lesson-step-dot ' + cls + '"></div>';
+  }).join('');
+
+  var backHtml = '<div style="margin-bottom:10px;">' +
+    '<button class="btn btn-secondary btn-sm" onclick="switchTab(\'today\')">← Back</button>' +
+    '</div>';
+
+  var headerHtml = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">' +
+    '<span style="font-size:1.2rem;">' + ls.lesson.icon + '</span>' +
+    '<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;color:var(--primary);">Day ' + ls.lesson.day + ' — ' + ls.lesson.topic + '</div>' +
+    '</div>' +
+    '<div class="lesson-step-bar">' + dotsHtml + '</div>';
+
+  var content = '';
+
+  if (ls.phase === 'learn') {
+    content = renderLessonLearn(ls, headerHtml);
+  } else if (ls.phase === 'practice') {
+    content = renderLessonPractice(ls, headerHtml);
+  } else if (ls.phase === 'speak') {
+    content = renderLessonSpeak(ls, headerHtml);
+  } else if (ls.phase === 'convo') {
+    content = renderLessonConvo(ls, headerHtml);
+  } else if (ls.phase === 'complete') {
+    content = renderLessonComplete(ls);
+  }
+
+  document.getElementById('main-content').innerHTML = backHtml + content;
+  window.scrollTo(0, 0);
+
+  if (ls.phase === 'learn' && S.settings.audioEnabled !== false) {
+    var item = ls.items[ls.phaseIndex];
+    if (item) setTimeout(function() { speakSpanish(item.spanish); }, 300);
+  }
+}
+
+function renderLessonLearn(ls, headerHtml) {
+  var item = ls.items[ls.phaseIndex];
+  if (!item) { lessonState.phase = 'practice'; lessonState.phaseIndex = 0; renderLessonStep(); return ''; }
+  var total = ls.items.length;
+  var idx = ls.phaseIndex;
+  var showPron = S.settings.pronunciationHelper;
+
+  var exHtml = item.example
+    ? '<div class="lesson-phrase-example"><strong>' + item.example + '</strong><br><span style="color:var(--muted);">' + item.exampleEn + '</span></div>'
+    : '';
+
+  return headerHtml +
+    '<div class="card">' +
+      '<div class="lesson-phase-label">📖 Phase 1 of 4 — Learn It (' + (idx+1) + '/' + total + ')</div>' +
+      '<div class="lesson-phrase-card">' +
+        '<div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px;">' +
+          '<div class="lesson-phrase-spanish">' + item.spanish + '</div>' +
+          '<button class="audio-btn" style="width:36px;height:36px;" data-speak="' + esc(item.spanish) + '" onclick="speakSpanish(this.dataset.speak,this)">🔊</button>' +
+        '</div>' +
+        (showPron && item.pron ? '<div class="lesson-phrase-pron">' + item.pron + '</div>' : '') +
+        '<div class="lesson-phrase-english">' + item.english + '</div>' +
+        exHtml +
+      '</div>' +
+      '<div style="background:#FFF5EE;border-radius:8px;padding:10px 12px;font-size:0.85rem;color:var(--primary);font-weight:600;text-align:center;margin-bottom:12px;">' +
+        '🎙️ Say it out loud — then tap Next.' +
+      '</div>' +
+      '<button class="btn btn-primary btn-full" onclick="lessonLearnNext()">I Said It → Next ' + (idx+1 < total ? '(' + (idx+2) + '/' + total + ')' : '→ Practice') + '</button>' +
+    '</div>';
+}
+
+function lessonLearnNext() {
+  lessonState.phaseIndex += 1;
+  if (lessonState.phaseIndex >= lessonState.items.length) {
+    lessonState.phase = 'practice';
+    lessonState.phaseIndex = 0;
+  }
+  renderLessonStep();
+}
+
+function renderLessonPractice(ls, headerHtml) {
+  var item = ls.practiceItems[ls.phaseIndex];
+  if (!item) { lessonState.phase = 'speak'; lessonState.phaseIndex = 0; renderLessonStep(); return ''; }
+  var total = ls.practiceItems.length;
+  var idx = ls.phaseIndex;
+  var revealed = ls.revealed || false;
+  var showPron = S.settings.pronunciationHelper;
+
+  var revealedHtml = '';
+  if (revealed) {
+    revealedHtml =
+      '<div style="background:#FFF5EE;border:2px solid var(--primary);border-radius:12px;padding:14px;text-align:center;margin:10px 0;">' +
+        '<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:4px;">' +
+          '<div style="font-size:1.5rem;font-weight:800;">' + item.spanish + '</div>' +
+          '<button class="audio-btn" data-speak="' + esc(item.spanish) + '" onclick="speakSpanish(this.dataset.speak,this)">🔊</button>' +
+        '</div>' +
+        (showPron && item.pron ? '<div style="font-size:0.8rem;color:var(--primary);font-style:italic;margin-bottom:4px;">' + item.pron + '</div>' : '') +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:6px;margin-top:10px;">' +
+        '<button class="btn btn-green" onclick="lessonPracticeResult(\'correct\')">✓ Said it confidently</button>' +
+        '<button class="btn" style="background:#FEEBC8;color:#7B341E;" onclick="lessonPracticeResult(\'guessed\')">~ Got through it</button>' +
+        '<button class="btn" style="background:#FED7D7;color:#9B2C2C;" onclick="lessonPracticeResult(\'missed\')">✗ Didn\'t know it</button>' +
+      '</div>';
+  } else {
+    revealedHtml =
+      '<div style="background:var(--bg);border-radius:8px;padding:10px 12px;font-size:0.82rem;color:var(--muted);text-align:center;margin-bottom:10px;">🎙️ Say it in Spanish first — then reveal.</div>' +
+      '<button class="btn btn-primary btn-full" onclick="lessonState.revealed=true;renderLessonStep()">I Said It → Reveal Answer</button>';
+  }
+
+  return headerHtml +
+    '<div class="card">' +
+      '<div class="lesson-phase-label">🧠 Phase 2 of 4 — Practice It (' + (idx+1) + '/' + total + ')</div>' +
+      '<div style="text-align:center;padding:16px 0 8px;">' +
+        '<div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Say this in Spanish — out loud:</div>' +
+        '<div style="font-size:1.6rem;font-weight:800;color:var(--text);margin-bottom:6px;">' + item.english + '</div>' +
+        (item.prompt ? '<div style="font-size:0.78rem;color:var(--muted);">' + item.prompt + '</div>' : '') +
+      '</div>' +
+      revealedHtml +
+    '</div>';
+}
+
+function lessonPracticeResult(result) {
+  var item = lessonState.practiceItems[lessonState.phaseIndex];
+  if (item) {
+    var prog = getItemProgress(item.id);
+    prog.lastReviewed = Date.now();
+    prog.confidence = result === 'correct' ? 4 : result === 'guessed' ? 2 : 1;
+    if (result !== 'correct') addToReviewDeck(item.id);
+    S.stats.totalSpeakReps += 1;
+    lessonState.xpEarned += (result === 'correct' ? 10 : result === 'guessed' ? 5 : 3);
+  }
+  lessonState.phaseIndex += 1;
+  lessonState.revealed = false;
+  if (lessonState.phaseIndex >= lessonState.practiceItems.length) {
+    lessonState.phase = 'speak';
+    lessonState.phaseIndex = 0;
+  }
+  saveState();
+  renderLessonStep();
+}
+
+function renderLessonSpeak(ls, headerHtml) {
+  var item = ls.speakItems[ls.phaseIndex];
+  if (!item) { lessonState.phase = 'convo'; lessonState.phaseIndex = 0; renderLessonStep(); return ''; }
+  var total = ls.speakItems.length;
+  var idx = ls.phaseIndex;
+  var showPron = S.settings.pronunciationHelper;
+
+  return headerHtml +
+    '<div class="card">' +
+      '<div class="lesson-phase-label">🎙️ Phase 3 of 4 — Say It Out Loud (' + (idx+1) + '/' + total + ')</div>' +
+      '<div style="text-align:center;padding:16px 0 8px;">' +
+        '<div style="display:flex;align-items:center;justify-content:center;gap:10px;margin:10px 0;">' +
+          '<div style="font-size:2rem;font-weight:800;color:var(--text);">' + item.spanish + '</div>' +
+          '<button class="audio-btn" style="width:36px;height:36px;" data-speak="' + esc(item.spanish) + '" onclick="speakSpanish(this.dataset.speak,this)">🔊</button>' +
+        '</div>' +
+        (showPron && item.pron ? '<div style="font-size:0.88rem;color:var(--primary);font-style:italic;margin-bottom:6px;">' + item.pron + '</div>' : '') +
+        '<div style="font-size:0.9rem;color:var(--muted);margin-bottom:12px;">' + item.english + '</div>' +
+      '</div>' +
+      '<div style="background:#FFF5EE;border-radius:8px;padding:10px 12px;font-size:0.85rem;color:var(--primary);font-weight:600;text-align:center;margin-bottom:12px;">🎙️ Say it out loud. Rate how it sounded.</div>' +
+      '<div style="display:flex;flex-direction:column;gap:6px;">' +
+        '<button class="btn" style="background:#9AE6B4;color:#1C4532;text-align:left;padding:10px 14px;font-weight:600;" onclick="lessonSpeakResult(5)">5 — Felt natural</button>' +
+        '<button class="btn" style="background:#C6F6D5;color:#22543D;text-align:left;padding:10px 14px;font-weight:600;" onclick="lessonSpeakResult(4)">4 — Sounded okay</button>' +
+        '<button class="btn" style="background:#EBF8FF;color:#2B6CB0;text-align:left;padding:10px 14px;font-weight:600;" onclick="lessonSpeakResult(3)">3 — Got through it</button>' +
+        '<button class="btn" style="background:#FEEBC8;color:#7B341E;text-align:left;padding:10px 14px;font-weight:600;" onclick="lessonSpeakResult(2)">2 — Struggled</button>' +
+        '<button class="btn" style="background:#FED7D7;color:#9B2C2C;text-align:left;padding:10px 14px;font-weight:600;" onclick="lessonSpeakResult(1)">1 — I froze</button>' +
+      '</div>' +
+    '</div>';
+}
+
+function lessonSpeakResult(conf) {
+  var item = lessonState.speakItems[lessonState.phaseIndex];
+  if (item) {
+    var prog = getItemProgress(item.id);
+    prog.speakConf = conf;
+    prog.lastReviewed = Date.now();
+    S.stats.totalSpeakReps += 1;
+    awardStar('speak');
+    if (conf <= 2) addToReviewDeck(item.id);
+    lessonState.xpEarned += (conf >= 4 ? 10 : conf >= 3 ? 7 : 4);
+  }
+  lessonState.phaseIndex += 1;
+  if (lessonState.phaseIndex >= lessonState.speakItems.length) {
+    lessonState.phase = 'convo';
+    lessonState.convoIndex = 0;
+  }
+  saveState();
+  renderLessonStep();
+}
+
+function renderLessonConvo(ls, headerHtml) {
+  var turns = ls.lesson.convo;
+  var idx = ls.convoIndex;
+  if (idx >= turns.length) { lessonState.phase = 'complete'; renderLessonStep(); return ''; }
+  var turn = turns[idx];
+
+  var optsHtml = turn.opts.map(function(opt, i) {
+    return '<button class="convo-opt" onclick="lessonConvoAnswer(' + i + ',' + turn.correct + ')">' + opt + '</button>';
+  }).join('');
+
+  return headerHtml +
+    '<div class="card">' +
+      '<div class="lesson-phase-label">💬 Phase 4 of 4 — Mini Conversation (' + (idx+1) + '/' + turns.length + ')</div>' +
+      '<div style="margin-bottom:16px;">' +
+        '<div class="convo-bubble-app">' +
+          '<div>' + turn.app + '</div>' +
+          '<div class="convo-bubble-sub">' + turn.appEn + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="font-size:0.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Choose the best response:</div>' +
+      '<div class="convo-opts">' + optsHtml + '</div>' +
+    '</div>';
+}
+
+function lessonConvoAnswer(chosen, correct) {
+  var btns = document.querySelectorAll('.convo-opt');
+  btns.forEach(function(b, i) {
+    b.disabled = true;
+    if (i === correct) b.classList.add('correct');
+    else if (i === chosen && chosen !== correct) b.classList.add('wrong');
+  });
+  if (chosen === correct) { lessonState.convoCorrect = (lessonState.convoCorrect || 0) + 1; lessonState.xpEarned += 5; }
+  awardStar('conversation');
+  setTimeout(function() {
+    lessonState.convoIndex += 1;
+    if (lessonState.convoIndex >= lessonState.lesson.convo.length) {
+      lessonState.phase = 'complete';
+    }
+    saveState();
+    renderLessonStep();
+  }, 700);
+}
+
+function renderLessonComplete(ls) {
+  var lesson = ls.lesson;
+  var xp = ls.xpEarned;
+  S.stats.xp = (S.stats.xp || 0) + xp;
+  if (!S.user.lessonDates) S.user.lessonDates = {};
+  S.user.lessonDates[lesson.id] = today();
+  if ((S.user.currentLesson || 1) <= lesson.day) {
+    S.user.currentLesson = Math.min(lesson.day + 1, LESSONS.length);
+  }
+  awardStar('recall');
+  checkBadges();
+  saveState();
+
+  var nextLesson = LESSONS.find(function(l) { return l.day === lesson.day + 1; });
+  var nextHtml = nextLesson
+    ? '<div style="background:var(--bg);border-radius:10px;padding:12px;margin-top:12px;display:flex;align-items:center;gap:10px;">' +
+        '<span style="font-size:1.3rem;">' + nextLesson.icon + '</span>' +
+        '<div><div style="font-weight:700;font-size:0.88rem;">Up Next: Day ' + nextLesson.day + ' — ' + nextLesson.topic + '</div>' +
+        '<div style="font-size:0.75rem;color:var(--muted);">Come back tomorrow to continue</div></div>' +
+      '</div>'
+    : '<div style="font-size:0.85rem;color:var(--muted);margin-top:10px;text-align:center;">You\'ve completed all 10 lessons. More coming soon!</div>';
+
+  return '<div class="card" style="text-align:center;">' +
+    '<div style="font-size:3rem;margin-bottom:8px;">🌟</div>' +
+    '<div style="font-size:1.3rem;font-weight:800;margin-bottom:4px;">Lesson Complete!</div>' +
+    '<div style="font-size:0.88rem;color:var(--muted);margin-bottom:16px;">Day ' + lesson.day + ' — ' + lesson.topic + '</div>' +
+    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">' +
+      '<div style="background:var(--bg);border-radius:8px;padding:10px;">' +
+        '<div style="font-size:1.3rem;font-weight:800;color:var(--gold);">+' + xp + '</div>' +
+        '<div style="font-size:0.65rem;color:var(--muted);">XP Earned</div>' +
+      '</div>' +
+      '<div style="background:var(--bg);border-radius:8px;padding:10px;">' +
+        '<div style="font-size:1.3rem;font-weight:800;color:var(--green);">' + lesson.itemIds.length + '</div>' +
+        '<div style="font-size:0.65rem;color:var(--muted);">Phrases Done</div>' +
+      '</div>' +
+      '<div style="background:var(--bg);border-radius:8px;padding:10px;">' +
+        '<div style="font-size:1.3rem;font-weight:800;color:var(--primary);">' + (ls.convoCorrect || 0) + '/3</div>' +
+        '<div style="font-size:0.65rem;color:var(--muted);">Convo Correct</div>' +
+      '</div>' +
+    '</div>' +
+    nextHtml +
+    '</div>' +
+    '<div class="btn-row" style="margin-top:14px;">' +
+      '<button class="btn btn-primary" onclick="switchTab(\'today\')">Back to Today</button>' +
+      '<button class="btn btn-secondary" onclick="switchTab(\'practice\')">More Practice</button>' +
+    '</div>';
+}
 
 // ===================================================
 // DIAGNOSTIC MODE
@@ -2936,8 +3626,9 @@ function skipDiagnostic() {
 // ===================================================
 updateStreak();
 initTTS();
-if (!S.user.diagnosticDone) {
-  // Show diagnostic on first visit
+if (!S.user.goalsDone) {
+  showGoals();
+} else if (!S.user.diagnosticDone) {
   document.getElementById('diagnostic-overlay').classList.remove('hidden');
   diagState.index = -1;
   renderDiagScreen();
