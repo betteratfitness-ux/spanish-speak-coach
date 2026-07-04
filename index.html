@@ -286,6 +286,17 @@ body {
 /* PANIC SHEET */
 .panic-group { margin-bottom: 16px; }
 .panic-group-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); margin-bottom: 8px; }
+.story-card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; margin-bottom: 12px; border-left: 4px solid var(--border); cursor: pointer; transition: border-color 0.15s; }
+.story-card.done { border-left-color: var(--green); }
+.story-card:hover { border-left-color: var(--primary); }
+.story-card-title { font-size: 1rem; font-weight: 800; margin-bottom: 4px; }
+.story-card-preview { font-size: 0.82rem; color: var(--muted); line-height: 1.45; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.story-body { font-size: 0.97rem; line-height: 1.75; color: var(--text); background: var(--bg); border-radius: 10px; padding: 16px; margin-bottom: 20px; }
+.story-opt { width: 100%; text-align: left; background: var(--surface); border: 2px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 0.9rem; font-weight: 600; cursor: pointer; margin-bottom: 8px; transition: border-color 0.15s, background 0.15s; }
+.story-opt:hover { border-color: var(--primary); }
+.story-opt.correct { background: #C6F6D5; border-color: var(--green); color: #22543D; }
+.story-opt.wrong { background: #FED7D7; border-color: var(--red); color: #9B2C2C; }
+.story-hint { background: #FFF5EE; border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 10px 12px; font-size: 0.82rem; color: var(--text); margin-bottom: 10px; line-height: 1.5; }
 .panic-phrase {
   background: var(--bg);
   border-radius: 8px;
@@ -577,6 +588,7 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
   <button class="tab-btn" data-tab="learn">Learn</button>
   <button class="tab-btn" data-tab="speak">Speak</button>
   <button class="tab-btn" data-tab="review">Review</button>
+  <button class="tab-btn" data-tab="stories">Stories</button>
   <button class="tab-btn" data-tab="roleplay">Roleplay</button>
   <button class="tab-btn" data-tab="reallife">Real-Life</button>
   <button class="tab-btn" data-tab="mastery">Mastery</button>
@@ -717,6 +729,7 @@ const DEFAULT_STATE = {
   mastery: {},       // { itemId: { mastered:false, masterDate:null } }
   roleplayHistory: {},
   realLife: { scheduled: [], completions: [] },
+  storyProgress: {},  // { 'S1': { completed: true, attempts: 1 } }
 };
 
 function loadState() {
@@ -1953,6 +1966,233 @@ document.getElementById('panic-overlay').addEventListener('click', e => {
 });
 
 // ===================================================
+// STORIES DATA
+// ===================================================
+const STORIES = [
+  {
+    id: 'S1',
+    title: 'En la cafetería',
+    level: 1,
+    levelLabel: 'Beginner',
+    spanish: `Ana entra a la cafetería. Ella ve a su amigo Carlos sentado en una mesa. "¡Hola, Carlos!" dice Ana. "¡Hola! ¿Cómo estás?" responde Carlos. "Muy bien, gracias. Tengo hambre." Ana pide un sándwich y un jugo de naranja. Los dos amigos hablan y comen juntos.`,
+    question: 'What are Ana and Carlos doing?',
+    options: [
+      { text: 'Waiting for a bus', correct: false, hint: 'The story takes place in a cafetería. There\'s no mention of a bus or waiting to go somewhere.' },
+      { text: 'Having a meal together', correct: true },
+      { text: 'Working at the café', correct: false, hint: '"Pide" means Ana is ordering food — she\'s a customer. The story says they eat together: "comen juntos."' },
+      { text: 'Studying for an exam', correct: false, hint: 'There\'s no mention of books, studying, or school. "Tengo hambre" means she\'s hungry — they\'re there to eat.' },
+    ]
+  },
+  {
+    id: 'S2',
+    title: 'El mercado del sábado',
+    level: 1,
+    levelLabel: 'Beginner',
+    spanish: `Roberto va al mercado los sábados. Hoy compra frutas: manzanas, plátanos y naranjas. También necesita leche y pan. El vendedor le dice: "Son veinte pesos, por favor." Roberto paga y dice gracias. Camina a casa con sus compras.`,
+    question: 'Why does Roberto go to the market?',
+    options: [
+      { text: 'To sell fruits to people', correct: false, hint: '"Compra" means he buys — Roberto is the customer. The "vendedor" (seller) is the one working there, not Roberto.' },
+      { text: 'To buy groceries for the week', correct: true },
+      { text: 'To meet friends for lunch', correct: false, hint: 'The story only mentions Roberto and the vendor. He walks home alone — "camina a casa" — with his bags.' },
+      { text: 'To find a job at the market', correct: false, hint: 'He goes every Saturday to shop — "los sábados." That\'s a routine errand, not a job search.' },
+    ]
+  },
+  {
+    id: 'S3',
+    title: 'Una llamada en la oficina',
+    level: 2,
+    levelLabel: 'Elementary',
+    spanish: `El teléfono suena en la oficina de María. "Buenas tardes, empresa García, habla María." "Buenas tardes. Necesito hablar con el señor López, por favor." "Lo siento, el señor López no está en este momento. ¿Puede llamar más tarde?" "Sí, claro. Gracias." María escribe un mensaje para el señor López.`,
+    question: 'What happens at the end of the story?',
+    options: [
+      { text: 'Señor López answers the phone', correct: false, hint: '"Lo siento, el señor López no está" — María tells the caller he is not there. He never picks up.' },
+      { text: 'María leaves the office early', correct: false, hint: 'The story ends with María writing — "escribe un mensaje." She stays at her desk.' },
+      { text: 'María takes a message for señor López', correct: true },
+      { text: 'María calls señor López herself', correct: false, hint: '"El teléfono suena" means the phone rings and María answers it — someone is calling her, not the other way around.' },
+    ]
+  },
+  {
+    id: 'S4',
+    title: 'Un día de lluvia',
+    level: 2,
+    levelLabel: 'Elementary',
+    spanish: `Hoy llueve mucho. Pedro no quiere salir de casa. Se queda en su cuarto y lee un libro. Su madre le llama para comer. "Pedro, la comida está lista." Pedro baja a la cocina y come con su familia. Después, vuelve a su cuarto a terminar el libro.`,
+    question: 'What is Pedro doing on this rainy day?',
+    options: [
+      { text: 'Playing soccer outside', correct: false, hint: '"Llueve mucho" means it\'s raining heavily. Pedro "no quiere salir" — he doesn\'t want to go outside at all.' },
+      { text: 'Cooking lunch for his family', correct: false, hint: 'His mother calls him when the food is ready — "la comida está lista." She cooked it, not Pedro.' },
+      { text: 'Staying home and reading', correct: true },
+      { text: 'Visiting a friend nearby', correct: false, hint: '"No quiere salir de casa" means he doesn\'t want to leave the house. He goes from his room to the kitchen and back — nowhere else.' },
+    ]
+  },
+  {
+    id: 'S5',
+    title: 'La cena familiar',
+    level: 2,
+    levelLabel: 'Elementary',
+    spanish: `La familia Rodríguez llega al restaurante a las ocho de la noche. El mesero los lleva a una mesa cerca de la ventana. "¿Qué desean ordenar?" pregunta el mesero. El padre pide pollo asado. La madre pide ensalada y sopa. Los niños quieren pizza. "¿Y para tomar?" "Agua para todos, por favor." La familia come y habla de su día.`,
+    question: 'What kind of event is this story about?',
+    options: [
+      { text: 'A business dinner between colleagues', correct: false, hint: '"La familia Rodríguez" — this is a family, not coworkers. There is no mention of work, business, or a meeting.' },
+      { text: 'A family dinner at a restaurant', correct: true },
+      { text: 'A birthday party celebration', correct: false, hint: 'There is no cake, gifts, or birthday mention. The family simply eats and talks — "habla de su día" means they talk about their day.' },
+      { text: 'A cooking class at a restaurant', correct: false, hint: 'They are ordering from a waiter — "el mesero." Customers in a restaurant order food; they don\'t cook it.' },
+    ]
+  },
+  {
+    id: 'S6',
+    title: 'El primer día de clases',
+    level: 3,
+    levelLabel: 'Intermediate',
+    spanish: `Hoy es el primer día de clases para Sofía. Está nerviosa pero también emocionada. Entra al salón y busca un asiento libre. Una chica se sienta a su lado. "Hola, me llamo Carmen. ¿Y tú?" "Soy Sofía. Es mi primera vez en esta escuela." "¡Bienvenida! Te voy a mostrar todo." Sofía sonríe. Va a ser un buen año.`,
+    question: 'How does Sofía feel about her first day?',
+    options: [
+      { text: 'Only nervous — she wants to go home', correct: false, hint: '"Nerviosa pero también emocionada" — the word "pero también" means "but also." She is nervous AND excited, not just one or the other.' },
+      { text: 'Both nervous and excited', correct: true },
+      { text: 'Angry that she has to be there', correct: false, hint: '"Emocionada" means excited, and "sonríe" at the end means she smiles. Those are positive feelings, not anger.' },
+      { text: 'Completely confident with no worries', correct: false, hint: '"Nerviosa" clearly means nervous. The story tells us she has mixed feelings — not pure confidence.' },
+    ]
+  },
+  {
+    id: 'S7',
+    title: 'El vecino nuevo',
+    level: 3,
+    levelLabel: 'Intermediate',
+    spanish: `Un hombre nuevo se mudó al apartamento de al lado. Se llama Diego. Esta mañana, Elena lo vio cargando cajas grandes. "¿Necesita ayuda?" le preguntó Elena. "Sí, muchas gracias. Hay muchas cajas." Los dos trabajaron juntos toda la mañana. Al final, Diego preparó café para los dos. "Gracias por su ayuda. Es usted muy amable," dijo Diego.`,
+    question: 'What is the main idea of this story?',
+    options: [
+      { text: 'Elena is moving to a new city', correct: false, hint: 'Diego is the one who moved — "se mudó al apartamento de al lado" means he moved into the apartment next door. Elena already lives there.' },
+      { text: 'Two neighbors help each other and become friendly', correct: true },
+      { text: 'Diego is working as a delivery man', correct: false, hint: 'Diego is moving into an apartment — the boxes are his belongings, not a delivery. "Se mudó" means he moved in.' },
+      { text: 'Elena asks Diego to leave the building', correct: false, hint: '"¿Necesita ayuda?" means "Do you need help?" — Elena is offering assistance, not asking him to leave. They end the story sharing coffee.' },
+    ]
+  },
+  {
+    id: 'S8',
+    title: 'El examen de conducir',
+    level: 4,
+    levelLabel: 'Pre-Intermediate',
+    spanish: `Miguel lleva tres meses practicando para su examen de conducir. Su hermano mayor le enseñó a manejar en el estacionamiento del supermercado. Hoy es el día del examen. Miguel está nervioso. El instructor sube al carro. "Buenos días. Por favor, encienda el motor." Miguel respira profundo y empieza. Cuarenta minutos después, el instructor dice: "Felicidades. Pasó el examen." Miguel llama a su hermano inmediatamente.`,
+    question: 'What does the ending of the story tell us?',
+    options: [
+      { text: 'Miguel failed and has to try again', correct: false, hint: '"Felicidades. Pasó el examen." — "Felicidades" means congratulations and "pasó" means he passed. That\'s the opposite of failing.' },
+      { text: 'Miguel passed his driving test', correct: true },
+      { text: 'Miguel decided not to get a license', correct: false, hint: 'The story describes him taking and finishing the exam. "Pasó el examen" is the clear result — he completed it successfully.' },
+      { text: 'The instructor failed Miguel for being nervous', correct: false, hint: 'Being nervous ("nervioso") didn\'t stop him. He breathed deeply — "respira profundo" — and drove. The instructor congratulated him at the end.' },
+    ]
+  },
+];
+
+// ===================================================
+// RENDERING — STORIES TAB
+// ===================================================
+function renderStories() {
+  const done = STORIES.filter(s => S.storyProgress[s.id]?.completed).length;
+  return `
+    <div class="section-label">Reading Comprehension</div>
+    <div class="nudge-card">
+      <strong>Read. Understand. Earn it.</strong>
+      Each story is entirely in Spanish. Read it, then answer what you think it means. Wrong answers come with a clue — so you learn either way.
+    </div>
+    ${done > 0 ? `<div style="font-size:0.78rem;color:var(--green);font-weight:700;margin-bottom:12px;">✓ ${done} of ${STORIES.length} stories completed</div>` : ''}
+    ${STORIES.map(story => {
+      const prog = S.storyProgress[story.id];
+      const completed = prog?.completed;
+      return `
+        <div class="story-card ${completed ? 'done' : ''}" onclick="renderStoryDetail('${story.id}')">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <span style="font-size:0.68rem;font-weight:700;text-transform:uppercase;color:var(--primary);letter-spacing:0.5px;">Level ${story.level} · ${story.levelLabel}</span>
+            ${completed ? '<span style="font-size:0.72rem;font-weight:700;color:var(--green);">✓ Completed</span>' : ''}
+          </div>
+          <div class="story-card-title">${story.title}</div>
+          <div class="story-card-preview">${story.spanish}</div>
+          <button class="btn btn-primary btn-sm" style="pointer-events:none;">${completed ? 'Read Again' : 'Read Story →'}</button>
+        </div>`;
+    }).join('')}
+  `;
+}
+
+let storyState = null; // { storyId, picked: null, showHint: false }
+
+function renderStoryDetail(storyId) {
+  const story = STORIES.find(s => s.id === storyId);
+  if (!story) return;
+  storyState = { storyId, picked: null };
+
+  document.getElementById('main-content').innerHTML = `
+    <div style="margin-bottom:12px;">
+      <button class="btn btn-secondary btn-sm" onclick="switchTab('stories')">← Stories</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+      <span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;color:var(--primary);">Level ${story.level} · ${story.levelLabel}</span>
+    </div>
+    <div style="font-size:1.1rem;font-weight:800;margin-bottom:12px;">${story.title}</div>
+
+    <div class="story-body" id="story-text">${story.spanish}</div>
+
+    <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:0.6px;margin-bottom:10px;">What is this story about?</div>
+    <div style="font-size:0.95rem;font-weight:700;color:var(--text);margin-bottom:14px;">${story.question}</div>
+
+    <div id="story-options">
+      ${story.options.map((o, i) => `
+        <button class="story-opt" id="story-opt-${i}" onclick="checkStoryAnswer('${story.id}', ${i})">${o.text}</button>
+      `).join('')}
+    </div>
+  `;
+}
+
+function checkStoryAnswer(storyId, optIndex) {
+  if (storyState && storyState.picked != null) return;
+  const story = STORIES.find(s => s.id === storyId);
+  if (!story) return;
+  const opt = story.options[optIndex];
+  storyState.picked = optIndex;
+
+  // Disable all buttons
+  story.options.forEach(function(_, i) {
+    var btn = document.getElementById('story-opt-' + i);
+    if (btn) btn.disabled = true;
+  });
+
+  var chosenBtn = document.getElementById('story-opt-' + optIndex);
+  var prog = S.storyProgress[storyId] || { completed: false, attempts: 0 };
+  prog.attempts = (prog.attempts || 0) + 1;
+
+  if (opt.correct) {
+    chosenBtn.classList.add('correct');
+    prog.completed = true;
+    S.storyProgress[storyId] = prog;
+    saveState();
+    awardStar('recall');
+
+    var successHtml = '<div style="background:#C6F6D5;border-radius:10px;padding:14px 16px;margin-top:10px;text-align:center;">'
+      + '<div style="font-size:1.1rem;font-weight:800;color:#22543D;margin-bottom:4px;">¡Correcto! 🎉</div>'
+      + '<div style="font-size:0.82rem;color:#276749;">You read and understood real Spanish. That\'s the skill.</div>'
+      + '<button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="switchTab(\'stories\')">← Back to Stories</button>'
+      + '</div>';
+    document.getElementById('story-options').insertAdjacentHTML('beforeend', successHtml);
+  } else {
+    chosenBtn.classList.add('wrong');
+    // Reveal the correct option in green
+    story.options.forEach(function(o, i) {
+      if (o.correct) {
+        var btn = document.getElementById('story-opt-' + i);
+        if (btn) btn.classList.add('correct');
+      }
+    });
+    S.storyProgress[storyId] = prog;
+    saveState();
+
+    var hintHtml = '<div class="story-hint">'
+      + '<strong>Clue:</strong> ' + opt.hint
+      + '<div style="margin-top:8px;">'
+      + '<button class="btn btn-secondary btn-sm" onclick="renderStoryDetail(\'' + storyId + '\')">Try Again</button>'
+      + '</div></div>';
+    chosenBtn.insertAdjacentHTML('afterend', hintHtml);
+  }
+}
+
+// ===================================================
 // TAB NAVIGATION
 // ===================================================
 const TAB_RENDERERS = {
@@ -1960,6 +2200,7 @@ const TAB_RENDERERS = {
   learn:    renderLearn,
   speak:    renderSpeak,
   review:   renderReview,
+  stories:  renderStories,
   roleplay: renderRoleplay,
   reallife: renderRealLife,
   mastery:  renderMastery,
