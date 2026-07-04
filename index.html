@@ -2550,7 +2550,99 @@ function renderProgress() {
           </div>`;
         }).join('')}
     </div>
+
+    <div class="section-label" style="margin-top:20px;">Teacher / Coach</div>
+    <div class="card" style="padding:16px;">
+      <div style="font-size:0.85rem;color:var(--muted);margin-bottom:12px;">Generate a progress report you can screenshot and share with a teacher, tutor, or coach.</div>
+      <button class="btn" onclick="showTeacherView()" style="width:100%;">📊 View Teacher Report</button>
+    </div>
   `;
+}
+
+function showTeacherView() {
+  const lessonsCompleted = Object.keys(S.user.lessonDates || {}).length;
+  const phrasesPracticed = Object.values(S.progress).filter(function(p){ return p.lastReviewed; }).length;
+  const storiesCompleted = Object.values(S.storyProgress).filter(function(p){ return p.completed; }).length;
+  const xp = S.stats.xp || 0;
+  const xpLevel = Math.floor(xp / 100) + 1;
+  const streak = S.streak.current;
+  const bestStreak = S.streak.best;
+  const name = S.user.name || 'Student';
+  const currentDay = S.user.currentLesson || 1;
+  const starDays = Object.entries(S.dailyStars).slice(-14).reverse();
+  const totalActiveDays = Object.keys(S.dailyStars).length;
+  const reportDate = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+
+  var lessonGrid = LESSONS.map(function(l) {
+    var done = S.user.lessonDates && S.user.lessonDates[l.id];
+    return '<div style="width:28px;height:28px;border-radius:6px;background:' + (done ? 'var(--green)' : 'var(--border)') + ';display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;color:' + (done ? '#fff' : 'var(--muted)') + ';">' + l.day + '</div>';
+  }).join('');
+
+  var starRows = starDays.length === 0
+    ? '<div style="font-size:0.82rem;color:var(--muted);">No activity recorded yet.</div>'
+    : starDays.slice(0, 10).map(function(entry) {
+        var date = entry[0]; var stars = entry[1];
+        var count = Object.values(stars).filter(Boolean).length;
+        return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);">' +
+          '<span style="font-size:0.72rem;color:var(--muted);width:95px;">' + date + '</span>' +
+          '<span style="font-size:0.85rem;">' + '⭐'.repeat(count) + '☆'.repeat(5 - count) + '</span>' +
+          '<span style="font-size:0.72rem;color:var(--muted);margin-left:auto;">' + count + '/5</span>' +
+        '</div>';
+      }).join('');
+
+  document.getElementById('main-content').innerHTML =
+    '<div style="margin-bottom:12px;">' +
+      '<button class="btn btn-secondary btn-sm" onclick="switchTab(\'progress\')">← Back to Progress</button>' +
+    '</div>' +
+
+    '<div style="background:var(--primary);color:#fff;border-radius:14px;padding:20px;margin-bottom:16px;">' +
+      '<div style="font-size:0.75rem;opacity:0.8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Spanish Speak Coach — Student Report</div>' +
+      '<div style="font-size:1.6rem;font-weight:800;">' + name + '</div>' +
+      '<div style="font-size:0.8rem;opacity:0.75;margin-top:4px;">Generated ' + reportDate + '</div>' +
+    '</div>' +
+
+    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;">' +
+      '<div class="card" style="text-align:center;padding:14px;">' +
+        '<div style="font-size:1.5rem;font-weight:800;color:var(--primary);">' + currentDay + '</div>' +
+        '<div style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;font-weight:700;">Current Day</div>' +
+      '</div>' +
+      '<div class="card" style="text-align:center;padding:14px;">' +
+        '<div style="font-size:1.5rem;font-weight:800;color:var(--primary);">' + streak + '</div>' +
+        '<div style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;font-weight:700;">Day Streak</div>' +
+      '</div>' +
+      '<div class="card" style="text-align:center;padding:14px;">' +
+        '<div style="font-size:1.5rem;font-weight:800;color:var(--primary);">Lv ' + xpLevel + '</div>' +
+        '<div style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;font-weight:700;">' + xp + ' XP</div>' +
+      '</div>' +
+    '</div>' +
+
+    '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;">' +
+      '<div class="card" style="padding:14px;">' +
+        '<div style="font-size:1.3rem;font-weight:800;color:var(--green);">' + lessonsCompleted + ' / 30</div>' +
+        '<div style="font-size:0.72rem;color:var(--muted);font-weight:700;">Lessons Completed</div>' +
+        '<div class="progress-wrap" style="margin-top:8px;"><div class="progress-bar" style="width:' + Math.round(lessonsCompleted / 30 * 100) + '%;background:var(--green);"></div></div>' +
+      '</div>' +
+      '<div class="card" style="padding:14px;">' +
+        '<div style="font-size:1.3rem;font-weight:800;color:var(--primary);">' + phrasesPracticed + '</div>' +
+        '<div style="font-size:0.72rem;color:var(--muted);font-weight:700;">Phrases Practiced</div>' +
+        '<div style="font-size:0.7rem;color:var(--muted);margin-top:6px;">' + storiesCompleted + ' stories read · ' + totalActiveDays + ' active days</div>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="section-label">Lesson Completion Map</div>' +
+    '<div class="card" style="padding:14px;margin-bottom:16px;">' +
+      '<div style="font-size:0.72rem;color:var(--muted);margin-bottom:10px;">Green = completed · Gray = not yet started</div>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:6px;">' + lessonGrid + '</div>' +
+      '<div style="font-size:0.72rem;color:var(--muted);margin-top:10px;font-weight:700;">' + lessonsCompleted + ' of 30 days completed · Best streak: ' + bestStreak + ' days</div>' +
+    '</div>' +
+
+    '<div class="section-label">Recent Activity (Last 10 Days)</div>' +
+    '<div class="card" style="padding:14px;margin-bottom:16px;">' + starRows + '</div>' +
+
+    '<div style="background:var(--border);border-radius:10px;padding:12px;text-align:center;">' +
+      '<div style="font-size:0.72rem;color:var(--muted);">📱 Screenshot this page to share with your teacher or coach</div>' +
+      '<div style="font-size:0.68rem;color:var(--muted);margin-top:4px;">Spanish Speak Coach · comforting-banoffee-0b238d.netlify.app</div>' +
+    '</div>';
 }
 
 function renderSettings() {
@@ -2915,6 +3007,174 @@ const STORIES = [
       { text: 'Miguel passed his driving test', correct: true },
       { text: 'Miguel decided not to get a license', correct: false, hint: 'The story describes him taking and finishing the exam. "Pasó el examen" is the clear result — he completed it successfully.' },
       { text: 'The instructor failed Miguel for being nervous', correct: false, hint: 'Being nervous ("nervioso") didn\'t stop him. He breathed deeply — "respira profundo" — and drove. The instructor congratulated him at the end.' },
+    ]
+  },
+  {
+    id: 'S9',
+    title: 'En la tienda de ropa',
+    level: 1,
+    levelLabel: 'Beginner',
+    spanish: `Lucía entra a una tienda de ropa. Busca una camisa para su hermano. "Buenos días, ¿en qué le puedo ayudar?" dice la vendedora. "Busco una camisa para un regalo. ¿Tienen en azul?" "Sí, aquí tenemos varias opciones." Lucía ve una camisa azul grande. "¿Me la puede dar? ¿Cuánto cuesta?" "Son doscientos pesos." Lucía paga con tarjeta y sale feliz de la tienda.`,
+    question: 'Why is Lucía at the store?',
+    options: [
+      { text: 'To buy a shirt as a gift', correct: true },
+      { text: 'To return a shirt she bought before', correct: false, hint: '"Busca una camisa para su hermano" — she is looking for a shirt for her brother. "Para un regalo" means it\'s a gift. There is no mention of a return.' },
+      { text: 'To apply for a job at the store', correct: false, hint: 'She is a customer — she asks prices and pays. "Sale feliz de la tienda" means she leaves happy after buying.' },
+      { text: 'To look at the store but buy nothing', correct: false, hint: '"Paga con tarjeta" means she pays by card. She buys the blue shirt.' },
+    ]
+  },
+  {
+    id: 'S10',
+    title: 'El autobús equivocado',
+    level: 1,
+    levelLabel: 'Beginner',
+    spanish: `Jorge necesita ir al centro. Toma el autobús número cuatro. El autobús va muy rápido y Jorge mira por la ventana. De repente, el autobús para en un lugar que Jorge no conoce. "Disculpe, ¿este autobús va al centro?" le pregunta a una señora. "No, señor. Este autobús va al aeropuerto. Usted necesita el número siete." Jorge se baja y espera el autobús correcto.`,
+    question: 'What problem does Jorge have?',
+    options: [
+      { text: 'He missed the last bus home', correct: false, hint: 'The story does not say anything about going home or missing the last bus. Jorge is trying to get to "el centro" — downtown.' },
+      { text: 'He took the wrong bus', correct: true },
+      { text: 'He lost his money on the bus', correct: false, hint: 'There is no mention of money or anything being lost. The lady tells him the right bus number — "el número siete."' },
+      { text: 'He fell asleep and missed his stop', correct: false, hint: 'Jorge was awake — "mira por la ventana." He noticed the unfamiliar place and asked for help immediately.' },
+    ]
+  },
+  {
+    id: 'S11',
+    title: 'La rutina de Marco',
+    level: 2,
+    levelLabel: 'Elementary',
+    spanish: `Marco se levanta todos los días a las seis de la mañana. Primero, toma una ducha y se prepara. Después desayuna: come huevos y toma café. A las siete y media sale de casa y toma el autobús al trabajo. Marco trabaja en una oficina hasta las cinco de la tarde. Cuando regresa a casa, cena con su esposa y sus dos hijos. A las diez de la noche, Marco se duerme.`,
+    question: 'What is the best description of Marco\'s day?',
+    options: [
+      { text: 'A relaxed day with lots of free time', correct: false, hint: 'Marco wakes at six, works until five, and sleeps at ten. That is a full structured day — "se levanta a las seis" and "se duerme a las diez." No free time is mentioned.' },
+      { text: 'A busy but organized daily routine', correct: true },
+      { text: 'A special holiday away from work', correct: false, hint: '"Trabaja en una oficina hasta las cinco" means he works at an office until five. It is a normal workday, not a holiday.' },
+      { text: 'His first day at a new job', correct: false, hint: 'The story says he does this "todos los días" — every day. This is his regular routine, not something new.' },
+    ]
+  },
+  {
+    id: 'S12',
+    title: 'Un mal día',
+    level: 2,
+    levelLabel: 'Elementary',
+    spanish: `Hoy Valeria no se siente bien. Se despertó tarde, no encontró sus llaves y perdió el autobús. En el trabajo, su jefe le dio más trabajo del normal. "Estoy muy cansada y estresada," le dice a su amiga Paula por teléfono. "No te preocupes," dice Paula. "¿Quieres salir a comer algo esta noche? Te va a hacer sentir mejor." Valeria piensa un momento. "Sí, tienes razón. Me parece bien."`,
+    question: 'How does the story end for Valeria?',
+    options: [
+      { text: 'She goes home and cries alone', correct: false, hint: '"Me parece bien" means she agrees to go out. Paula\'s invitation cheers her up — the story ends positively.' },
+      { text: 'She agrees to go out with her friend', correct: true },
+      { text: 'She quits her job because of stress', correct: false, hint: 'There is no mention of quitting. Her friend offers a simple solution — dinner — and Valeria says yes.' },
+      { text: 'She calls her boss to complain', correct: false, hint: 'She calls her friend Paula, not her boss. "No te preocupes" is Paula comforting Valeria, not a confrontation at work.' },
+    ]
+  },
+  {
+    id: 'S13',
+    title: 'Planes para el sábado',
+    level: 2,
+    levelLabel: 'Elementary',
+    spanish: `El jueves por la noche, Tomás le manda un mensaje a su amigo Raúl. "¿Tienes planes para el sábado?" Raúl responde: "No todavía. ¿Por qué?" "Hay un partido de fútbol a las tres. ¿Quieres ir?" "¡Claro! Me encanta el fútbol. ¿Dónde nos vemos?" "En la entrada del estadio, a las dos y media." "Perfecto. Nos vemos el sábado."`,
+    question: 'What are Tomás and Raúl planning to do on Saturday?',
+    options: [
+      { text: 'Watch a soccer game together', correct: true },
+      { text: 'Play soccer in the park', correct: false, hint: 'They are going to a "partido" at a "estadio" — a match at a stadium. They are spectators, not players.' },
+      { text: 'Go to a concert on Saturday night', correct: false, hint: '"Partido de fútbol" means soccer match. The plan is for 3 p.m. and they meet at the stadium entrance — not a concert.' },
+      { text: 'Meet at Raúl\'s house for lunch', correct: false, hint: 'They agree to meet "en la entrada del estadio" — at the stadium entrance. There is no mention of lunch or Raúl\'s house.' },
+    ]
+  },
+  {
+    id: 'S14',
+    title: 'Lo que hice ayer',
+    level: 3,
+    levelLabel: 'Intermediate',
+    spanish: `Ayer fue un día muy ocupado para mí. Por la mañana, fui al mercado a comprar verduras y frutas. Después, limpié la casa y lavé la ropa. A mediodía, mi vecina Esperanza vino a visitarme y tomamos café juntas. Por la tarde, fui a buscar a mis hijos a la escuela. En la noche, mi esposo llegó del trabajo y cenamos en familia. Fue un día largo, pero bueno.`,
+    question: 'What did the narrator do in the morning?',
+    options: [
+      { text: 'Visited her neighbor Esperanza', correct: false, hint: 'Esperanza came to visit "a mediodía" — at noon. The morning activities were going to the market and cleaning.' },
+      { text: 'Picked up her children from school', correct: false, hint: '"Fui a buscar a mis hijos a la escuela" was in the afternoon — "por la tarde." The morning was the market and housework.' },
+      { text: 'Went to the market and cleaned the house', correct: true },
+      { text: 'Had dinner with her husband', correct: false, hint: '"En la noche" — at night — is when her husband arrived and they had dinner. That\'s the last thing in the day, not the morning.' },
+    ]
+  },
+  {
+    id: 'S15',
+    title: 'El primer día de trabajo',
+    level: 3,
+    levelLabel: 'Intermediate',
+    spanish: `Hoy es el primer día de Andrés en su nuevo trabajo. Llega a la oficina diez minutos antes. Su jefe, el señor Fuentes, lo saluda: "Buenos días, Andrés. Bienvenido al equipo." Le presentan a sus compañeros: Sandra, Luis y Mei. Todos son muy amables. Andrés aprende dónde está todo y qué tiene que hacer. Al final del día, el señor Fuentes le dice: "Muy bien. Se ve que va a ser un gran aporte." Andrés sale sonriendo.`,
+    question: 'How does Andrés feel at the end of his first day?',
+    options: [
+      { text: 'Worried because he made too many mistakes', correct: false, hint: 'His boss says "Muy bien" and calls him a great addition — "gran aporte." There is no mention of mistakes. Andrés leaves smiling.' },
+      { text: 'Confident and encouraged', correct: true },
+      { text: 'Bored because the work was too easy', correct: false, hint: '"Sale sonriendo" means he leaves smiling — a sign of satisfaction, not boredom. His boss gave him positive feedback.' },
+      { text: 'Angry at his coworkers', correct: false, hint: '"Todos son muy amables" — everyone is very kind. The coworkers are described positively, not negatively.' },
+    ]
+  },
+  {
+    id: 'S16',
+    title: 'En el mercado de frutas',
+    level: 3,
+    levelLabel: 'Intermediate',
+    spanish: `Doña Carmen llega al mercado temprano el domingo. Primero va con don Ignacio, el vendedor de frutas. "¿Qué tiene hoy de bueno?" "Tengo mangos, piñas y sandías muy frescas, doña Carmen." "¿Cuánto vale la sandía?" "Cincuenta pesos." "¿Me puede dar un descuento? La semana pasada me cobró cuarenta." Don Ignacio sonríe. "Está bien. Cuarenta y cinco pesos y le doy una piña también." Doña Carmen acepta con gusto.`,
+    question: 'What does doña Carmen successfully do at the market?',
+    options: [
+      { text: 'Sell her own fruit to don Ignacio', correct: false, hint: 'Doña Carmen is the buyer — she asks "¿cuánto vale?" (how much?) and pays. Don Ignacio is the seller.' },
+      { text: 'Negotiate a better price for her fruit', correct: true },
+      { text: 'Buy mangoes and leave without paying', correct: false, hint: '"Doña Carmen acepta" — she accepts the deal and buys. She negotiated a fair price; there is no indication she left without paying.' },
+      { text: 'Complain that the market is closed', correct: false, hint: 'The market is open — she arrives early and talks directly with the fruit vendor. There is no problem with the market being closed.' },
+    ]
+  },
+  {
+    id: 'S17',
+    title: 'La visita al médico',
+    level: 4,
+    levelLabel: 'Pre-Intermediate',
+    spanish: `Desde hace tres días, Isabel tiene dolor de cabeza y fiebre. Su esposo la lleva al médico. En el consultorio, el doctor le pregunta: "¿Cuándo empezaron los síntomas?" "El miércoles por la noche, doctor." El médico la examina y le dice: "Tiene una infección. Le voy a recetar antibióticos. Tiene que descansar y tomar mucha agua." Isabel sale con la receta. En la farmacia, el farmacéutico le explica cómo tomar el medicamento. Tres días después, Isabel ya se siente mucho mejor.`,
+    question: 'What does the doctor tell Isabel to do?',
+    options: [
+      { text: 'Go to the hospital immediately', correct: false, hint: 'The doctor gives her a prescription — "receta" — and tells her to rest and drink water. He does not send her to a hospital.' },
+      { text: 'Rest, drink water, and take antibiotics', correct: true },
+      { text: 'Stop eating for two days', correct: false, hint: 'The doctor says "descansar y tomar mucha agua" — rest and drink plenty of water. There is no mention of stopping food.' },
+      { text: 'Come back tomorrow for more tests', correct: false, hint: 'After the exam, the doctor gives a prescription right away. Isabel goes directly to the pharmacy — "en la farmacia" — and recovers in three days.' },
+    ]
+  },
+  {
+    id: 'S18',
+    title: 'Los pasatiempos de Claudia',
+    level: 4,
+    levelLabel: 'Pre-Intermediate',
+    spanish: `A Claudia le encanta la música. Desde los ocho años toca la guitarra y canta. Los fines de semana, practica con un grupo de amigos en el garaje de su casa. "La música me relaja y me hace feliz," dice ella. También le gusta cocinar. Los domingos prepara recetas nuevas para su familia. Su platillo favorito es el mole de pollo. "No me gusta ver televisión," admite. "Prefiero hacer cosas con las manos." Su familia dice que Claudia nunca se aburre.`,
+    question: 'What does Claudia prefer to do with her free time?',
+    options: [
+      { text: 'Watch TV and relax on the couch', correct: false, hint: '"No me gusta ver televisión" — she says clearly she does not like watching TV. She prefers active hobbies with her hands.' },
+      { text: 'Play music and cook', correct: true },
+      { text: 'Go shopping with her friends on weekends', correct: false, hint: 'On weekends she practices music with friends in the garage — "en el garaje de su casa." Shopping is not mentioned.' },
+      { text: 'Travel to new places every weekend', correct: false, hint: 'Claudia stays home — she practices in her garage and cooks for her family. Travel is not part of her weekend routine.' },
+    ]
+  },
+  {
+    id: 'S19',
+    title: 'Una emergencia en la calle',
+    level: 4,
+    levelLabel: 'Pre-Intermediate',
+    spanish: `Era de noche cuando Félix vio a un hombre mayor caído en la acera. El hombre no podía levantarse. Félix se acercó inmediatamente. "Señor, ¿está bien? ¿Puede oírme?" El hombre abrió los ojos pero no habló. Félix sacó su teléfono y llamó a la ambulancia. "Es una emergencia. Hay un hombre caído en la calle Cinco, cerca del parque." Mientras esperaba, se arrodilló junto al hombre y le habló con calma. La ambulancia llegó en diez minutos. Los paramédicos le agradecieron a Félix su rápida reacción.`,
+    question: 'What did Félix do when he found the man?',
+    options: [
+      { text: 'He walked away because he was afraid', correct: false, hint: '"Félix se acercó inmediatamente" — he approached immediately. He stayed with the man and called for help.' },
+      { text: 'He called an ambulance and stayed with the man', correct: true },
+      { text: 'He carried the man to the hospital himself', correct: false, hint: 'Félix called an ambulance — "llamó a la ambulancia" — and waited with the man. He did not carry him anywhere.' },
+      { text: 'He asked other people to handle the situation', correct: false, hint: 'Félix acted alone and immediately. He made the call, gave the location, and stayed with the man until help arrived.' },
+    ]
+  },
+  {
+    id: 'S20',
+    title: 'Una conversación real',
+    level: 4,
+    levelLabel: 'Pre-Intermediate',
+    spanish: `En el trabajo, la jefa de Sandra le preguntó cómo le iba con el español. "Estoy aprendiendo poco a poco," dijo Sandra. "Antes no podía decir ni hola. Ahora puedo hablar un poco con mis clientes." La jefa sonrió. "¿Y cómo lo aprendes?" "Con una aplicación, todos los días, aunque sea diez minutos." "¿Funciona?" Sandra pensó un momento. "Sí. Lo importante no es aprender rápido. Es no parar." La jefa asintió. "Tienes toda la razón."`,
+    question: 'What is the lesson Sandra shares about learning Spanish?',
+    options: [
+      { text: 'You need a professional teacher to make progress', correct: false, hint: 'Sandra uses an app on her own — "con una aplicación." She never mentions a teacher. Her method is consistent daily practice.' },
+      { text: 'Consistency matters more than speed', correct: true },
+      { text: 'You should only study for long sessions to improve', correct: false, hint: '"Aunque sea diez minutos" means "even if it\'s just ten minutes." Short daily sessions are exactly what she recommends.' },
+      { text: 'Learning Spanish at work is impossible', correct: false, hint: 'Sandra says she can now speak with clients — "puedo hablar un poco con mis clientes." She made real progress.' },
     ]
   },
 ];
