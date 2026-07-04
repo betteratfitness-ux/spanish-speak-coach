@@ -691,6 +691,52 @@ const CONTENT = [
   {id:'FB-002',domain:'D1',level:1,type:'fill-blank',spanish:'Me ___ María. (My name is)',english:'llamo',pron:'YA-mo',example:'Me llamo María. ¿Y tú?',exampleEn:'My name is María. And you?',prompt:'Complete: "Me ___ María." (My name is)',answer:'llamo',difficulty:1},
   {id:'FB-003',domain:'D7',level:1,type:'fill-blank',spanish:'___ aprendiendo español. (I am)',english:'Estoy',pron:'es-TOY',example:'Estoy aprendiendo español poco a poco.',exampleEn:'I\'m learning Spanish little by little.',prompt:'Complete: "___ aprendiendo español."',answer:'Estoy',difficulty:2},
   {id:'FB-004',domain:'D3',level:1,type:'fill-blank',spanish:'¿___ está el baño? (Where)',english:'Dónde',pron:'DON-deh',example:'Disculpe, ¿dónde está el baño?',exampleEn:'Excuse me, where is the bathroom?',prompt:'Complete: "¿___ está el baño?"',answer:'Dónde',difficulty:1},
+
+  // ── WORD CHUNKS — native collocations ──────────────────
+  // Fillers & Thinking Time
+  {id:'CH-001',domain:'CHUNK',level:1,type:'chunk',spanish:'A ver...',english:"Let's see... / Let me check...",pron:'ah VEH',usage:'Buys you thinking time. Said before checking something or pausing to think.',example:'A ver, ¿dónde puse las llaves?',exampleEn:"Let's see, where did I put my keys?",prompt:'What do you say to buy thinking time?',difficulty:1},
+  {id:'CH-002',domain:'CHUNK',level:1,type:'chunk',spanish:'Bueno...',english:'Well... / Okay...',pron:'BWEH-no',usage:'Starts a sentence, shows agreement, or softens a transition.',example:'Bueno, vamos a empezar.',exampleEn:'Well, let\'s get started.',prompt:'How do you open a sentence casually?',difficulty:1},
+  {id:'CH-003',domain:'CHUNK',level:1,type:'chunk',spanish:'Pues...',english:'Well... / So... / Then...',pron:'pwes',usage:'One of the most-used fillers in Spanish. Opens almost any sentence.',example:'Pues, no sé qué decirte.',exampleEn:"Well, I don't know what to tell you.",prompt:'What filler starts almost any Spanish sentence?',difficulty:1},
+  {id:'CH-004',domain:'CHUNK',level:1,type:'chunk',spanish:'O sea...',english:'I mean... / That is... / In other words...',pron:'o SEH-ah',usage:'Clarifies or rephrases what you just said. Extremely common in spoken Spanish.',example:'Es complicado, o sea, no es fácil.',exampleEn:"It's complicated, I mean, it's not easy.",prompt:'How do you say "I mean" or rephrase something?',difficulty:1},
+  {id:'CH-005',domain:'CHUNK',level:1,type:'chunk',spanish:'Es que...',english:"The thing is... / It's just that...",pron:'es keh',usage:'Introduces an explanation or excuse. Softens what you say next.',example:"Es que no tengo tiempo ahora.",exampleEn:"The thing is, I don't have time right now.",prompt:'How do you say "the thing is" before an explanation?',difficulty:1},
+  {id:'CH-006',domain:'CHUNK',level:1,type:'chunk',spanish:'Mira...',english:'Look... / Listen...',pron:'MEE-rah',usage:"Gets someone's attention or signals you're about to say something important.",example:'Mira, te voy a ser honesto.',exampleEn:"Look, I'm going to be honest with you.",prompt:'How do you say "look" to get attention?',difficulty:1},
+  {id:'CH-007',domain:'CHUNK',level:1,type:'chunk',spanish:'Oye...',english:'Hey... / Listen...',pron:'OH-yeh',usage:"Informal way to get someone's attention. Like tapping someone on the shoulder.",example:'Oye, ¿me puedes ayudar?',exampleEn:'Hey, can you help me?',prompt:'What informal word gets someone\'s attention?',difficulty:1},
+  {id:'CH-008',domain:'CHUNK',level:2,type:'chunk',spanish:'Déjame pensar.',english:'Let me think.',pron:'DEH-hah-meh pen-SAR',usage:'Asks for a moment to consider. Sounds natural and buys you time.',example:'Déjame pensar... sí, creo que sí.',exampleEn:'Let me think... yes, I think so.',prompt:'How do you ask for a moment to think?',difficulty:2},
+
+  // Reactions & Agreements
+  {id:'CH-009',domain:'CHUNK',level:1,type:'chunk',spanish:'¡Claro!',english:'Of course! / Sure!',pron:'KLAH-ro',usage:'Strong, natural agreement. Used constantly by native speakers.',example:'¿Puedes venir? ¡Claro!',exampleEn:'Can you come? Of course!',prompt:'How do you say "of course" strongly?',difficulty:1},
+  {id:'CH-010',domain:'CHUNK',level:1,type:'chunk',spanish:'¡Exacto!',english:'Exactly! / That\'s right!',pron:'ex-AK-to',usage:'Confirms you completely agree with what was just said.',example:'Eso es lo que dije. ¡Exacto!',exampleEn:"That's what I said. Exactly!",prompt:'How do you say "exactly" in reaction?',difficulty:1},
+  {id:'CH-011',domain:'CHUNK',level:1,type:'chunk',spanish:'¡Qué bueno!',english:'How great! / That\'s great!',pron:'keh BWEH-no',usage:'Expresses happiness or approval about something.',example:'Pasé el examen. ¡Qué bueno!',exampleEn:'I passed the test. How great!',prompt:'How do you say "how great!" in Spanish?',difficulty:1},
+  {id:'CH-012',domain:'CHUNK',level:1,type:'chunk',spanish:'¡No me digas!',english:"No way! / You don't say! / Really?!",pron:'no meh DEE-gas',usage:'Shows surprise or disbelief at what you just heard.',example:'Se casaron ayer. ¡No me digas!',exampleEn:'They got married yesterday. No way!',prompt:'How do you express shock or disbelief?',difficulty:2},
+  {id:'CH-013',domain:'CHUNK',level:1,type:'chunk',spanish:'¿Verdad?',english:"Right? / Isn't it? / Don't you think?",pron:'ver-DAD',usage:"Tag question — added to the end of a sentence to seek agreement. Like 'right?' in English.",example:'Hace mucho calor, ¿verdad?',exampleEn:"It's really hot, right?",prompt:'How do you add "right?" to the end of a sentence?',difficulty:1},
+  {id:'CH-014',domain:'CHUNK',level:1,type:'chunk',spanish:'Me parece bien.',english:"Sounds good to me. / That works for me.",pron:'meh pa-REH-seh BYEN',usage:'Shows you are okay with a plan or suggestion.',example:'¿A las tres? Me parece bien.',exampleEn:'At three? Sounds good to me.',prompt:'How do you say something sounds good to you?',difficulty:2},
+  {id:'CH-015',domain:'CHUNK',level:2,type:'chunk',spanish:'Tienes razón.',english:"You're right.",pron:'TYEH-nes ra-SON',usage:'Concedes a point. Strong, natural way to agree someone is correct.',example:'Tienes razón, debí llamar antes.',exampleEn:"You're right, I should have called first.",prompt:'How do you tell someone they are right?',difficulty:1},
+  {id:'CH-016',domain:'CHUNK',level:1,type:'chunk',spanish:'¡Eso es!',english:"That's it! / Exactly! / Yes, that!",pron:'EH-so es',usage:'Enthusiastic confirmation that someone got something right.',example:'¿Así? ¡Eso es!',exampleEn:'Like this? That\'s it!',prompt:'How do you say "that\'s it!" when someone gets it right?',difficulty:1},
+
+  // Transitions
+  {id:'CH-017',domain:'CHUNK',level:2,type:'chunk',spanish:'Por cierto...',english:'By the way...',pron:'por SYER-to',usage:'Introduces a new topic or something you just remembered.',example:'Por cierto, ¿viste a Marcos?',exampleEn:'By the way, did you see Marcos?',prompt:'How do you say "by the way"?',difficulty:1},
+  {id:'CH-018',domain:'CHUNK',level:2,type:'chunk',spanish:'De hecho...',english:'In fact... / Actually...',pron:'deh EH-cho',usage:'Adds information that supports or contrasts what was said.',example:'De hecho, ya lo terminé.',exampleEn:'In fact, I already finished it.',prompt:'How do you say "in fact" or "actually"?',difficulty:2},
+  {id:'CH-019',domain:'CHUNK',level:2,type:'chunk',spanish:'Sin embargo...',english:'However... / Nevertheless...',pron:'sin em-BAR-go',usage:'Introduces a contrast. Like "but" but more formal and natural in speech.',example:'Es difícil. Sin embargo, vale la pena.',exampleEn:"It's hard. However, it's worth it.",prompt:'How do you say "however" in Spanish?',difficulty:2},
+  {id:'CH-020',domain:'CHUNK',level:2,type:'chunk',spanish:'Además...',english:'Besides... / Also... / On top of that...',pron:'ah-deh-MAS',usage:'Adds an extra point to support what you said.',example:'Es barato y, además, es muy bueno.',exampleEn:"It's cheap and, on top of that, it's really good.",prompt:'How do you add "on top of that" to your point?',difficulty:2},
+  {id:'CH-021',domain:'CHUNK',level:2,type:'chunk',spanish:'Al final...',english:'In the end... / Eventually...',pron:'al fee-NAL',usage:'Wraps up a story or shows what ultimately happened.',example:'Al final, todo salió bien.',exampleEn:'In the end, everything worked out.',prompt:'How do you say "in the end"?',difficulty:1},
+
+  // Requests & Softeners
+  {id:'CH-022',domain:'CHUNK',level:1,type:'chunk',spanish:'No te preocupes.',english:"Don't worry. / No worries.",pron:'no teh preh-oh-KOO-pes',usage:'Reassures someone. Very common and warm.',example:'Olvidé llamar. No te preocupes.',exampleEn:"I forgot to call. Don't worry.",prompt:'How do you tell someone not to worry?',difficulty:2},
+  {id:'CH-023',domain:'CHUNK',level:1,type:'chunk',spanish:'Por si acaso.',english:'Just in case.',pron:'por see ah-KAH-so',usage:'Added to explain you are being cautious.',example:'Lleva un paraguas, por si acaso.',exampleEn:'Bring an umbrella, just in case.',prompt:'How do you say "just in case"?',difficulty:2},
+  {id:'CH-024',domain:'CHUNK',level:2,type:'chunk',spanish:'¿Me puedes ayudar?',english:'Can you help me?',pron:'meh PWEH-des ah-yoo-DAR',usage:'Polite request for help. Natural and non-awkward.',example:'Disculpa, ¿me puedes ayudar con esto?',exampleEn:'Excuse me, can you help me with this?',prompt:'How do you politely ask for help?',difficulty:1},
+  {id:'CH-025',domain:'CHUNK',level:2,type:'chunk',spanish:'A ver si puedo...',english:"Let me see if I can... / I'll see if I can...",pron:'ah VEH see PWEH-do',usage:'Shows willingness to try without making a firm promise.',example:'A ver si puedo ir mañana.',exampleEn:"Let me see if I can go tomorrow.",prompt:'How do you say you\'ll see if you can do something?',difficulty:2},
+
+  // Everyday expressions
+  {id:'CH-026',domain:'CHUNK',level:1,type:'chunk',spanish:'Más o menos.',english:'More or less. / Sort of.',pron:'mas o MEH-nos',usage:"Vague answer to 'how are you?' or 'how was it?' Very natural.",example:'¿Cómo estuvo? Más o menos.',exampleEn:'How was it? More or less.',prompt:'How do you say "more or less"?',difficulty:1},
+  {id:'CH-027',domain:'CHUNK',level:1,type:'chunk',spanish:'Ni idea.',english:'No idea. / I have no clue.',pron:'nee ee-DEH-ah',usage:'Strong way to say you have absolutely no idea.',example:'¿Dónde está Juan? Ni idea.',exampleEn:'Where is Juan? No idea.',prompt:'How do you say "no idea" strongly?',difficulty:1},
+  {id:'CH-028',domain:'CHUNK',level:1,type:'chunk',spanish:'¿Qué tal?',english:"How's it going? / How was it?",pron:'keh TAL',usage:'Casual greeting or check-in. Can ask about a person or an event.',example:'¿Qué tal el fin de semana?',exampleEn:'How was the weekend?',prompt:'What casual phrase asks how things are going?',difficulty:1},
+  {id:'CH-029',domain:'CHUNK',level:1,type:'chunk',spanish:'Todo bien.',english:"All good. / Everything's fine.",pron:'TO-do BYEN',usage:'Simple, positive response. Works as a greeting reply or status update.',example:'¿Cómo estás? Todo bien, gracias.',exampleEn:'How are you? All good, thanks.',prompt:'How do you say everything is fine?',difficulty:1},
+  {id:'CH-030',domain:'CHUNK',level:2,type:'chunk',spanish:'Poco a poco.',english:'Little by little. / Step by step.',pron:'PO-ko ah PO-ko',usage:'Encourages patience or describes gradual progress.',example:'No te preocupes, poco a poco.',exampleEn:"Don't worry, little by little.",prompt:'How do you say "little by little"?',difficulty:1},
+  {id:'CH-031',domain:'CHUNK',level:2,type:'chunk',spanish:'¿A qué hora...?',english:'At what time...?',pron:'ah keh O-rah',usage:'The natural way to ask when something happens.',example:'¿A qué hora empieza la clase?',exampleEn:'At what time does the class start?',prompt:'How do you ask what time something happens?',difficulty:1},
+  {id:'CH-032',domain:'CHUNK',level:2,type:'chunk',spanish:'Tengo ganas de...',english:'I feel like... / I want to... / I\'m in the mood for...',pron:'TEN-go GAH-nas deh',usage:"Expresses desire or being in the mood for something. Very natural.",example:'Tengo ganas de bailar.',exampleEn:"I feel like dancing.",prompt:'How do you say you feel like doing something?',difficulty:2},
+  {id:'CH-033',domain:'CHUNK',level:2,type:'chunk',spanish:'Me da igual.',english:"It's all the same to me. / I don't mind. / Either way.",pron:'meh dah ee-GWAL',usage:'Shows indifference between options. Neutral, not rude.',example:'¿Café o té? Me da igual.',exampleEn:'Coffee or tea? Either way.',prompt:'How do you say you don\'t mind either option?',difficulty:2},
+  {id:'CH-034',domain:'CHUNK',level:3,type:'chunk',spanish:'No hay de qué.',english:"Don't mention it. / You're welcome. / No problem.",pron:'no AY deh keh',usage:'More expressive alternative to "de nada" when someone thanks you.',example:'Gracias por todo. No hay de qué.',exampleEn:"Thank you for everything. Don't mention it.",prompt:'What is a warmer way to say "you\'re welcome"?',difficulty:2},
+  {id:'CH-035',domain:'CHUNK',level:3,type:'chunk',spanish:'¿Cómo que...?',english:"What do you mean...? / How do you mean...?",pron:'KO-mo keh',usage:'Asks for clarification when something said surprises or confuses you.',example:'¿Cómo que no vas a venir?',exampleEn:"What do you mean you're not coming?",prompt:'How do you ask "what do you mean" when surprised?',difficulty:3},
 ];
 
 // Domain metadata
@@ -702,7 +748,102 @@ const DOMAINS = {
   D5: { name: 'Work & Service', icon: '💼', desc: 'Appointments, scheduling, professional conversation' },
   D6: { name: 'Real Conversation', icon: '💬', desc: 'Opinions, feelings, keeping conversation going' },
   D7: { name: 'Grammar That Speaks', icon: '🔑', desc: 'Key verbs and patterns for speaking fluency' },
+  CHUNK: { name: 'Word Chunks', icon: '🧩', desc: 'Phrases natives say together — fillers, reactions, transitions, expressions' },
 };
+
+// ===================================================
+// GRAMMAR MINI-LESSONS
+// ===================================================
+const GRAMMAR = [
+  {
+    id:'G1', title:'Ser vs. Estar', subtitle:'Two ways to say "to be"',
+    rule:'Use <strong>ser</strong> for permanent facts. Use <strong>estoy</strong> for temporary states.',
+    examples:[
+      {sp:'Soy mexicano.',en:'I am Mexican. (permanent identity)'},
+      {sp:'Estoy cansado.',en:'I am tired. (temporary state)'},
+      {sp:'Ella es doctora.',en:'She is a doctor. (profession)'},
+      {sp:'Ella está en casa.',en:'She is at home. (location/state)'},
+    ],
+    tip:'Memory trick: <em>SER</em> = Stable, Enduring, Real. <em>ESTAR</em> = Emotions, Temporary, Accidental, Results.'
+  },
+  {
+    id:'G2', title:'Por vs. Para', subtitle:'Two ways to say "for"',
+    rule:'<strong>Para</strong> = destination, purpose, deadline, recipient. <strong>Por</strong> = exchange, duration, cause, on behalf of.',
+    examples:[
+      {sp:'Esto es para ti.',en:'This is for you. (recipient → para)'},
+      {sp:'Gracias por tu ayuda.',en:'Thanks for your help. (exchange → por)'},
+      {sp:'Estudio para aprender.',en:"I study to learn. (purpose → para)"},
+      {sp:'Caminé por una hora.',en:'I walked for an hour. (duration → por)'},
+    ],
+    tip:'Quick test: if you can replace "for" with "in order to" → use <em>para</em>. If it\'s about exchange or time passing → use <em>por</em>.'
+  },
+  {
+    id:'G3', title:'Reflexive Verbs', subtitle:'When you do something to yourself',
+    rule:'Add a reflexive pronoun (me, te, se, nos) before the verb when the subject does the action to themselves.',
+    examples:[
+      {sp:'Me llamo Ana.',en:'My name is Ana. (I call myself Ana)'},
+      {sp:'Me levanto a las seis.',en:'I get up at six.'},
+      {sp:'¿Cómo te sientes?',en:'How do you feel?'},
+      {sp:'Se durmió en el sofá.',en:'He fell asleep on the sofa.'},
+    ],
+    tip:'Watch for these common reflexive verbs: llamarse, levantarse, sentirse, dormirse, ponerse, quedarse.'
+  },
+  {
+    id:'G4', title:'Preterite (Simple Past)', subtitle:'Completed actions in the past',
+    rule:'Use the preterite for actions that are <strong>finished</strong> — with a clear start and end.',
+    examples:[
+      {sp:'Comí pizza anoche.',en:'I ate pizza last night.'},
+      {sp:'Ella llamó tres veces.',en:'She called three times.'},
+      {sp:'Fuimos al mercado.',en:'We went to the market.'},
+      {sp:'¿Qué hiciste ayer?',en:'What did you do yesterday?'},
+    ],
+    tip:'Key time words that signal preterite: <em>ayer, anoche, la semana pasada, una vez, de repente.</em>'
+  },
+  {
+    id:'G5', title:'Gustar (and verbs like it)', subtitle:'"I like" works backwards in Spanish',
+    rule:'"Me gusta" literally means "it pleases me." The thing you like is the subject — the person is the indirect object.',
+    examples:[
+      {sp:'Me gusta el café.',en:'I like coffee. (coffee pleases me)'},
+      {sp:'Me gustan los tacos.',en:'I like tacos. (tacos please me — plural)'},
+      {sp:'Le gusta bailar.',en:'He/she likes to dance.'},
+      {sp:'¿Te gusta vivir aquí?',en:'Do you like living here?'},
+    ],
+    tip:'Rule: one thing → <em>gusta</em>. More than one thing → <em>gustan</em>. Same pattern for: encantar, molestar, importar, doler.'
+  },
+  {
+    id:'G6', title:'Ir a + Infinitive', subtitle:'The easiest way to talk about the future',
+    rule:'<strong>Ir a</strong> + verb infinitive = going to do something. Works exactly like English.',
+    examples:[
+      {sp:'Voy a estudiar mañana.',en:"I'm going to study tomorrow."},
+      {sp:'Vamos a comer juntos.',en:"We're going to eat together."},
+      {sp:'¿Qué vas a hacer?',en:'What are you going to do?'},
+      {sp:'Ella va a llegar tarde.',en:"She's going to arrive late."},
+    ],
+    tip:'Master the forms: voy / vas / va / vamos / van. Add any infinitive after and you can talk about almost any future plan.'
+  },
+  {
+    id:'G7', title:'Direct Object Pronouns', subtitle:'Replace the thing you\'re talking about',
+    rule:'Instead of repeating a noun, replace it with lo (him/it), la (her/it), los, las.',
+    examples:[
+      {sp:'¿Tienes el libro? Sí, lo tengo.',en:'Do you have the book? Yes, I have it.'},
+      {sp:'Vi a María. La vi ayer.',en:'I saw María. I saw her yesterday.'},
+      {sp:'¿Compras los boletos? Sí, los compro.',en:'Are you buying the tickets? Yes, I\'m buying them.'},
+      {sp:'No lo sé.',en:"I don't know it / I don't know."},
+    ],
+    tip:'Placement: before conjugated verb (<em>lo veo</em>) OR attached to infinitive (<em>verlo</em>). Both are correct.'
+  },
+  {
+    id:'G8', title:'Tú Commands', subtitle:'Telling someone (informal) what to do',
+    rule:'For regular <strong>positive</strong> commands with tú, use the él/ella form of the present tense.',
+    examples:[
+      {sp:'¡Habla más despacio!',en:'Speak more slowly!'},
+      {sp:'Come tu desayuno.',en:'Eat your breakfast.'},
+      {sp:'Escucha esto.',en:'Listen to this.'},
+      {sp:'No hables tan rápido.',en:"Don't speak so fast. (negative → use subjunctive)"},
+    ],
+    tip:'Irregular positive commands to memorize: <em>ven</em> (come), <em>di</em> (say), <em>haz</em> (do), <em>ve</em> (go), <em>pon</em> (put), <em>ten</em> (have), <em>sal</em> (leave).'
+  },
+];
 
 // ===================================================
 // STATE MANAGEMENT
@@ -990,7 +1131,8 @@ function renderToday() {
 // RENDERING — LEARN TAB
 // ===================================================
 function renderLearn() {
-  const domainRows = Object.entries(DOMAINS).map(([key, d]) => {
+  const regularDomains = Object.entries(DOMAINS).filter(([k]) => k !== 'CHUNK');
+  const domainRows = regularDomains.map(([key, d]) => {
     const items = CONTENT.filter(c => c.domain === key);
     const practiced = items.filter(c => S.progress[c.id] && S.progress[c.id].lastReviewed).length;
     const pct = items.length > 0 ? Math.round(practiced / items.length * 100) : 0;
@@ -1008,6 +1150,20 @@ function renderLearn() {
       </div>`;
   }).join('');
 
+  const chunkItems = CONTENT.filter(c => c.domain === 'CHUNK');
+  const chunkPracticed = chunkItems.filter(c => S.progress[c.id]?.lastReviewed).length;
+  const chunkPct = Math.round(chunkPracticed / chunkItems.length * 100);
+
+  const grammarRows = GRAMMAR.map(g => `
+    <div class="domain-card" onclick="openGrammarLesson('${g.id}')">
+      <div class="domain-icon">📖</div>
+      <div class="domain-info">
+        <strong>${g.title}</strong>
+        <span>${g.subtitle}</span>
+      </div>
+      <div style="font-size:0.75rem;color:var(--primary);font-weight:700;">Read →</div>
+    </div>`).join('');
+
   return `
     <div class="section-label">Learning Domains</div>
     <div class="nudge-card">
@@ -1015,6 +1171,69 @@ function renderLearn() {
       Browse a domain. Study a phrase. Then go to Speak tab and say it out loud.
     </div>
     ${domainRows}
+
+    <div class="section-label" style="margin-top:20px;">🧩 Word Chunks</div>
+    <div class="nudge-card">
+      <strong>Sound Like a Native</strong>
+      These are real phrases natives say together — fillers, reactions, transitions. Drill them until they come out automatically.
+    </div>
+    <div class="domain-card" onclick="openDomain('CHUNK')">
+      <div class="domain-icon">🧩</div>
+      <div class="domain-info">
+        <strong>Native Phrase Chunks (${chunkItems.length})</strong>
+        <span>Fillers, reactions, transitions, everyday expressions</span>
+        <div class="progress-wrap" style="margin-top:6px;height:5px;">
+          <div class="progress-bar" style="width:${chunkPct}%"></div>
+        </div>
+      </div>
+      <div class="domain-count">${chunkPracticed}/${chunkItems.length}</div>
+    </div>
+
+    <div class="section-label" style="margin-top:20px;">📖 Grammar Mini-Lessons</div>
+    <div class="nudge-card">
+      <strong>Rules That Unlock Speaking</strong>
+      Quick, plain-English breakdowns of the grammar patterns that appear most in real conversation.
+    </div>
+    ${grammarRows}
+  `;
+}
+
+function openGrammarLesson(id) {
+  const g = GRAMMAR.find(x => x.id === id);
+  if (!g) return;
+  const exRows = g.examples.map(e => `
+    <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border);">
+      <div style="flex:1;">
+        <div style="font-weight:700;font-size:0.95rem;display:flex;align-items:center;gap:6px;">
+          ${e.sp}
+          <button class="audio-btn" data-speak="${esc(e.sp)}" onclick="speakSpanish(this.dataset.speak,this)" title="Hear it">🔊</button>
+        </div>
+        <div style="font-size:0.82rem;color:var(--muted);margin-top:2px;">${e.en}</div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('main-content').innerHTML = `
+    <div style="margin-bottom:12px;">
+      <button class="btn btn-secondary btn-sm" onclick="switchTab('learn')">← Learn</button>
+    </div>
+    <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;color:var(--primary);letter-spacing:0.5px;margin-bottom:4px;">Grammar Mini-Lesson</div>
+    <div style="font-size:1.2rem;font-weight:800;margin-bottom:2px;">${g.title}</div>
+    <div style="font-size:0.85rem;color:var(--muted);margin-bottom:16px;">${g.subtitle}</div>
+
+    <div class="card" style="border-left:4px solid var(--primary);">
+      <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:0.5px;margin-bottom:8px;">The Rule</div>
+      <div style="font-size:0.92rem;line-height:1.6;">${g.rule}</div>
+    </div>
+
+    <div class="card">
+      <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:0.5px;margin-bottom:4px;">Examples</div>
+      ${exRows}
+    </div>
+
+    <div class="card" style="background:#FFF8E1;border-left:4px solid var(--gold);">
+      <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#B7791F;letter-spacing:0.5px;margin-bottom:6px;">💡 Memory Tip</div>
+      <div style="font-size:0.88rem;line-height:1.6;">${g.tip}</div>
+    </div>
   `;
 }
 
