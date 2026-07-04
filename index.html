@@ -309,6 +309,15 @@ body {
 .panic-phrase .sp { font-size: 0.95rem; font-weight: 700; color: var(--text); }
 .panic-phrase .en { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
 .panic-phrase .ph { font-size: 0.72rem; color: var(--primary); margin-top: 2px; font-style: italic; }
+.badge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 4px; }
+.badge-item { background: var(--surface); border-radius: 10px; padding: 12px 8px; text-align: center; border: 2px solid var(--border); }
+.badge-item.earned { border-color: var(--gold); background: #FFFBEA; }
+.badge-item.locked { opacity: 0.4; filter: grayscale(1); }
+.badge-icon { font-size: 1.6rem; margin-bottom: 4px; }
+.badge-name { font-size: 0.68rem; font-weight: 700; color: var(--text); line-height: 1.3; }
+.badge-desc { font-size: 0.62rem; color: var(--muted); margin-top: 2px; line-height: 1.3; }
+.xp-bar-wrap { background: var(--border); border-radius: 99px; height: 8px; overflow: hidden; margin: 6px 0; }
+.xp-bar { background: linear-gradient(90deg, var(--primary), var(--gold)); height: 100%; border-radius: 99px; transition: width 0.5s ease; }
 .audio-btn {
   background: none;
   border: 1.5px solid var(--primary);
@@ -865,12 +874,13 @@ const DEFAULT_STATE = {
   dailyStars: {},    // { 'YYYY-MM-DD': { speak:bool, listen:bool, recall:bool, conversation:bool, comeback:bool } }
   streak: { current: 0, best: 0, lastDate: null },
   progress: {},      // { itemId: { correct:0, missed:0, guessed:0, confidence:0, speakConf:0, nextDue:null, lastReviewed:null } }
-  stats: { totalSpeakReps: 0, totalReviewReps: 0, totalRoleplays: 0, comebacks: 0, totalRealLifeReps: 0 },
+  stats: { totalSpeakReps: 0, totalReviewReps: 0, totalRoleplays: 0, comebacks: 0, totalRealLifeReps: 0, panicOpens: 0, grammarRead: 0, xp: 0 },
   reviewDeck: [],    // array of item ids
   mastery: {},       // { itemId: { mastered:false, masterDate:null } }
   roleplayHistory: {},
   realLife: { scheduled: [], completions: [] },
   storyProgress: {},  // { 'S1': { completed: true, attempts: 1 } }
+  badges: [],         // array of earned badge ids
 };
 
 function loadState() {
@@ -880,8 +890,9 @@ function loadState() {
     const saved = JSON.parse(raw);
     const state = structuredClone(DEFAULT_STATE);
     Object.assign(state, saved);
-    // Deep-merge settings so newly added keys always get their defaults
+    // Deep-merge so newly added keys always get their defaults
     state.settings = Object.assign(structuredClone(DEFAULT_STATE.settings), saved.settings || {});
+    state.stats    = Object.assign(structuredClone(DEFAULT_STATE.stats),    saved.stats    || {});
     return state;
   } catch(e) { return structuredClone(DEFAULT_STATE); }
 }
@@ -1211,6 +1222,16 @@ function openGrammarLesson(id) {
         <div style="font-size:0.82rem;color:var(--muted);margin-top:2px;">${e.en}</div>
       </div>
     </div>`).join('');
+
+  // Track unique grammar lessons read
+  if (!S.progress['grammar_' + id]) {
+    S.progress['grammar_' + id] = { read: true };
+    const readCount = GRAMMAR.filter(x => S.progress['grammar_' + x.id]).length;
+    S.stats.grammarRead = readCount;
+    S.stats.xp = (S.stats.xp || 0) + 5;
+    saveState();
+    checkBadges();
+  }
 
   document.getElementById('main-content').innerHTML = `
     <div style="margin-bottom:12px;">
@@ -1617,6 +1638,8 @@ function recordResult(result, confidence) {
     prog.speakConf = confidence;
     S.stats.totalSpeakReps += 1;
     awardStar('speak');
+    // XP: more for confident reps
+    S.stats.xp = (S.stats.xp || 0) + (confidence >= 4 ? 10 : confidence >= 3 ? 7 : 4);
   }
   // Listen star specifically for listen-repeat
   if (modeState.mode === 'listen-repeat') awardStar('listen');
@@ -1951,7 +1974,34 @@ function renderProgress() {
     return { key, d, items: items.length, practiced, mastered, pct };
   });
 
+  const xp = S.stats.xp || 0;
+  const xpLevel = Math.floor(xp / 100) + 1;
+  const xpInLevel = xp % 100;
+  const earnedBadges = S.badges || [];
+
   return `
+    <div class="card" style="margin-bottom:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <div style="font-weight:800;font-size:1rem;">⚡ Level ${xpLevel}</div>
+        <div style="font-size:0.78rem;color:var(--muted);">${xp} XP total</div>
+      </div>
+      <div class="xp-bar-wrap"><div class="xp-bar" style="width:${xpInLevel}%"></div></div>
+      <div style="font-size:0.68rem;color:var(--muted);margin-top:4px;">${xpInLevel}/100 XP to Level ${xpLevel + 1}</div>
+    </div>
+
+    <div class="section-label">Badges (${earnedBadges.length}/${BADGES.length})</div>
+    <div class="badge-grid" style="margin-bottom:14px;">
+      ${BADGES.map(b => {
+        const got = earnedBadges.includes(b.id);
+        return '<div class="badge-item ' + (got ? 'earned' : 'locked') + '">' +
+          '<div class="badge-icon">' + b.icon + '</div>' +
+          '<div class="badge-name">' + b.name + '</div>' +
+          '<div class="badge-desc">' + b.desc + '</div>' +
+        '</div>';
+      }).join('')}
+    </div>
+
+    <div class="section-label">Stats</div>
     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px;">
       ${[
         ['🔥','Streak',`${S.streak.current} days`],
@@ -2117,8 +2167,67 @@ function resetApp() {
 // ===================================================
 // PANIC SHEET
 // ===================================================
-function showPanic() { document.getElementById('panic-overlay').classList.remove('hidden'); }
+function showPanic() {
+  document.getElementById('panic-overlay').classList.remove('hidden');
+  S.stats.panicOpens = (S.stats.panicOpens || 0) + 1;
+  saveState();
+  checkBadges();
+}
 function closePanic() { document.getElementById('panic-overlay').classList.add('hidden'); }
+
+// ===================================================
+// BADGES & XP
+// ===================================================
+const BADGES = [
+  { id:'B01', icon:'👣', name:'First Step',      desc:'Complete your first speak rep',          check:()=> S.stats.totalSpeakReps >= 1 },
+  { id:'B02', icon:'🔥', name:'On a Roll',       desc:'Reach a 3-day streak',                   check:()=> S.streak.current >= 3 },
+  { id:'B03', icon:'⚔️', name:'Week Warrior',    desc:'Reach a 7-day streak',                   check:()=> S.streak.current >= 7 },
+  { id:'B04', icon:'📅', name:'Consistent',      desc:'Reach a 14-day streak',                  check:()=> S.streak.current >= 14 },
+  { id:'B05', icon:'🚀', name:'Unstoppable',     desc:'Reach a 30-day streak',                  check:()=> S.streak.current >= 30 },
+  { id:'B06', icon:'📖', name:'Story Reader',    desc:'Complete your first story',              check:()=> Object.values(S.storyProgress||{}).some(p=>p.completed) },
+  { id:'B07', icon:'🏆', name:'Story Master',    desc:'Complete all stories',                   check:()=> Object.values(S.storyProgress||{}).filter(p=>p.completed).length >= STORIES.length },
+  { id:'B08', icon:'🎙️', name:'Speaker',         desc:'Log 25 speak reps',                      check:()=> S.stats.totalSpeakReps >= 25 },
+  { id:'B09', icon:'💬', name:'Fluent Rep',      desc:'Log 100 speak reps',                     check:()=> S.stats.totalSpeakReps >= 100 },
+  { id:'B10', icon:'🧩', name:'Chunk Collector', desc:'Practice 10 word chunks',               check:()=> Object.keys(S.progress).filter(id=>id.startsWith('CH-')&&S.progress[id].lastReviewed).length >= 10 },
+  { id:'B11', icon:'📚', name:'Grammar Nerd',    desc:'Read all grammar lessons',               check:()=> (S.stats.grammarRead||0) >= GRAMMAR.length },
+  { id:'B12', icon:'⚡', name:'Panic-Proof',     desc:'Open the Panic Sheet 5 times',           check:()=> (S.stats.panicOpens||0) >= 5 },
+  { id:'B13', icon:'🔄', name:'Review Warrior',  desc:'Complete 50 review reps',                check:()=> S.stats.totalReviewReps >= 50 },
+  { id:'B14', icon:'⭐', name:'5-Star Day',      desc:'Earn all 5 Daily Stars in one day',      check:()=> Object.values(S.dailyStars).some(d=>d.speak&&d.listen&&d.recall&&d.conversation&&d.comeback) },
+  { id:'B15', icon:'💪', name:'Comeback Kid',    desc:'Complete 3 comeback sessions',           check:()=> S.stats.comebacks >= 3 },
+  { id:'B16', icon:'🎯', name:'Sharp Shooter',   desc:'Reach a fluency score of 40',            check:()=> calcFluencyScore() >= 40 },
+  { id:'B17', icon:'🌟', name:'High Achiever',   desc:'Reach a fluency score of 75',            check:()=> calcFluencyScore() >= 75 },
+  { id:'B18', icon:'🧠', name:'Deep Learner',    desc:'Practice items in 5 different domains',  check:()=> new Set(Object.keys(S.progress).map(id=>{const c=CONTENT.find(x=>x.id===id);return c?.domain;}).filter(Boolean)).size >= 5 },
+];
+
+function awardXP(amount) {
+  S.stats.xp = (S.stats.xp || 0) + amount;
+  checkBadges();
+  saveState();
+}
+
+function checkBadges() {
+  const earned = S.badges || [];
+  BADGES.forEach(b => {
+    if (earned.includes(b.id)) return;
+    try {
+      if (b.check()) {
+        earned.push(b.id);
+        S.badges = earned;
+        S.stats.xp = (S.stats.xp || 0) + 50; // bonus XP for badge
+        showBadgeToast(b);
+      }
+    } catch(e) {}
+  });
+}
+
+function showBadgeToast(badge) {
+  var t = document.createElement('div');
+  t.style.cssText = 'position:fixed;top:72px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--gold);color:#1A202C;padding:10px 20px;border-radius:12px;font-weight:700;font-size:0.88rem;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.25);transition:transform 0.3s ease,opacity 0.3s ease;white-space:nowrap;';
+  t.textContent = badge.icon + ' Badge Unlocked: ' + badge.name + '!';
+  document.body.appendChild(t);
+  requestAnimationFrame(()=>{ t.style.transform='translateX(-50%) translateY(0)'; });
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(-10px)'; setTimeout(()=>t.remove(), 400); }, 2800);
+}
 
 // ===================================================
 // AUDIO — Web Speech API
