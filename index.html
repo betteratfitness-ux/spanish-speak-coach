@@ -597,7 +597,7 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
   padding: 12px 14px; font-size: 0.9rem; cursor: pointer; text-align: left;
   transition: all 0.15s; font-weight: 600;
 }
-.convo-opt:hover { border-color: var(--primary); background: #FFF5EE; }
+@media (hover: hover) { .convo-opt:hover { border-color: var(--primary); background: #FFF5EE; } }
 .convo-opt.correct { border-color: var(--green); background: #F0FFF4; color: var(--green); }
 .convo-opt.wrong { border-color: var(--red); background: #FFF5F5; color: var(--red); }
 
@@ -643,6 +643,39 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
   font-size: 0.68rem; font-weight: 700; padding: 3px 8px;
   border-radius: 99px; white-space: nowrap; flex-shrink: 0;
 }
+
+/* OWN THIS PHRASE */
+.own-phrase-card { border-top: 4px solid var(--primary); }
+.own-section { margin-bottom: 14px; }
+.own-section-label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 6px; }
+.own-row { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+.own-row:last-child { border-bottom: none; }
+.own-tag { font-size: 0.65rem; font-weight: 700; padding: 2px 7px; border-radius: 99px; white-space: nowrap; flex-shrink: 0; }
+.own-tag-casual { background: #EDF2FF; color: #3C63C9; }
+.own-tag-polite { background: #F0FFF4; color: #276749; }
+.own-tag-fast   { background: #FFFAF0; color: #975A16; }
+.own-val { flex: 1; font-size: 0.88rem; font-weight: 600; color: var(--text); }
+.audio-btn-sm { background: none; border: none; font-size: 1rem; cursor: pointer; padding: 2px; opacity: 0.7; flex-shrink: 0; }
+.audio-btn-sm:hover { opacity: 1; }
+.own-ctx-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 6px; }
+.own-ctx-btn { background: var(--bg); border: 2px solid var(--border); border-radius: 8px; padding: 8px 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; text-align: left; transition: all 0.15s; color: var(--text); }
+.own-ctx-btn.active { border-color: var(--primary); background: rgba(232,93,4,0.08); }
+@media (hover: hover) { .own-ctx-btn:hover { border-color: var(--primary); } }
+
+/* OWNERSHIP BADGE */
+.ownership-badge { font-size: 0.65rem; font-weight: 800; padding: 3px 9px; border-radius: 99px; color: #fff; text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* PHRASE BANK */
+.pb-filter-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 14px; scrollbar-width: none; }
+.pb-filter-row::-webkit-scrollbar { display: none; }
+.pb-filter-btn { flex-shrink: 0; font-size: 0.75rem; font-weight: 700; padding: 5px 12px; border-radius: 99px; border: 2px solid var(--border); background: var(--bg); cursor: pointer; transition: all 0.15s; color: var(--text); }
+.pb-filter-btn.active { border-color: var(--primary); background: var(--primary); color: #fff; }
+.pb-card { background: var(--card); border-radius: var(--radius); border: 2px solid var(--border); padding: 14px; margin-bottom: 10px; }
+.pb-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.pb-spanish { font-size: 1.1rem; font-weight: 800; color: var(--text); }
+.pb-english { font-size: 0.82rem; color: var(--muted); margin-top: 2px; }
+.pb-versions { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+.pb-ver-row { display: flex; align-items: center; gap: 7px; }
 </style>
 </head>
 <body>
@@ -751,9 +784,9 @@ const CONTENT = [
   {id:'D1-013',domain:'D1',level:1,type:'phrase',spanish:'De nada.',english:'You\'re welcome.',pron:'deh NA-da',example:'Gracias. — De nada.',exampleEn:'Thank you. — You\'re welcome.',prompt:'How do you respond to "gracias"?',difficulty:1},
   {id:'D1-014',domain:'D1',level:1,type:'phrase',spanish:'Sí / No',english:'Yes / No',pron:'see / no',example:'¿Hablas español? Sí, un poco.',exampleEn:'Do you speak Spanish? Yes, a little.',prompt:'What are the words for yes and no?',difficulty:1},
   {id:'D1-015',domain:'D1',level:1,type:'phrase',spanish:'No sé.',english:'I don\'t know.',pron:'no seh',example:'¿Dónde está? No sé.',exampleEn:'Where is it? I don\'t know.',prompt:'How do you say "I don\'t know"?',difficulty:1},
-  {id:'D1-016',domain:'D1',level:1,type:'phrase',spanish:'Estoy aprendiendo español.',english:'I\'m learning Spanish.',pron:'es-TOY ah-pren-DYEN-do es-pa-NYOL',example:'Disculpe, estoy aprendiendo español.',exampleEn:'Excuse me, I\'m learning Spanish.',prompt:'How do you tell someone you\'re learning Spanish?',difficulty:2},
+  {id:'D1-016',domain:'D1',level:1,type:'phrase',hvp:true,spanish:'Estoy aprendiendo español.',english:'I\'m learning Spanish.',pron:'es-TOY ah-pren-DYEN-do es-pa-NYOL',example:'Disculpe, estoy aprendiendo español.',exampleEn:'Excuse me, I\'m learning Spanish.',prompt:'How do you tell someone you\'re learning Spanish?',difficulty:2},
   {id:'D1-017',domain:'D1',level:1,type:'phrase',spanish:'No hablo español bien.',english:'I don\'t speak Spanish well.',pron:'no AH-blo es-pa-NYOL BYEN',example:'Lo siento, no hablo español bien.',exampleEn:'Sorry, I don\'t speak Spanish well.',prompt:'How do you say your Spanish isn\'t great?',difficulty:2},
-  {id:'D1-018',domain:'D1',level:1,type:'phrase',spanish:'¿Puede hablar más despacio?',english:'Can you speak more slowly?',pron:'PWEH-deh ah-BLAR mas des-PA-syo',example:'¿Puede hablar más despacio, por favor?',exampleEn:'Can you speak more slowly, please?',prompt:'How do you ask someone to slow down?',difficulty:2},
+  {id:'D1-018',domain:'D1',level:1,type:'phrase',hvp:true,spanish:'¿Puede hablar más despacio?',english:'Can you speak more slowly?',pron:'PWEH-deh ah-BLAR mas des-PA-syo',example:'¿Puede hablar más despacio, por favor?',exampleEn:'Can you speak more slowly, please?',prompt:'How do you ask someone to slow down?',difficulty:2},
   {id:'D1-019',domain:'D1',level:2,type:'phrase',spanish:'Hasta luego.',english:'Goodbye. / See you later.',pron:'AS-ta LWEH-go',example:'Fue un placer. Hasta luego.',exampleEn:'It was a pleasure. Goodbye.',prompt:'How do you say "goodbye" in Spanish?',difficulty:1},
   {id:'D1-020',domain:'D1',level:1,type:'phrase',spanish:'Disculpe.',english:'Excuse me. / Sorry.',pron:'dees-KOOL-peh',example:'Disculpe, ¿dónde está la salida?',exampleEn:'Excuse me, where is the exit?',prompt:'How do you say "excuse me"?',difficulty:1},
 
@@ -774,7 +807,7 @@ const CONTENT = [
   {id:'D3-002',domain:'D3',level:1,type:'phrase',spanish:'A la derecha / izquierda',english:'To the right / left',pron:'ah lah deh-REH-chah / ees-KYEHR-dah',example:'Gire a la derecha.',exampleEn:'Turn to the right.',prompt:'How do you say "right" and "left"?',difficulty:2},
   {id:'D3-003',domain:'D3',level:1,type:'phrase',spanish:'Recto / Derecho',english:'Straight ahead',pron:'REK-to / deh-REH-cho',example:'Siga recto dos cuadras.',exampleEn:'Go straight two blocks.',prompt:'How do you say "straight ahead"?',difficulty:2},
   {id:'D3-004',domain:'D3',level:1,type:'phrase',spanish:'La cuenta, por favor.',english:'The check, please.',pron:'lah KWEN-tah',example:'Perdón, la cuenta, por favor.',exampleEn:'Excuse me, the check, please.',prompt:'How do you ask for the check at a restaurant?',difficulty:1},
-  {id:'D3-005',domain:'D3',level:1,type:'phrase',spanish:'¿Cuánto cuesta?',english:'How much does it cost?',pron:'KWAHN-to KWES-tah',example:'¿Cuánto cuesta este libro?',exampleEn:'How much does this book cost?',prompt:'How do you ask the price?',difficulty:1},
+  {id:'D3-005',domain:'D3',level:1,type:'phrase',hvp:true,spanish:'¿Cuánto cuesta?',english:'How much does it cost?',pron:'KWAHN-to KWES-tah',example:'¿Cuánto cuesta este libro?',exampleEn:'How much does this book cost?',prompt:'How do you ask the price?',difficulty:1},
   {id:'D3-006',domain:'D3',level:2,type:'phrase',spanish:'Quiero una mesa para dos.',english:'I want a table for two.',pron:'KYEH-ro OO-nah MEH-sah PAH-rah DOS',example:'Buenas noches. Quiero una mesa para dos.',exampleEn:'Good evening. I want a table for two.',prompt:'How do you ask for a table for two?',difficulty:2},
   {id:'D3-007',domain:'D3',level:1,type:'phrase',spanish:'¿Tiene ___?',english:'Do you have ___?',pron:'TYEH-neh',example:'¿Tiene habitaciones disponibles?',exampleEn:'Do you have available rooms?',prompt:'How do you ask if they have something?',difficulty:1},
   {id:'D3-008',domain:'D3',level:2,type:'phrase',spanish:'¿Me puede ayudar?',english:'Can you help me?',pron:'meh PWEH-deh ah-yoo-DAR',example:'Disculpe, ¿me puede ayudar?',exampleEn:'Excuse me, can you help me?',prompt:'How do you ask for help politely?',difficulty:2},
@@ -942,6 +975,123 @@ const CONTENT = [
   {id:'D16-003',domain:'D16',level:2,type:'phrase',spanish:'¿A qué hora empiezas / terminas?',english:'What time do you start / finish?',pron:'ah keh O-rah em-PYEH-sas / ter-MEE-nas',example:'¿A qué hora empiezas hoy?',exampleEn:'What time do you start today?',prompt:'How do you ask what time someone starts or finishes work?',difficulty:2},
   {id:'D16-004',domain:'D16',level:2,type:'phrase',spanish:'Tengo el día libre.',english:'I have the day off.',pron:'TEN-go el DEE-ah LEE-breh',example:'Hoy tengo el día libre. ¿Salimos?',exampleEn:'Today I have the day off. Shall we go out?',prompt:'How do you say you have the day off?',difficulty:2},
   {id:'D16-005',domain:'D16',level:2,type:'phrase',spanish:'Estoy buscando trabajo.',english:'I\'m looking for work.',pron:'es-TOY boos-KAN-do tra-BAH-ho',example:'Estoy buscando trabajo en esta área.',exampleEn:'I\'m looking for work in this area.',prompt:'How do you say "I\'m looking for work"?',difficulty:2},
+
+  // HIGH-VALUE PHRASES (HVP) — Phrase Ownership Mode
+  {id:'HVP-001',domain:'D1',level:1,type:'phrase',hvp:true,spanish:'Necesito ayuda.',english:'I need help.',pron:'neh-seh-SEE-to ah-YOO-dah',example:'Disculpe, necesito ayuda.',exampleEn:'Excuse me, I need help.',prompt:'How do you say "I need help"?',difficulty:1},
+  {id:'HVP-002',domain:'D1',level:1,type:'phrase',hvp:true,spanish:'No entiendo.',english:'I don\'t understand.',pron:'no en-TYEN-do',example:'Lo siento, no entiendo.',exampleEn:'I\'m sorry, I don\'t understand.',prompt:'How do you say "I don\'t understand"?',difficulty:1},
+  {id:'HVP-003',domain:'D1',level:1,type:'phrase',hvp:true,spanish:'¿Puede repetirlo?',english:'Can you repeat that?',pron:'PWEH-deh reh-peh-TEER-lo',example:'¿Puede repetirlo, por favor?',exampleEn:'Can you repeat that, please?',prompt:'How do you ask someone to repeat something?',difficulty:2},
+  {id:'HVP-004',domain:'D3',level:1,type:'phrase',hvp:true,spanish:'¿Dónde está el baño?',english:'Where is the bathroom?',pron:'DON-deh es-TAH el BA-nyo',example:'Disculpe, ¿dónde está el baño?',exampleEn:'Excuse me, where is the bathroom?',prompt:'How do you ask where the bathroom is?',difficulty:1},
+  {id:'HVP-005',domain:'D1',level:2,type:'phrase',hvp:true,spanish:'Quisiera...',english:'I would like...',pron:'kee-SYEH-rah',example:'Quisiera un café, por favor.',exampleEn:'I would like a coffee, please.',prompt:'How do you say "I would like..." politely?',difficulty:2},
+  {id:'HVP-006',domain:'D3',level:1,type:'phrase',hvp:true,spanish:'Estoy buscando...',english:'I\'m looking for...',pron:'es-TOY boos-KAN-do',example:'Estoy buscando la farmacia.',exampleEn:'I\'m looking for the pharmacy.',prompt:'How do you say "I\'m looking for..."?',difficulty:1},
+  {id:'HVP-007',domain:'D1',level:1,type:'phrase',hvp:true,spanish:'Tengo una pregunta.',english:'I have a question.',pron:'TEN-go OO-nah preh-GOON-tah',example:'Disculpe, tengo una pregunta.',exampleEn:'Excuse me, I have a question.',prompt:'How do you say "I have a question"?',difficulty:1},
+];
+
+// ===================================================
+// HIGH-VALUE PHRASE ENRICHMENT DATA
+// ===================================================
+const HVP_DATA = {
+  'HVP-001': {
+    whenToUse: 'Any time you need assistance — store, street, clinic, anywhere. It is universally understood and always appropriate.',
+    whenNotTo: 'Not needed when someone is already helping you — just let them continue.',
+    casual:    'Ayuda, por favor.',
+    polite:    'Necesito ayuda, por favor.',
+    formal:    'Disculpe, ¿me podría ayudar?',
+    realFast:  'Ayuda.',
+    miniConvo: { q: 'Perdone, ¿puedo ayudarle?', qEn: 'Excuse me, can I help you?', a: 'Sí, necesito ayuda. Gracias.', aEn: 'Yes, I need help. Thank you.' },
+  },
+  'HVP-002': {
+    whenToUse: 'When someone speaks too fast, uses unfamiliar words, or gives complicated directions. Use it freely — people appreciate honesty.',
+    whenNotTo: 'Do not use it sarcastically. In formal settings, add "disculpe" before it to soften it.',
+    casual:    'No entiendo.',
+    polite:    'Disculpe, no entiendo.',
+    formal:    'Lo siento, no le entiendo bien.',
+    realFast:  'No entiendo, más despacio.',
+    miniConvo: { q: 'El precio total es cuarenta y dos cincuenta.', qEn: 'The total is forty-two fifty.', a: 'Lo siento, no entiendo. ¿Puede repetirlo?', aEn: 'I\'m sorry, I don\'t understand. Can you repeat that?' },
+  },
+  'HVP-003': {
+    whenToUse: 'Any time someone said something too fast or you missed it. Always polite. Always welcome.',
+    whenNotTo: 'If they have already repeated it twice, try "¿Puede escribirlo?" (Can you write it?) instead.',
+    casual:    '¿Otra vez?',
+    polite:    '¿Puede repetirlo, por favor?',
+    formal:    '¿Podría repetirlo más despacio?',
+    realFast:  '¿Otra vez, por favor?',
+    miniConvo: { q: 'Doble a la izquierda y luego siga recto.', qEn: 'Turn left and then go straight.', a: '¿Puede repetirlo más despacio, por favor?', aEn: 'Can you repeat that more slowly, please?' },
+  },
+  'D1-018': {
+    whenToUse: 'When someone is speaking too fast for you to follow. It is polite, common, and completely normal to ask.',
+    whenNotTo: 'Do not use it with someone who is already speaking slowly — try "¿Puede repetirlo?" instead.',
+    casual:    'Más despacio, por favor.',
+    polite:    '¿Puede hablar más despacio?',
+    formal:    '¿Podría hablar un poco más despacio, por favor?',
+    realFast:  'Más despacio.',
+    miniConvo: { q: 'Gire a la derecha, pase el semáforo y luego a la izquierda.', qEn: 'Turn right, pass the light, then left.', a: '¿Puede hablar más despacio, por favor? Estoy aprendiendo español.', aEn: 'Can you speak more slowly please? I\'m learning Spanish.' },
+  },
+  'D3-005': {
+    whenToUse: 'Shopping, market, taxi, restaurant — anywhere price matters. Always polite.',
+    whenNotTo: 'In very formal or high-end settings, "¿Cuál es el precio?" sounds slightly more refined.',
+    casual:    '¿Cuánto?',
+    polite:    '¿Cuánto cuesta?',
+    formal:    '¿Cuál es el precio de esto?',
+    realFast:  '¿Cuánto es?',
+    miniConvo: { q: 'Buenos días, ¿en qué le puedo ayudar?', qEn: 'Good morning, how can I help you?', a: 'Hola, ¿cuánto cuesta este?', aEn: 'Hi, how much does this one cost?' },
+  },
+  'D1-016': {
+    whenToUse: 'Whenever you make a small mistake or need patience from someone. Most Spanish speakers will immediately slow down and help.',
+    whenNotTo: 'Do not use it as an excuse to avoid trying — say it AFTER you attempt the phrase, not before.',
+    casual:    'Estoy aprendiendo.',
+    polite:    'Estoy aprendiendo español.',
+    formal:    'Disculpe, estoy aprendiendo español y quiero practicar.',
+    realFast:  'Aprendo español.',
+    miniConvo: { q: '¿Habla usted español?', qEn: 'Do you speak Spanish?', a: 'Un poco. Estoy aprendiendo español.', aEn: 'A little. I\'m learning Spanish.' },
+  },
+  'HVP-004': {
+    whenToUse: 'Any public place — restaurant, store, church, office. It is one of the most universal phrases in any language.',
+    whenNotTo: 'No restrictions — this phrase is always appropriate.',
+    casual:    '¿El baño?',
+    polite:    '¿Dónde está el baño?',
+    formal:    'Disculpe, ¿podría indicarme dónde está el baño?',
+    realFast:  '¿El baño, por favor?',
+    miniConvo: { q: '¿Le puedo ayudar en algo?', qEn: 'Can I help you with something?', a: 'Sí, ¿dónde está el baño, por favor?', aEn: 'Yes, where is the bathroom, please?' },
+  },
+  'HVP-005': {
+    whenToUse: 'Ordering food, making requests, asking for services. Sounds more polite than "Quiero" (I want) in most situations.',
+    whenNotTo: 'In very casual settings with friends, "Quiero" is perfectly fine and more natural.',
+    casual:    'Quiero...',
+    polite:    'Quisiera...',
+    formal:    'Me gustaría...',
+    realFast:  'Quisiera uno, por favor.',
+    miniConvo: { q: '¿Qué va a pedir?', qEn: 'What will you have?', a: 'Quisiera el pollo con arroz, por favor.', aEn: 'I would like the chicken with rice, please.' },
+  },
+  'HVP-006': {
+    whenToUse: 'Shopping, navigating, asking for directions to a specific place or item.',
+    whenNotTo: 'If you already see what you\'re looking for, just point and say "Este, por favor."',
+    casual:    'Busco...',
+    polite:    'Estoy buscando...',
+    formal:    'Disculpe, ¿podría indicarme dónde está...?',
+    realFast:  'Busco el baño.',
+    miniConvo: { q: '¿En qué le puedo ayudar?', qEn: 'How can I help you?', a: 'Estoy buscando la sección de ropa para niños.', aEn: 'I\'m looking for the children\'s clothing section.' },
+  },
+  'HVP-007': {
+    whenToUse: 'Before asking anything — at a store, clinic, class, or with a neighbor. It signals respect and gets people to focus.',
+    whenNotTo: 'With close friends or family, just ask directly — "Tengo una pregunta" can sound stiff in casual conversation.',
+    casual:    'Oye, ¿te puedo preguntar algo?',
+    polite:    'Tengo una pregunta.',
+    formal:    'Disculpe, ¿me permite hacerle una pregunta?',
+    realFast:  'Una pregunta: ¿...?',
+    miniConvo: { q: '¿Todo bien?', qEn: 'Is everything okay?', a: 'Sí, pero tengo una pregunta sobre el horario.', aEn: 'Yes, but I have a question about the schedule.' },
+  },
+};
+
+// Context labels for "Use It In Your World"
+const WORLD_CONTEXTS = [
+  { key:'food',      icon:'🍽️', label:'Food & Restaurants' },
+  { key:'family',    icon:'👨‍👩‍👧', label:'Family & Home' },
+  { key:'work',      icon:'💼', label:'Work' },
+  { key:'travel',    icon:'✈️', label:'Travel' },
+  { key:'community', icon:'⛪', label:'Church / Community' },
+  { key:'emergency', icon:'🚨', label:'Emergency' },
+  { key:'smalltalk', icon:'💬', label:'Small Talk' },
+  { key:'parenting', icon:'🧒', label:'Parenting' },
 ];
 
 // Domain metadata
@@ -1064,7 +1214,7 @@ const GRAMMAR = [
 // ===================================================
 const LESSONS = [
   {
-    id:'L01', day:1, topic:'First Greetings', icon:'👋', domain:'D1',
+    id:'L01', day:1, topic:'First Greetings', icon:'👋', domain:'D1', heroPhrase:'HVP-007',
     desc:'The phrases you say every single day — hello, good morning, how are you.',
     itemIds:['D1-001','D1-002','D1-003','D1-004','D1-005'],
     convo:[
@@ -1074,7 +1224,7 @@ const LESSONS = [
     ]
   },
   {
-    id:'L02', day:2, topic:'Introducing Yourself', icon:'🙋', domain:'D1',
+    id:'L02', day:2, topic:'Introducing Yourself', icon:'🙋', domain:'D1', heroPhrase:'D1-016',
     desc:'Say your name, ask others, and make a great first impression.',
     itemIds:['D1-008','D1-009','D1-010','D1-016','D1-019'],
     convo:[
@@ -1084,7 +1234,7 @@ const LESSONS = [
     ]
   },
   {
-    id:'L03', day:3, topic:'Please, Thank You & Politeness', icon:'🙏', domain:'D1',
+    id:'L03', day:3, topic:'Please, Thank You & Politeness', icon:'🙏', domain:'D1', heroPhrase:'HVP-001',
     desc:'The magic words that open every door in any Spanish-speaking place.',
     itemIds:['D1-011','D1-012','D1-013','D1-014','D1-020'],
     convo:[
@@ -1094,7 +1244,7 @@ const LESSONS = [
     ]
   },
   {
-    id:'L04', day:4, topic:'Asking for Help', icon:'🆘', domain:'D1',
+    id:'L04', day:4, topic:'Asking for Help', icon:'🆘', domain:'D1', heroPhrase:'HVP-002',
     desc:'What to say when you need help, or when you do not understand.',
     itemIds:['D1-015','D1-017','D1-018','D3-008','D5-004'],
     convo:[
@@ -1104,7 +1254,7 @@ const LESSONS = [
     ]
   },
   {
-    id:'L05', day:5, topic:'Food & Ordering', icon:'🍽️', domain:'D3',
+    id:'L05', day:5, topic:'Food & Ordering', icon:'🍽️', domain:'D3', heroPhrase:'HVP-005',
     desc:'Survive any restaurant — order food, ask for the check, ask what they have.',
     itemIds:['D3-004','D3-005','D3-006','D3-007','D2-001'],
     convo:[
@@ -1114,7 +1264,7 @@ const LESSONS = [
     ]
   },
   {
-    id:'L06', day:6, topic:'Directions & Getting Around', icon:'🗺️', domain:'D3',
+    id:'L06', day:6, topic:'Directions & Getting Around', icon:'🗺️', domain:'D3', heroPhrase:'HVP-004',
     desc:'Ask where things are and understand the basic answer.',
     itemIds:['D3-001','D3-002','D3-003','D1-020','D1-015'],
     convo:[
@@ -1124,7 +1274,7 @@ const LESSONS = [
     ]
   },
   {
-    id:'L07', day:7, topic:'Daily Life & Time', icon:'🕐', domain:'D2',
+    id:'L07', day:7, topic:'Daily Life & Time', icon:'🕐', domain:'D2', heroPhrase:'HVP-006',
     desc:'Ask the time, talk about weather, and handle everyday moments.',
     itemIds:['D2-007','D2-008','D2-009','D2-010','D2-003'],
     convo:[
@@ -1154,7 +1304,7 @@ const LESSONS = [
     ]
   },
   {
-    id:'L10', day:10, topic:'Starting Real Conversations', icon:'💬', domain:'D6',
+    id:'L10', day:10, topic:'Starting Real Conversations', icon:'💬', domain:'D6', heroPhrase:'HVP-003',
     desc:'Open conversations, share opinions, and keep talking beyond hello.',
     itemIds:['D6-001','D6-002','D6-003','D6-004','D6-005'],
     convo:[
@@ -1164,7 +1314,7 @@ const LESSONS = [
     ]
   },
   {
-    id:'L11', day:11, topic:'Numbers & Counting', icon:'🔢', domain:'D8',
+    id:'L11', day:11, topic:'Numbers & Counting', icon:'🔢', domain:'D8', heroPhrase:'D3-005',
     desc:'Count things, tell time, and talk about quantities — you use numbers constantly.',
     itemIds:['D8-001','D8-002','D8-003','D8-004','D2-008'],
     convo:[
@@ -1184,7 +1334,7 @@ const LESSONS = [
     ]
   },
   {
-    id:'L13', day:13, topic:'Shopping & Buying', icon:'🛍️', domain:'D9',
+    id:'L13', day:13, topic:'Shopping & Buying', icon:'🛍️', domain:'D9', heroPhrase:'D1-018',
     desc:'Ask prices, try things on, pay — and get a deal at any store or market.',
     itemIds:['D9-001','D9-002','D9-003','D9-004','D9-005'],
     convo:[
@@ -1387,7 +1537,8 @@ const DEFAULT_STATE = {
   progress: {},      // { itemId: { correct:0, missed:0, guessed:0, confidence:0, speakConf:0, nextDue:null, lastReviewed:null } }
   stats: { totalSpeakReps: 0, totalReviewReps: 0, totalRoleplays: 0, comebacks: 0, totalRealLifeReps: 0, panicOpens: 0, grammarRead: 0, xp: 0,
     speakFromMemoryReps: 0, convoCorrect: 0, convoTotal: 0, reviewCorrect: 0, reviewTotal: 0,
-    backupReminderDismissed: false, lastBackupPrompt: null },
+    backupReminderDismissed: false, lastBackupPrompt: null, hvpPracticed: 0 },
+  ownership: {},   // { itemId: { worldContext: null, sawOwnCard: false } }
   reviewDeck: [],    // array of item ids
   mastery: {},       // { itemId: { mastered:false, masterDate:null } }
   roleplayHistory: {},
@@ -1404,9 +1555,10 @@ function loadState() {
     const state = structuredClone(DEFAULT_STATE);
     Object.assign(state, saved);
     // Deep-merge so newly added keys always get their defaults
-    state.settings = Object.assign(structuredClone(DEFAULT_STATE.settings), saved.settings || {});
-    state.stats    = Object.assign(structuredClone(DEFAULT_STATE.stats),    saved.stats    || {});
-    state.user     = Object.assign(structuredClone(DEFAULT_STATE.user),     saved.user     || {});
+    state.settings  = Object.assign(structuredClone(DEFAULT_STATE.settings),  saved.settings  || {});
+    state.stats     = Object.assign(structuredClone(DEFAULT_STATE.stats),     saved.stats     || {});
+    state.user      = Object.assign(structuredClone(DEFAULT_STATE.user),      saved.user      || {});
+    state.ownership = Object.assign(structuredClone(DEFAULT_STATE.ownership), saved.ownership || {});
     return state;
   } catch(e) { return structuredClone(DEFAULT_STATE); }
 }
@@ -1476,6 +1628,40 @@ function getMemoryState(id) {
   if (p.correct >= 1 || p.missed >= 1 || p.guessed >= 1) return 'learning';
   return 'unseen';
 }
+
+function isHvp(id) {
+  var item = CONTENT.find(function(c){ return c.id === id; });
+  return !!(item && item.hvp);
+}
+
+function getOwnershipLabel(id) {
+  var state = getMemoryState(id);
+  if (state === 'mastered')  return 'Own It';
+  if (state === 'reviewing') return 'Solid';
+  if (state === 'learning')  return 'Fuzzy';
+  return 'New';
+}
+
+function getOwnershipColor(label) {
+  if (label === 'Own It') return 'var(--green)';
+  if (label === 'Solid')  return 'var(--primary)';
+  if (label === 'Fuzzy')  return 'var(--gold)';
+  return 'var(--muted)';
+}
+
+function saveWorldContext(id, ctx) {
+  if (!S.ownership[id]) S.ownership[id] = { worldContext: null, sawOwnCard: false };
+  S.ownership[id].worldContext = ctx;
+  S.ownership[id].sawOwnCard = true;
+  S.stats.hvpPracticed = (S.stats.hvpPracticed || 0) + 1;
+  addToReviewDeck(id);
+  saveState();
+}
+
+function getHvpOwned()        { return CONTENT.filter(function(c){ return c.hvp && getMemoryState(c.id) === 'mastered'; }).length; }
+function getHvpSolid()        { return CONTENT.filter(function(c){ return c.hvp && getMemoryState(c.id) === 'reviewing'; }).length; }
+function getHvpFuzzy()        { return CONTENT.filter(function(c){ return c.hvp && getMemoryState(c.id) === 'learning'; }).length; }
+function getHvpNew()          { return CONTENT.filter(function(c){ return c.hvp && getMemoryState(c.id) === 'unseen'; }).length; }
 
 function calcNextDue(result, confidence) {
   const now = Date.now();
@@ -2570,6 +2756,37 @@ function renderProgress() {
   const xpInLevel = xp % 100;
   const earnedBadges = S.badges || [];
 
+  // Phrase ownership summary
+  var hvpTotal  = CONTENT.filter(function(c){ return c.hvp; }).length;
+  var hvpOwnedN = getHvpOwned(), hvpSolidN = getHvpSolid(), hvpFuzzyN = getHvpFuzzy(), hvpNewN = getHvpNew();
+  var ownershipSummary =
+    '<div class="section-label">Phrase Ownership</div>' +
+    '<div class="card" style="margin-bottom:14px;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;">' +
+        '<div style="font-weight:700;font-size:0.9rem;">High-Value Phrases</div>' +
+        '<button class="btn btn-secondary btn-sm" onclick="showPhraseBank(\'all\')">View Phrase Bank →</button>' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;">' +
+        '<div style="text-align:center;padding:10px 4px;border-radius:8px;border:1px solid var(--border);">' +
+          '<div style="font-size:1.3rem;font-weight:800;color:var(--green);">' + hvpOwnedN + '</div>' +
+          '<div style="font-size:0.62rem;color:var(--muted);font-weight:700;text-transform:uppercase;margin-top:2px;">Own It</div>' +
+        '</div>' +
+        '<div style="text-align:center;padding:10px 4px;border-radius:8px;border:1px solid var(--border);">' +
+          '<div style="font-size:1.3rem;font-weight:800;color:var(--primary);">' + hvpSolidN + '</div>' +
+          '<div style="font-size:0.62rem;color:var(--muted);font-weight:700;text-transform:uppercase;margin-top:2px;">Solid</div>' +
+        '</div>' +
+        '<div style="text-align:center;padding:10px 4px;border-radius:8px;border:1px solid var(--border);">' +
+          '<div style="font-size:1.3rem;font-weight:800;color:var(--gold);">' + hvpFuzzyN + '</div>' +
+          '<div style="font-size:0.62rem;color:var(--muted);font-weight:700;text-transform:uppercase;margin-top:2px;">Fuzzy</div>' +
+        '</div>' +
+        '<div style="text-align:center;padding:10px 4px;border-radius:8px;border:1px solid var(--border);">' +
+          '<div style="font-size:1.3rem;font-weight:800;color:var(--muted);">' + hvpNewN + '</div>' +
+          '<div style="font-size:0.62rem;color:var(--muted);font-weight:700;text-transform:uppercase;margin-top:2px;">New</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="font-size:0.75rem;color:var(--muted);">New → Fuzzy → Solid → Own It. Each stage = more reps, more real-life use.</div>' +
+    '</div>';
+
   // Sub-metric breakdown for Practice Progress Score
   const allProgress = Object.values(S.progress);
   const allAttempts = allProgress.reduce(function(a, p){ return a + (p.correct||0) + (p.missed||0) + (p.guessed||0); }, 0);
@@ -2703,7 +2920,7 @@ function renderProgress() {
       '<button class="btn" onclick="showTeacherView()" style="width:100%;">📊 View Teacher Report</button>' +
     '</div>';
 
-  return scoreBreakdown + xpCard + badgesHTML + statsGrid + domainMap + starsHistory + teacherBtn;
+  return ownershipSummary + scoreBreakdown + xpCard + badgesHTML + statsGrid + domainMap + starsHistory + teacherBtn;
 }
 
 function showTeacherView() {
@@ -2723,6 +2940,13 @@ function showTeacherView() {
   // Rich metrics for teacher
   var practiceScore = calcPracticeScore();
   var scoreLabel = practiceLevel(practiceScore);
+  var hvpOwnedT  = getHvpOwned(), hvpSolidT = getHvpSolid(), hvpFuzzyT = getHvpFuzzy();
+  var hvpTotalT  = CONTENT.filter(function(c){ return c.hvp; }).length;
+  var hvpPracticed = S.stats.hvpPracticed || 0;
+  // Recommended next focus
+  var nextFocus = hvpFuzzyT > 0 ? 'Review "Fuzzy" phrases in the Phrase Bank — they are almost owned.'
+    : hvpSolidT > 0 ? 'Keep practicing "Solid" phrases until they become "Own It."'
+    : 'Start any daily lesson to unlock the next high-value phrase.';
   var sfmReps = S.stats.speakFromMemoryReps || 0;
   var totalSpeakReps = S.stats.totalSpeakReps || 0;
   var convoTotal = S.stats.convoTotal || 0;
@@ -2801,6 +3025,31 @@ function showTeacherView() {
           '<span style="color:var(--muted);">Comeback sessions</span><br>' +
           '<strong>' + comebacks + '</strong> — returned after gaps' +
         '</div>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="section-label">Phrase Ownership</div>' +
+    '<div class="card" style="padding:14px;margin-bottom:16px;">' +
+      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;">' +
+        '<div style="text-align:center;padding:8px 4px;border-radius:8px;border:1px solid var(--border);">' +
+          '<div style="font-size:1.1rem;font-weight:800;color:var(--green);">' + hvpOwnedT + '</div>' +
+          '<div style="font-size:0.6rem;color:var(--muted);font-weight:700;text-transform:uppercase;">Own It</div>' +
+        '</div>' +
+        '<div style="text-align:center;padding:8px 4px;border-radius:8px;border:1px solid var(--border);">' +
+          '<div style="font-size:1.1rem;font-weight:800;color:var(--primary);">' + hvpSolidT + '</div>' +
+          '<div style="font-size:0.6rem;color:var(--muted);font-weight:700;text-transform:uppercase;">Solid</div>' +
+        '</div>' +
+        '<div style="text-align:center;padding:8px 4px;border-radius:8px;border:1px solid var(--border);">' +
+          '<div style="font-size:1.1rem;font-weight:800;color:var(--gold);">' + hvpFuzzyT + '</div>' +
+          '<div style="font-size:0.6rem;color:var(--muted);font-weight:700;text-transform:uppercase;">Fuzzy</div>' +
+        '</div>' +
+        '<div style="text-align:center;padding:8px 4px;border-radius:8px;border:1px solid var(--border);">' +
+          '<div style="font-size:1.1rem;font-weight:800;color:var(--muted);">' + hvpPracticed + '</div>' +
+          '<div style="font-size:0.6rem;color:var(--muted);font-weight:700;text-transform:uppercase;">HVP Reps</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="font-size:0.75rem;color:var(--muted);padding:8px;background:var(--bg);border-radius:6px;">' +
+        '<strong>Recommended next focus:</strong> ' + nextFocus +
       '</div>' +
     '</div>' +
 
@@ -3479,10 +3728,145 @@ function checkStoryAnswer(storyId, optIndex) {
 // ===================================================
 // RENDERING — PRACTICE HUB
 // ===================================================
+function showPhraseBank(filter) {
+  filter = filter || 'all';
+  var allHvp = CONTENT.filter(function(c){ return c.hvp; });
+
+  var filterDefs = [
+    { key:'all',      label:'All Phrases' },
+    { key:'own',      label:'Own It' },
+    { key:'solid',    label:'Solid' },
+    { key:'fuzzy',    label:'Fuzzy' },
+    { key:'new',      label:'New' },
+    { key:'emergency',label:'Emergency' },
+    { key:'food',     label:'Food' },
+    { key:'directions',label:'Directions' },
+    { key:'conversation',label:'Conversation' },
+  ];
+
+  var filterBtns = filterDefs.map(function(f) {
+    return '<button class="pb-filter-btn' + (filter === f.key ? ' active' : '') + '" onclick="showPhraseBank(\'' + f.key + '\')">' + f.label + '</button>';
+  }).join('');
+
+  var contextToPhrase = {
+    emergency: ['HVP-001','HVP-002','HVP-003','D1-018'],
+    food:      ['HVP-005','D3-004','D3-005','D3-006'],
+    directions:['HVP-004','HVP-006','D3-001','D3-002','D3-003'],
+    conversation:['HVP-007','D1-016','D6-001','D6-002','D6-004','D6-005'],
+  };
+
+  var filtered = allHvp.filter(function(item) {
+    if (filter === 'all') return true;
+    if (filter === 'own')   return getOwnershipLabel(item.id) === 'Own It';
+    if (filter === 'solid') return getOwnershipLabel(item.id) === 'Solid';
+    if (filter === 'fuzzy') return getOwnershipLabel(item.id) === 'Fuzzy';
+    if (filter === 'new')   return getOwnershipLabel(item.id) === 'New';
+    var list = contextToPhrase[filter];
+    return list && list.indexOf(item.id) !== -1;
+  });
+
+  var cardsHtml = filtered.length === 0
+    ? '<div style="text-align:center;padding:30px;color:var(--muted);font-size:0.88rem;">No phrases in this category yet.</div>'
+    : filtered.map(function(item) {
+        var hvp = HVP_DATA[item.id];
+        var label = getOwnershipLabel(item.id);
+        var labelColor = getOwnershipColor(label);
+        var ctx = S.ownership[item.id] && S.ownership[item.id].worldContext;
+        var ctxObj = ctx ? WORLD_CONTEXTS.find(function(c){ return c.key === ctx; }) : null;
+        var showPron = S.settings.pronunciationHelper;
+
+        var versionsHtml = hvp ? (
+          '<div class="pb-versions">' +
+            '<div class="pb-ver-row">' +
+              '<span class="own-tag own-tag-casual">Casual</span>' +
+              '<span style="font-size:0.82rem;flex:1;">' + hvp.casual + '</span>' +
+              '<button class="audio-btn-sm" data-speak="' + esc(hvp.casual) + '" onclick="speakSpanish(this.dataset.speak,this)">🔊</button>' +
+            '</div>' +
+            '<div class="pb-ver-row">' +
+              '<span class="own-tag own-tag-polite">Polite</span>' +
+              '<span style="font-size:0.82rem;flex:1;">' + hvp.polite + '</span>' +
+              '<button class="audio-btn-sm" data-speak="' + esc(hvp.polite) + '" onclick="speakSpanish(this.dataset.speak,this)">🔊</button>' +
+            '</div>' +
+            '<div class="pb-ver-row">' +
+              '<span class="own-tag own-tag-fast">Real Life</span>' +
+              '<span style="font-size:0.82rem;flex:1;">' + hvp.realFast + '</span>' +
+              '<button class="audio-btn-sm" data-speak="' + esc(hvp.realFast) + '" onclick="speakSpanish(this.dataset.speak,this)">🔊</button>' +
+            '</div>' +
+          '</div>'
+        ) : '';
+
+        var whenHtml = hvp ? (
+          '<div style="font-size:0.75rem;color:var(--muted);margin-top:8px;line-height:1.4;">' +
+            '<strong style="color:var(--text);">Use when:</strong> ' + hvp.whenToUse.substring(0, 90) + (hvp.whenToUse.length > 90 ? '…' : '') +
+          '</div>'
+        ) : '';
+
+        return '<div class="pb-card">' +
+          '<div class="pb-card-top">' +
+            '<div>' +
+              '<div style="display:flex;align-items:center;gap:8px;">' +
+                '<div class="pb-spanish">' + item.spanish + '</div>' +
+                '<button class="audio-btn-sm" data-speak="' + esc(item.spanish) + '" onclick="speakSpanish(this.dataset.speak,this)">🔊</button>' +
+              '</div>' +
+              (showPron && item.pron ? '<div style="font-size:0.72rem;color:var(--primary);font-style:italic;">' + item.pron + '</div>' : '') +
+              '<div class="pb-english">' + item.english + '</div>' +
+            '</div>' +
+            '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">' +
+              '<span class="ownership-badge" style="background:' + labelColor + ';">' + label + '</span>' +
+              (ctxObj ? '<span style="font-size:0.68rem;color:var(--muted);">' + ctxObj.icon + ' ' + ctxObj.label + '</span>' : '') +
+            '</div>' +
+          '</div>' +
+          versionsHtml +
+          whenHtml +
+        '</div>';
+      }).join('');
+
+  var owned = getHvpOwned(), solid = getHvpSolid(), fuzzy = getHvpFuzzy(), newCount = getHvpNew();
+  var summaryHtml =
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px;">' +
+      '<div style="text-align:center;background:var(--card);border-radius:10px;padding:10px 4px;border:1px solid var(--border);">' +
+        '<div style="font-size:1.2rem;font-weight:800;color:var(--green);">' + owned + '</div>' +
+        '<div style="font-size:0.6rem;color:var(--muted);font-weight:700;text-transform:uppercase;">Own It</div>' +
+      '</div>' +
+      '<div style="text-align:center;background:var(--card);border-radius:10px;padding:10px 4px;border:1px solid var(--border);">' +
+        '<div style="font-size:1.2rem;font-weight:800;color:var(--primary);">' + solid + '</div>' +
+        '<div style="font-size:0.6rem;color:var(--muted);font-weight:700;text-transform:uppercase;">Solid</div>' +
+      '</div>' +
+      '<div style="text-align:center;background:var(--card);border-radius:10px;padding:10px 4px;border:1px solid var(--border);">' +
+        '<div style="font-size:1.2rem;font-weight:800;color:var(--gold);">' + fuzzy + '</div>' +
+        '<div style="font-size:0.6rem;color:var(--muted);font-weight:700;text-transform:uppercase;">Fuzzy</div>' +
+      '</div>' +
+      '<div style="text-align:center;background:var(--card);border-radius:10px;padding:10px 4px;border:1px solid var(--border);">' +
+        '<div style="font-size:1.2rem;font-weight:800;color:var(--muted);">' + newCount + '</div>' +
+        '<div style="font-size:0.6rem;color:var(--muted);font-weight:700;text-transform:uppercase;">New</div>' +
+      '</div>' +
+    '</div>';
+
+  document.getElementById('main-content').innerHTML =
+    '<div style="margin-bottom:12px;">' +
+      '<button class="btn btn-secondary btn-sm" onclick="switchTab(\'practice\')">← Back to Practice</button>' +
+    '</div>' +
+    '<div style="font-size:1rem;font-weight:800;margin-bottom:4px;">⭐ Phrase Bank</div>' +
+    '<div style="font-size:0.8rem;color:var(--muted);margin-bottom:12px;">High-value phrases you are building toward owning. These are the ones that actually come up in real life.</div>' +
+    summaryHtml +
+    '<div class="pb-filter-row">' + filterBtns + '</div>' +
+    cardsHtml;
+}
+
 function renderPractice() {
   const dueCount = getDueReviewItems().length;
   const dueBadge = dueCount > 0 ? '<span class="practice-hub-badge">' + dueCount + ' due</span>' : '';
-  return '<div class="section-label">Practice Modes</div>' +
+  var hvpOwned = getHvpOwned(), hvpTotal = CONTENT.filter(function(c){ return c.hvp; }).length;
+  var pbBadge = hvpOwned > 0 ? '<span class="practice-hub-badge" style="background:var(--green);">' + hvpOwned + ' owned</span>' : '';
+
+  return '<div class="section-label">Phrase Ownership</div>' +
+    '<div class="practice-hub-option" onclick="showPhraseBank(\'all\')">' +
+      '<span class="practice-hub-icon">⭐</span>' +
+      '<span class="practice-hub-text"><strong>Phrase Bank</strong><span>High-value phrases — casual, polite, and real-life fast versions</span></span>' +
+      pbBadge +
+    '</div>' +
+
+    '<div class="section-label" style="margin-top:4px;">Practice Modes</div>' +
     '<div class="nudge-card">Your mouth needs reps, not just eyes. Pick a mode and speak every single card.</div>' +
 
     '<div class="practice-hub-option" onclick="startMode(\'listen-repeat\')">' +
@@ -3686,6 +4070,7 @@ function startLesson(lessonId) {
   const lesson = LESSONS.find(function(l) { return l.id === lessonId; });
   if (!lesson) return;
   const items = lessonId ? lesson.itemIds.map(function(id) { return CONTENT.find(function(c) { return c.id === id; }); }).filter(Boolean) : [];
+  var hvpId = lesson.heroPhrase && HVP_DATA[lesson.heroPhrase] ? lesson.heroPhrase : null;
   lessonState = {
     lesson: lesson,
     phase: 'learn',
@@ -3696,6 +4081,8 @@ function startLesson(lessonId) {
     convoIndex: 0,
     convoCorrect: 0,
     xpEarned: 0,
+    hvpId: hvpId,
+    hvpWorldCtx: null,
   };
   renderLessonStep();
 }
@@ -3703,10 +4090,13 @@ function startLesson(lessonId) {
 function renderLessonStep() {
   if (!lessonState) return switchTab('today');
   var ls = lessonState;
-  var phases = ['learn','practice','speak','convo','complete'];
+  var phases = ls.hvpId
+    ? ['learn','own','practice','speak','convo','complete']
+    : ['learn','practice','speak','convo','complete'];
   var phaseIdx = phases.indexOf(ls.phase);
+  var dotPhases = phases.slice(0, phases.length - 1); // exclude 'complete' from dots
 
-  var dotsHtml = phases.slice(0,4).map(function(p, i) {
+  var dotsHtml = dotPhases.map(function(p, i) {
     var cls = i < phaseIdx ? 'done' : i === phaseIdx ? 'active' : '';
     return '<div class="lesson-step-dot ' + cls + '"></div>';
   }).join('');
@@ -3725,6 +4115,8 @@ function renderLessonStep() {
 
   if (ls.phase === 'learn') {
     content = renderLessonLearn(ls, headerHtml);
+  } else if (ls.phase === 'own') {
+    content = renderOwnThisPhrase(ls, headerHtml);
   } else if (ls.phase === 'practice') {
     content = renderLessonPractice(ls, headerHtml);
   } else if (ls.phase === 'speak') {
@@ -3742,6 +4134,112 @@ function renderLessonStep() {
     var item = ls.items[ls.phaseIndex];
     if (item) setTimeout(function() { speakSpanish(item.spanish); }, 300);
   }
+}
+
+function renderOwnThisPhrase(ls, headerHtml) {
+  var id   = ls.hvpId;
+  var hvp  = HVP_DATA[id];
+  var item = CONTENT.find(function(c){ return c.id === id; });
+  if (!item || !hvp) { lessonState.phase = 'practice'; lessonState.phaseIndex = 0; renderLessonStep(); return ''; }
+
+  var label = getOwnershipLabel(id);
+  var labelColor = getOwnershipColor(label);
+  var showPron = S.settings.pronunciationHelper;
+  var savedCtx = S.ownership[id] && S.ownership[id].worldContext;
+
+  var ctxButtonsHtml = WORLD_CONTEXTS.map(function(ctx) {
+    var active = savedCtx === ctx.key;
+    return '<button class="own-ctx-btn' + (active ? ' active' : '') + '" onclick="lessonSetCtx(\'' + ctx.key + '\')" style="' + (active ? 'border-color:var(--primary);background:rgba(232,93,4,0.1);' : '') + '">' +
+      ctx.icon + ' ' + ctx.label +
+    '</button>';
+  }).join('');
+
+  return headerHtml +
+    '<div class="card own-phrase-card">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">' +
+        '<div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;color:var(--primary);letter-spacing:0.06em;">⭐ Own This Phrase</div>' +
+        '<span class="ownership-badge" style="background:' + labelColor + ';">' + label + '</span>' +
+      '</div>' +
+
+      '<div style="text-align:center;margin-bottom:14px;">' +
+        '<div style="display:inline-flex;align-items:center;gap:10px;margin-bottom:4px;">' +
+          '<div style="font-size:1.7rem;font-weight:800;color:var(--text);">' + item.spanish + '</div>' +
+          '<button class="audio-btn" data-speak="' + esc(item.spanish) + '" onclick="speakSpanish(this.dataset.speak,this)">🔊</button>' +
+        '</div>' +
+        (showPron && item.pron ? '<div style="font-size:0.8rem;color:var(--primary);font-style:italic;margin-bottom:2px;">' + item.pron + '</div>' : '') +
+        '<div style="font-size:0.95rem;color:var(--muted);">' + item.english + '</div>' +
+      '</div>' +
+
+      '<div class="own-section">' +
+        '<div class="own-section-label">Say It 3 Ways</div>' +
+        '<div class="own-row">' +
+          '<span class="own-tag own-tag-casual">Casual</span>' +
+          '<span class="own-val">' + hvp.casual + '</span>' +
+          '<button class="audio-btn-sm" data-speak="' + esc(hvp.casual) + '" onclick="speakSpanish(this.dataset.speak,this)">🔊</button>' +
+        '</div>' +
+        '<div class="own-row">' +
+          '<span class="own-tag own-tag-polite">Polite</span>' +
+          '<span class="own-val">' + hvp.polite + '</span>' +
+          '<button class="audio-btn-sm" data-speak="' + esc(hvp.polite) + '" onclick="speakSpanish(this.dataset.speak,this)">🔊</button>' +
+        '</div>' +
+        '<div class="own-row">' +
+          '<span class="own-tag own-tag-fast">Real Life</span>' +
+          '<span class="own-val">' + hvp.realFast + '</span>' +
+          '<button class="audio-btn-sm" data-speak="' + esc(hvp.realFast) + '" onclick="speakSpanish(this.dataset.speak,this)">🔊</button>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="own-section">' +
+        '<div class="own-section-label">When to Use It</div>' +
+        '<div style="font-size:0.82rem;color:var(--text);line-height:1.55;">' + hvp.whenToUse + '</div>' +
+      '</div>' +
+
+      '<div class="own-section" style="border-left:3px solid #e53e3e;padding-left:10px;">' +
+        '<div class="own-section-label" style="color:#e53e3e;">When NOT to Use It</div>' +
+        '<div style="font-size:0.82rem;color:var(--text);line-height:1.55;">' + hvp.whenNotTo + '</div>' +
+      '</div>' +
+
+      '<div class="own-section">' +
+        '<div class="own-section-label">Hear It in a Real Exchange</div>' +
+        '<div style="background:var(--bg);border-radius:10px;padding:10px;">' +
+          '<div style="font-size:0.8rem;margin-bottom:6px;">' +
+            '<span style="display:inline-block;background:var(--border);border-radius:6px;padding:4px 8px;margin-bottom:4px;">' + hvp.miniConvo.q + '</span>' +
+            '<div style="font-size:0.7rem;color:var(--muted);padding-left:4px;">' + hvp.miniConvo.qEn + '</div>' +
+          '</div>' +
+          '<div style="font-size:0.8rem;text-align:right;">' +
+            '<span style="display:inline-block;background:rgba(232,93,4,0.12);border-radius:6px;padding:4px 8px;margin-bottom:4px;color:var(--primary);font-weight:600;">' + hvp.miniConvo.a + '</span>' +
+            '<div style="font-size:0.7rem;color:var(--muted);padding-right:4px;">' + hvp.miniConvo.aEn + '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="own-section">' +
+        '<div class="own-section-label">Where Would You Actually Use This?</div>' +
+        '<div style="font-size:0.78rem;color:var(--muted);margin-bottom:8px;">Pick your real-life situation so this phrase sticks.</div>' +
+        '<div class="own-ctx-grid">' + ctxButtonsHtml + '</div>' +
+      '</div>' +
+
+      '<button class="btn btn-primary btn-full" style="margin-top:14px;" onclick="lessonOwnNext()">Got It — Continue to Practice →</button>' +
+      '<div style="font-size:0.72rem;color:var(--muted);text-align:center;margin-top:8px;">Say it slowly. Real use matters more than perfect speed.</div>' +
+    '</div>';
+}
+
+function lessonSetCtx(ctx) {
+  lessonState.hvpWorldCtx = ctx;
+  var btns = document.querySelectorAll('.own-ctx-btn');
+  btns.forEach(function(b) { b.classList.remove('active'); b.style.borderColor = ''; b.style.background = ''; });
+  var clicked = Array.from(btns).find(function(b){ return b.textContent.trim().indexOf(WORLD_CONTEXTS.find(function(c){ return c.key === ctx; }).label) !== -1; });
+  if (clicked) { clicked.classList.add('active'); clicked.style.borderColor = 'var(--primary)'; clicked.style.background = 'rgba(232,93,4,0.1)'; }
+}
+
+function lessonOwnNext() {
+  if (lessonState.hvpId) {
+    saveWorldContext(lessonState.hvpId, lessonState.hvpWorldCtx);
+    lessonState.xpEarned += 5;
+  }
+  lessonState.phase = 'practice';
+  lessonState.phaseIndex = 0;
+  renderLessonStep();
 }
 
 function renderLessonLearn(ls, headerHtml) {
@@ -3777,7 +4275,7 @@ function renderLessonLearn(ls, headerHtml) {
 function lessonLearnNext() {
   lessonState.phaseIndex += 1;
   if (lessonState.phaseIndex >= lessonState.items.length) {
-    lessonState.phase = 'practice';
+    lessonState.phase = lessonState.hvpId ? 'own' : 'practice';
     lessonState.phaseIndex = 0;
   }
   renderLessonStep();
@@ -3918,6 +4416,7 @@ function renderLessonConvo(ls, headerHtml) {
 }
 
 function lessonConvoAnswer(chosen, correct) {
+  if (document.activeElement) document.activeElement.blur();
   var btns = document.querySelectorAll('.convo-opt');
   btns.forEach(function(b, i) {
     b.disabled = true;
