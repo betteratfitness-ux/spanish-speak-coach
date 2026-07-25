@@ -676,6 +676,7 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
 .pb-english { font-size: 0.82rem; color: var(--muted); margin-top: 2px; }
 .pb-versions { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
 .pb-ver-row { display: flex; align-items: center; gap: 7px; }
+@keyframes mic-pulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.2); opacity: 0.7; } }
 </style>
 </head>
 <body>
@@ -4342,12 +4343,110 @@ function lessonPracticeResult(result) {
   renderLessonStep();
 }
 
+function speechMatchScore(heard, target) {
+  function norm(s) {
+    return (s || '').toLowerCase()
+      .replace(/[¿¡.,!?;:«»""'']/g, '')
+      .replace(/á/g,'a').replace(/é/g,'e').replace(/í/g,'i').replace(/ó/g,'o').replace(/ú/g,'u').replace(/ü/g,'u').replace(/ñ/g,'n')
+      .trim();
+  }
+  var h = norm(heard).split(/\s+/).filter(Boolean);
+  var t = norm(target).split(/\s+/).filter(Boolean);
+  if (!t.length) return 0;
+  var matches = h.filter(function(w) { return t.indexOf(w) > -1; }).length;
+  return Math.round(matches / t.length * 100);
+}
+
+function lessonSpeakManualHtml() {
+  return '<div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">' +
+    '<div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:4px;text-align:center;letter-spacing:0.6px;">How did it sound?</div>' +
+    '<button class="btn" style="background:#9AE6B4;color:#1C4532;text-align:left;padding:10px 14px;font-weight:600;" onclick="lessonSpeakResult(5)">5 — Felt natural</button>' +
+    '<button class="btn" style="background:#C6F6D5;color:#22543D;text-align:left;padding:10px 14px;font-weight:600;" onclick="lessonSpeakResult(4)">4 — Sounded okay</button>' +
+    '<button class="btn" style="background:#EBF8FF;color:#2B6CB0;text-align:left;padding:10px 14px;font-weight:600;" onclick="lessonSpeakResult(3)">3 — Got through it</button>' +
+    '<button class="btn" style="background:#FEEBC8;color:#7B341E;text-align:left;padding:10px 14px;font-weight:600;" onclick="lessonSpeakResult(2)">2 — Struggled</button>' +
+    '<button class="btn" style="background:#FED7D7;color:#9B2C2C;text-align:left;padding:10px 14px;font-weight:600;" onclick="lessonSpeakResult(1)">1 — I froze</button>' +
+  '</div>';
+}
+
+function showVoiceResult(heard, score, target) {
+  var area = document.getElementById('voice-check-area');
+  if (!area) return;
+  var autoConf, feedback, bdr;
+  if (score >= 80)      { autoConf = 5; feedback = 'Great match! 🟢'; bdr = '#9AE6B4'; }
+  else if (score >= 55) { autoConf = 4; feedback = 'Close! 🟡';        bdr = '#C6F6D5'; }
+  else if (score >= 30) { autoConf = 3; feedback = 'Getting there. 🔵'; bdr = '#BEE3F8'; }
+  else                  { autoConf = 2; feedback = 'Keep practicing. 🔴'; bdr = '#FEEBC8'; }
+  area.innerHTML =
+    '<div style="border:2px solid ' + bdr + ';border-radius:12px;padding:14px;text-align:center;margin-bottom:12px;">' +
+      '<div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:6px;letter-spacing:0.6px;">We heard:</div>' +
+      '<div style="font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:6px;">"' + esc(heard) + '"</div>' +
+      '<div style="font-size:0.9rem;font-weight:700;">' + feedback + '</div>' +
+    '</div>' +
+    '<div style="display:flex;gap:8px;margin-bottom:8px;">' +
+      '<button class="btn btn-green" style="flex:1;" onclick="lessonSpeakResult(' + autoConf + ')">Continue →</button>' +
+      '<button class="btn btn-secondary" style="flex:1;" data-tgt="' + esc(target) + '" onclick="startVoiceCheck(this.dataset.tgt)">Try Again</button>' +
+    '</div>' +
+    '<details><summary style="font-size:0.75rem;color:var(--muted);cursor:pointer;text-align:center;padding:4px 0;">Rate manually instead</summary>' +
+      lessonSpeakManualHtml() +
+    '</details>';
+}
+
+function startVoiceCheck(target) {
+  var area = document.getElementById('voice-check-area');
+  if (!area) return;
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    area.innerHTML = '<div style="text-align:center;font-size:0.82rem;color:var(--muted);padding:8px 0;">Voice check not available in this browser.</div>' + lessonSpeakManualHtml();
+    return;
+  }
+  area.innerHTML =
+    '<div style="text-align:center;padding:18px 0;">' +
+      '<div style="font-size:2.5rem;animation:mic-pulse 1s ease-in-out infinite;">🎙️</div>' +
+      '<div style="font-size:0.9rem;color:var(--primary);font-weight:700;margin-top:8px;">Listening...</div>' +
+      '<div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">Say the phrase in Spanish</div>' +
+    '</div>';
+  var rec = new SR();
+  rec.lang = 'es-ES';
+  rec.continuous = false;
+  rec.interimResults = false;
+  rec.maxAlternatives = 3;
+  var gotResult = false;
+  rec.onresult = function(e) {
+    gotResult = true;
+    var transcript = e.results[0][0].transcript;
+    showVoiceResult(transcript, speechMatchScore(transcript, target), target);
+  };
+  rec.onerror = function(e) {
+    gotResult = true;
+    var a = document.getElementById('voice-check-area');
+    if (!a) return;
+    var msg = e.error === 'not-allowed'
+      ? 'Mic access denied. Allow microphone in browser settings.'
+      : e.error === 'no-speech' ? 'No speech detected. Try again.' : 'Could not hear you. Try again.';
+    a.innerHTML =
+      '<div style="text-align:center;font-size:0.85rem;color:var(--muted);padding:8px 0;">' + msg + '</div>' +
+      '<button class="btn btn-primary btn-full" style="margin:8px 0;" data-tgt="' + esc(target) + '" onclick="startVoiceCheck(this.dataset.tgt)">Try Again</button>' +
+      lessonSpeakManualHtml();
+  };
+  rec.onend = function() {
+    if (!gotResult) {
+      var a = document.getElementById('voice-check-area');
+      if (a) a.innerHTML =
+        '<div style="text-align:center;font-size:0.85rem;color:var(--muted);padding:8px 0;">No speech detected. Try again.</div>' +
+        '<button class="btn btn-primary btn-full" style="margin:8px 0;" data-tgt="' + esc(target) + '" onclick="startVoiceCheck(this.dataset.tgt)">Try Again</button>' +
+        lessonSpeakManualHtml();
+    }
+  };
+  rec.start();
+}
+
 function renderLessonSpeak(ls, headerHtml) {
   var item = ls.speakItems[ls.phaseIndex];
   if (!item) { lessonState.phase = 'convo'; lessonState.phaseIndex = 0; renderLessonStep(); return ''; }
   var total = ls.speakItems.length;
   var idx = ls.phaseIndex;
   var showPron = S.settings.pronunciationHelper;
+  var hasSR = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
 
   return headerHtml +
     '<div class="card">' +
@@ -4358,16 +4457,15 @@ function renderLessonSpeak(ls, headerHtml) {
           '<button class="audio-btn" style="width:36px;height:36px;" data-speak="' + esc(item.spanish) + '" onclick="speakSpanish(this.dataset.speak,this)">🔊</button>' +
         '</div>' +
         (showPron && item.pron ? '<div style="font-size:0.88rem;color:var(--primary);font-style:italic;margin-bottom:6px;">' + item.pron + '</div>' : '') +
-        '<div style="font-size:0.9rem;color:var(--muted);margin-bottom:12px;">' + item.english + '</div>' +
+        '<div style="font-size:0.9rem;color:var(--muted);margin-bottom:4px;">' + item.english + '</div>' +
       '</div>' +
-      '<div style="background:#FFF5EE;border-radius:8px;padding:10px 12px;font-size:0.85rem;color:var(--primary);font-weight:600;text-align:center;margin-bottom:12px;">🎙️ Say it out loud. Rate how it sounded.</div>' +
-      '<div style="display:flex;flex-direction:column;gap:6px;">' +
-        '<button class="btn" style="background:#9AE6B4;color:#1C4532;text-align:left;padding:10px 14px;font-weight:600;" onclick="lessonSpeakResult(5)">5 — Felt natural</button>' +
-        '<button class="btn" style="background:#C6F6D5;color:#22543D;text-align:left;padding:10px 14px;font-weight:600;" onclick="lessonSpeakResult(4)">4 — Sounded okay</button>' +
-        '<button class="btn" style="background:#EBF8FF;color:#2B6CB0;text-align:left;padding:10px 14px;font-weight:600;" onclick="lessonSpeakResult(3)">3 — Got through it</button>' +
-        '<button class="btn" style="background:#FEEBC8;color:#7B341E;text-align:left;padding:10px 14px;font-weight:600;" onclick="lessonSpeakResult(2)">2 — Struggled</button>' +
-        '<button class="btn" style="background:#FED7D7;color:#9B2C2C;text-align:left;padding:10px 14px;font-weight:600;" onclick="lessonSpeakResult(1)">1 — I froze</button>' +
-      '</div>' +
+      (hasSR
+        ? '<button class="btn btn-primary btn-full" style="margin:12px 0;font-size:1rem;padding:14px;" data-tgt="' + esc(item.spanish) + '" onclick="startVoiceCheck(this.dataset.tgt)">🎙️ Tap to Speak</button>'
+        : '<div style="background:#FFF5EE;border-radius:8px;padding:10px 12px;font-size:0.85rem;color:var(--primary);font-weight:600;text-align:center;margin-bottom:12px;">🎙️ Say it out loud. Rate how it sounded.</div>') +
+      '<div id="voice-check-area"></div>' +
+      (hasSR
+        ? '<details style="margin-top:4px;"><summary style="font-size:0.75rem;color:var(--muted);cursor:pointer;text-align:center;padding:4px 0;">Skip voice check — rate manually</summary>' + lessonSpeakManualHtml() + '</details>'
+        : lessonSpeakManualHtml()) +
     '</div>';
 }
 
