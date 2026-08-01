@@ -677,6 +677,9 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
 .pb-versions { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
 .pb-ver-row { display: flex; align-items: center; gap: 7px; }
 @keyframes mic-pulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.2); opacity: 0.7; } }
+.partner-prompt { background: var(--bg); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; }
+.partner-learner { background: #FFF5EE; border: 2px solid var(--primary); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; }
+@media (prefers-color-scheme: dark) { .partner-learner { background: rgba(205,92,10,0.12); } }
 </style>
 </head>
 <body>
@@ -1093,6 +1096,139 @@ const WORLD_CONTEXTS = [
   { key:'emergency', icon:'🚨', label:'Emergency' },
   { key:'smalltalk', icon:'💬', label:'Small Talk' },
   { key:'parenting', icon:'🧒', label:'Parenting' },
+];
+
+// ===================================================
+// PARTNER PRACTICE — weekly conversation system
+// ===================================================
+var PARTNER_CONVOS = [
+  { // Sunday (0) — combine everything
+    label: 'Sunday — Mix It All Together',
+    phraseId: 'HVP-001',
+    theory: 'Real conversations are just patterns stacked together. Today, try combining: a greeting → a request with "Quisiera" → "No entiendo" if you get lost → "¿Puede repetirlo?" to recover. You already know every piece.',
+    pattern: 'Hola → Quisiera ___ → No entiendo → ¿Puede repetirlo?',
+    examples: [
+      { sp: 'Quisiera un café.', en: 'I would like a coffee.' },
+      { sp: 'No entiendo. ¿Puede repetirlo?', en: 'I don\'t understand. Can you repeat it?' },
+      { sp: 'Necesito ayuda, por favor.', en: 'I need help, please.' },
+    ],
+    script: [
+      { who:'A', text:'Buenos días. ¿En qué le puedo ayudar?', textEn:'Good morning. How can I help you?' },
+      { who:'B', text:'Quisiera un café, por favor.', textEn:'I would like a coffee, please.' },
+      { who:'A', text:'¿Grande o pequeño?', textEn:'Large or small?' },
+      { who:'B', text:'Lo siento, no entiendo. ¿Puede repetirlo?', textEn:'I\'m sorry, I don\'t understand. Can you repeat it?' },
+      { who:'A', text:'Grande o pequeño — big or small.', textEn:'Large or small.' },
+      { who:'B', text:'Grande, gracias.', textEn:'Large, thank you.' },
+    ],
+  },
+  { // Monday (1) — Necesito
+    label: 'Monday — Asking for Help',
+    phraseId: 'HVP-001',
+    theory: '"Necesito" = I need. Add any noun or verb after it. Necesito agua (I need water). Necesito descansar (I need to rest). Necesito ayuda (I need help). One word unlocks unlimited needs.',
+    pattern: 'Necesito + [noun or verb]',
+    examples: [
+      { sp: 'Necesito agua.', en: 'I need water.' },
+      { sp: 'Necesito descansar.', en: 'I need to rest.' },
+      { sp: 'Necesito hablar contigo.', en: 'I need to talk to you.' },
+    ],
+    script: [
+      { who:'A', text:'¿Estás bien?', textEn:'Are you okay?' },
+      { who:'B', text:'Necesito ayuda.', textEn:'I need help.' },
+      { who:'A', text:'Claro. ¿Qué necesitas?', textEn:'Of course. What do you need?' },
+      { who:'B', text:'Necesito practicar mi español contigo.', textEn:'I need to practice my Spanish with you.' },
+      { who:'A', text:'¡Me encanta esa idea!', textEn:'I love that idea!' },
+    ],
+  },
+  { // Tuesday (2) — ¿Puede?
+    label: 'Tuesday — The "Can You?" Frame',
+    phraseId: 'HVP-003',
+    theory: '"¿Puede + verb?" = "Can you + verb?" This single frame covers dozens of real situations. ¿Puede ayudarme? / ¿Puede repetirlo? / ¿Puede hablar más despacio? / ¿Puede escribirlo? Learn the frame once — swap the verb every time.',
+    pattern: '¿Puede + [infinitive verb]?',
+    examples: [
+      { sp: '¿Puede ayudarme?', en: 'Can you help me?' },
+      { sp: '¿Puede escribirlo?', en: 'Can you write it down?' },
+      { sp: '¿Puede hablar más despacio?', en: 'Can you speak more slowly?' },
+    ],
+    script: [
+      { who:'A', text:'El restaurante cierra a las diez de la noche.', textEn:'The restaurant closes at ten at night.' },
+      { who:'B', text:'¿Puede repetirlo? No entendí bien.', textEn:'Can you repeat it? I didn\'t understand well.' },
+      { who:'A', text:'Claro. Cierra a las diez.', textEn:'Sure. It closes at ten.' },
+      { who:'B', text:'Gracias. ¿Puede hablar más despacio?', textEn:'Thank you. Can you speak more slowly?' },
+      { who:'A', text:'Sí, con gusto. Cierra... a las diez.', textEn:'Yes, gladly. It closes... at ten.' },
+    ],
+  },
+  { // Wednesday (3) — No + verb
+    label: 'Wednesday — Saying "I Don\'t"',
+    phraseId: 'HVP-002',
+    theory: 'In Spanish, "No" before any verb means "I don\'t." No entiendo (I don\'t understand). No sé (I don\'t know). No hablo (I don\'t speak). No tengo (I don\'t have). The simplest grammar rule in the entire language — and one of the most useful.',
+    pattern: 'No + [verb] = I don\'t [verb]',
+    examples: [
+      { sp: 'No sé.', en: 'I don\'t know.' },
+      { sp: 'No hablo español bien.', en: 'I don\'t speak Spanish well.' },
+      { sp: 'No tengo cambio.', en: 'I don\'t have change.' },
+    ],
+    script: [
+      { who:'A', text:'¿Hablas español?', textEn:'Do you speak Spanish?' },
+      { who:'B', text:'Un poco. No entiendo todo todavía.', textEn:'A little. I don\'t understand everything yet.' },
+      { who:'A', text:'¿Sabes dónde está el banco?', textEn:'Do you know where the bank is?' },
+      { who:'B', text:'No sé. Lo siento.', textEn:'I don\'t know. Sorry.' },
+      { who:'A', text:'No hay problema. Lo buscamos juntos.', textEn:'No problem. We\'ll look for it together.' },
+    ],
+  },
+  { // Thursday (4) — Quisiera
+    label: 'Thursday — Polite Requests',
+    phraseId: 'HVP-005',
+    theory: '"Quisiera" vs "Quiero" — both mean I want, but quisiera sounds like "I would like." In Spanish, the same verb in a different tense (past subjunctive) becomes automatic politeness. Use quisiera with strangers and in public. Use quiero with family.',
+    pattern: 'Quisiera + [what you want]',
+    examples: [
+      { sp: 'Quisiera la cuenta.', en: 'I would like the bill.' },
+      { sp: 'Quisiera hablar con usted.', en: 'I would like to speak with you.' },
+      { sp: 'Quisiera agua sin gas.', en: 'I would like still water.' },
+    ],
+    script: [
+      { who:'A', text:'¿Qué desea ordenar?', textEn:'What would you like to order?' },
+      { who:'B', text:'Quisiera el pollo, por favor.', textEn:'I would like the chicken, please.' },
+      { who:'A', text:'Muy bien. ¿Algo más?', textEn:'Very good. Anything else?' },
+      { who:'B', text:'Quisiera agua también. Y la cuenta, por favor.', textEn:'I would like water too. And the bill, please.' },
+      { who:'A', text:'Ahora mismo se la traigo.', textEn:'I\'ll bring it right away.' },
+    ],
+  },
+  { // Friday (5) — ¿Dónde está?
+    label: 'Friday — Finding Places',
+    phraseId: 'HVP-004',
+    theory: '"¿Dónde está ___?" = "Where is ___?" Fill in any place: el baño, la salida (exit), un cajero (ATM), la farmacia (pharmacy), el hospital. Same question, every location. Learn the frame once — it works in every city, every country.',
+    pattern: '¿Dónde está + [place]?',
+    examples: [
+      { sp: '¿Dónde está la salida?', en: 'Where is the exit?' },
+      { sp: '¿Dónde está un cajero?', en: 'Where is an ATM?' },
+      { sp: '¿Dónde está la farmacia?', en: 'Where is the pharmacy?' },
+    ],
+    script: [
+      { who:'A', text:'Disculpe, ¿le puedo ayudar?', textEn:'Excuse me, can I help you?' },
+      { who:'B', text:'Sí, gracias. ¿Dónde está el baño?', textEn:'Yes, thank you. Where is the bathroom?' },
+      { who:'A', text:'Al fondo a la derecha.', textEn:'At the back on the right.' },
+      { who:'B', text:'Muchas gracias. ¿Y dónde está la salida?', textEn:'Thank you very much. And where is the exit?' },
+      { who:'A', text:'La salida está por aquí.', textEn:'The exit is this way.' },
+    ],
+  },
+  { // Saturday (6) — Present progressive
+    label: 'Saturday — What You\'re Doing Now',
+    phraseId: 'D1-016',
+    theory: '"Estoy + verb" = what you\'re doing right now. -AR verbs add -ando (hablar → hablando, trabajar → trabajando). -ER and -IR verbs add -iendo (comer → comiendo, aprender → aprendiendo). Two endings. Every verb in the language. That\'s the whole rule.',
+    pattern: 'Estoy + [verb]-ando  OR  Estoy + [verb]-iendo',
+    examples: [
+      { sp: 'Estoy comiendo.', en: 'I\'m eating.' },
+      { sp: 'Estoy trabajando.', en: 'I\'m working.' },
+      { sp: 'Estoy escuchando.', en: 'I\'m listening.' },
+    ],
+    script: [
+      { who:'A', text:'¿Qué estás haciendo?', textEn:'What are you doing?' },
+      { who:'B', text:'Estoy aprendiendo español.', textEn:'I\'m learning Spanish.' },
+      { who:'A', text:'¡Qué bueno! ¿Y ella?', textEn:'How great! And her?' },
+      { who:'B', text:'Ella también está aprendiendo. Practicamos juntos.', textEn:'She\'s learning too. We practice together.' },
+      { who:'A', text:'¡Eso es perfecto!', textEn:'That\'s perfect!' },
+    ],
+  },
 ];
 
 // Suggested responses for key phrases — what a Spanish speaker might say back
@@ -1598,6 +1734,7 @@ const DEFAULT_STATE = {
   realLife: { scheduled: [], completions: [] },
   storyProgress: {},  // { 'S1': { completed: true, attempts: 1 } }
   badges: [],         // array of earned badge ids
+  partnerLog: {},     // { 'YYYY-MM-DD': true }
 };
 
 function loadState() {
@@ -1611,7 +1748,8 @@ function loadState() {
     state.settings  = Object.assign(structuredClone(DEFAULT_STATE.settings),  saved.settings  || {});
     state.stats     = Object.assign(structuredClone(DEFAULT_STATE.stats),     saved.stats     || {});
     state.user      = Object.assign(structuredClone(DEFAULT_STATE.user),      saved.user      || {});
-    state.ownership = Object.assign(structuredClone(DEFAULT_STATE.ownership), saved.ownership || {});
+    state.ownership   = Object.assign(structuredClone(DEFAULT_STATE.ownership),   saved.ownership   || {});
+    state.partnerLog  = Object.assign(structuredClone(DEFAULT_STATE.partnerLog),  saved.partnerLog  || {});
     return state;
   } catch(e) { return structuredClone(DEFAULT_STATE); }
 }
@@ -1950,6 +2088,33 @@ function renderToday() {
       '<button class="btn btn-secondary btn-sm" onclick="startEmergencyDay()">⚡ Only have 3 min? Emergency Day Mode</button>' +
     '</div>';
 
+  // Partner Practice card
+  var dow = new Date().getDay();
+  var pc = PARTNER_CONVOS[dow];
+  var pcItem = CONTENT.find(function(c) { return c.id === pc.phraseId; });
+  var partnerDone = S.partnerLog && S.partnerLog[today()];
+  var partnerStreak = 0;
+  var pd = new Date();
+  while (S.partnerLog && S.partnerLog[pd.toISOString().slice(0,10)]) { partnerStreak++; pd.setDate(pd.getDate()-1); }
+
+  var partnerCard =
+    '<div class="card" style="border-left:4px solid var(--green);margin-bottom:14px;">' +
+      '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">' +
+        '<div style="flex:1;">' +
+          '<div style="font-weight:700;font-size:0.9rem;margin-bottom:2px;">👫 Practice With Your Partner</div>' +
+          '<div style="font-size:0.75rem;color:var(--muted);margin-bottom:8px;">' + esc(pc.label) + '</div>' +
+          (pcItem ? '<div style="font-size:1rem;font-weight:800;color:var(--primary);">' + esc(pcItem.spanish) + '</div>' +
+            '<div style="font-size:0.75rem;color:var(--muted);">' + esc(pcItem.english) + '</div>' : '') +
+          (partnerStreak >= 2 ? '<div style="font-size:0.72rem;color:var(--green);margin-top:6px;font-weight:700;">🔥 ' + partnerStreak + '-day partner streak</div>' : '') +
+        '</div>' +
+        '<div style="flex-shrink:0;">' +
+          (partnerDone
+            ? '<div style="text-align:center;padding:4px;"><div style="font-size:1.4rem;">✅</div><div style="font-size:0.65rem;color:var(--green);font-weight:700;">Done!</div></div>'
+            : '<button class="btn btn-sm" style="background:var(--green);color:white;font-weight:700;white-space:nowrap;" onclick="showPartnerMode()">Start →</button>') +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
   return '<div class="section-label">📅 ' + new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}) + '</div>' +
     comebackCard +
     backupCard +
@@ -1957,6 +2122,7 @@ function renderToday() {
     statsRow +
     reviewCard +
     starsCard +
+    partnerCard +
     nudgeCard +
     emergencyCard;
 }
@@ -3781,6 +3947,109 @@ function checkStoryAnswer(storyId, optIndex) {
 // ===================================================
 // RENDERING — PRACTICE HUB
 // ===================================================
+
+var partnerRoleSwapped = false;
+
+function showPartnerMode() {
+  partnerRoleSwapped = false;
+  renderPartnerScreen();
+}
+
+function renderPartnerScreen() {
+  var dow = new Date().getDay();
+  var convo = PARTNER_CONVOS[dow];
+  var item = CONTENT.find(function(c) { return c.id === convo.phraseId; });
+  var showPron = S.settings.pronunciationHelper;
+  var practiced = S.partnerLog && S.partnerLog[today()];
+
+  var scriptHtml = convo.script.map(function(turn) {
+    var isLearner = partnerRoleSwapped ? (turn.who === 'A') : (turn.who === 'B');
+    var label = isLearner ? 'Your turn:' : 'Partner says:';
+    if (!isLearner) {
+      return '<div style="margin-bottom:10px;">' +
+        '<div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:0.5px;margin-bottom:4px;">' + label + '</div>' +
+        '<div class="partner-prompt">' +
+          '<div style="font-size:0.9rem;font-style:italic;color:var(--muted);">"' + esc(turn.textEn) + '"</div>' +
+          '<div style="font-size:0.75rem;color:var(--muted);margin-top:3px;opacity:0.7;">Spanish: ' + esc(turn.text) + '</div>' +
+        '</div></div>';
+    }
+    return '<div style="margin-bottom:10px;">' +
+      '<div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:var(--primary);letter-spacing:0.5px;margin-bottom:4px;">' + label + '</div>' +
+      '<div class="partner-learner">' +
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">' +
+          '<div style="font-size:1.05rem;font-weight:800;color:var(--text);">' + esc(turn.text) + '</div>' +
+          '<button class="audio-btn-sm" data-speak="' + esc(turn.text) + '" onclick="speakSpanish(this.dataset.speak,this)">🔊</button>' +
+        '</div>' +
+        '<div style="font-size:0.78rem;color:var(--muted);">"' + esc(turn.textEn) + '"</div>' +
+      '</div></div>';
+  }).join('');
+
+  var examplesHtml = convo.examples.map(function(ex) {
+    return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);">' +
+      '<button class="audio-btn-sm" data-speak="' + esc(ex.sp) + '" onclick="speakSpanish(this.dataset.speak,this)">🔊</button>' +
+      '<div><div style="font-size:0.9rem;font-weight:700;color:var(--text);">' + esc(ex.sp) + '</div>' +
+      '<div style="font-size:0.75rem;color:var(--muted);">' + esc(ex.en) + '</div></div>' +
+    '</div>';
+  }).join('');
+
+  var html =
+    '<div style="margin-bottom:10px;display:flex;align-items:center;gap:8px;">' +
+      '<button class="btn btn-secondary btn-sm" onclick="switchTab(\'today\')">← Today</button>' +
+      '<div style="flex:1;font-size:0.9rem;font-weight:700;color:var(--text);">' + esc(convo.label) + '</div>' +
+    '</div>' +
+
+    (item ? '<div class="card" style="text-align:center;padding:16px;">' +
+      '<div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:0.6px;margin-bottom:8px;">This Week\'s Focus Phrase</div>' +
+      '<div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px;">' +
+        '<div style="font-size:1.8rem;font-weight:800;color:var(--text);">' + esc(item.spanish) + '</div>' +
+        '<button class="audio-btn" data-speak="' + esc(item.spanish) + '" onclick="speakSpanish(this.dataset.speak,this)">🔊</button>' +
+      '</div>' +
+      (showPron && item.pron ? '<div style="font-size:0.82rem;color:var(--primary);font-style:italic;margin-bottom:4px;">' + esc(item.pron) + '</div>' : '') +
+      '<div style="font-size:0.85rem;color:var(--muted);">' + esc(item.english) + '</div>' +
+    '</div>' : '') +
+
+    '<div class="card" style="border-left:4px solid var(--primary);">' +
+      '<div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:var(--primary);letter-spacing:0.6px;margin-bottom:8px;">The Pattern</div>' +
+      '<div style="font-size:0.85rem;background:var(--bg);border-radius:8px;padding:10px 12px;font-family:monospace;font-weight:700;color:var(--text);margin-bottom:10px;">' + esc(convo.pattern) + '</div>' +
+      '<div style="font-size:0.84rem;color:var(--text);line-height:1.65;">' + esc(convo.theory) + '</div>' +
+      '<div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px;">' +
+        '<div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:0.5px;margin-bottom:6px;">Same pattern — different words:</div>' +
+        examplesHtml +
+      '</div>' +
+    '</div>' +
+
+    '<div class="card">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">' +
+        '<div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:0.6px;">Try It Together</div>' +
+        '<button class="btn btn-secondary btn-sm" onclick="partnerRoleSwapped=!partnerRoleSwapped;renderPartnerScreen();">' +
+          (partnerRoleSwapped ? '🔄 Swap Back' : '🔄 Switch Roles') +
+        '</button>' +
+      '</div>' +
+      '<div style="font-size:0.72rem;color:var(--muted);margin-bottom:14px;">' +
+        (partnerRoleSwapped
+          ? 'You say the A lines (gray). Partner says the orange lines.'
+          : 'You say the orange lines. Partner reads the gray prompts.') +
+      '</div>' +
+      scriptHtml +
+    '</div>' +
+
+    '<div style="margin:8px 0 24px;">' +
+      (practiced
+        ? '<div style="text-align:center;padding:14px;font-size:0.95rem;font-weight:700;color:var(--green);">✓ Practiced together today</div>'
+        : '<button class="btn btn-green btn-full" style="padding:14px;font-size:1rem;" onclick="markPartnerPracticed()">✓ We Practiced This Together</button>') +
+    '</div>';
+
+  document.getElementById('main-content').innerHTML = html;
+  window.scrollTo(0, 0);
+}
+
+function markPartnerPracticed() {
+  if (!S.partnerLog) S.partnerLog = {};
+  S.partnerLog[today()] = true;
+  S.stats.xp = (S.stats.xp || 0) + 10;
+  saveState();
+  renderPartnerScreen();
+}
 
 function findPhraseMatches(input) {
   var q = (input || '').toLowerCase().trim().replace(/[¿¡.,!?;:]/g, '');
