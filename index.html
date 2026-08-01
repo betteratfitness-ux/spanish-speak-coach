@@ -1095,6 +1095,58 @@ const WORLD_CONTEXTS = [
   { key:'parenting', icon:'🧒', label:'Parenting' },
 ];
 
+// Suggested responses for key phrases — what a Spanish speaker might say back
+var PHRASE_RESPONSES = {
+  'D1-013': [ // Hola
+    { sp: '¡Hola! ¿Cómo estás?', en: 'Hi! How are you?' },
+    { sp: 'Mucho gusto.', en: 'Nice to meet you.' },
+  ],
+  'D1-016': [ // Estoy aprendiendo español
+    { sp: '¡Qué bueno! ¿Cuánto tiempo llevas?', en: 'How great! How long have you been learning?' },
+    { sp: 'Su español es muy bueno.', en: 'Your Spanish is very good.' },
+    { sp: 'Practiquemos juntos.', en: 'Let\'s practice together.' },
+  ],
+  'D1-018': [ // ¿Puede hablar más despacio?
+    { sp: 'Sí, disculpe. Más despacio.', en: 'Yes, sorry. More slowly.' },
+    { sp: 'Claro que sí, con gusto.', en: 'Of course, gladly.' },
+  ],
+  'D3-005': [ // ¿Cuánto cuesta?
+    { sp: 'Son veinte dólares.', en: 'It\'s twenty dollars.' },
+    { sp: 'Cuesta doce cincuenta.', en: 'It costs twelve fifty.' },
+    { sp: 'Está en oferta — diez pesos.', en: 'It\'s on sale — ten pesos.' },
+  ],
+  'HVP-001': [ // Necesito ayuda
+    { sp: '¿Cómo puedo ayudarle?', en: 'How can I help you?' },
+    { sp: 'Con mucho gusto. ¿Qué necesita?', en: 'With pleasure. What do you need?' },
+  ],
+  'HVP-002': [ // No entiendo
+    { sp: 'Lo repito más despacio.', en: 'I\'ll repeat it more slowly.' },
+    { sp: '¿Le explico de otra manera?', en: 'Shall I explain it differently?' },
+  ],
+  'HVP-003': [ // ¿Puede repetirlo?
+    { sp: 'Claro, con gusto.', en: 'Of course, with pleasure.' },
+    { sp: 'Sí, por supuesto.', en: 'Yes, of course.' },
+  ],
+  'HVP-004': [ // ¿Dónde está el baño?
+    { sp: 'Al fondo a la derecha.', en: 'At the back on the right.' },
+    { sp: 'Siga recto y luego a la izquierda.', en: 'Go straight then left.' },
+    { sp: 'Está por allá.', en: 'It\'s over there.' },
+  ],
+  'HVP-005': [ // Quisiera...
+    { sp: 'Con gusto. ¿Algo más?', en: 'With pleasure. Anything else?' },
+    { sp: 'Ahora mismo le traigo.', en: 'I\'ll bring it right away.' },
+  ],
+  'HVP-006': [ // Estoy buscando...
+    { sp: 'Está en el pasillo tres.', en: 'It\'s in aisle three.' },
+    { sp: 'Le ayudo a encontrarlo.', en: 'I\'ll help you find it.' },
+    { sp: 'Lo siento, no lo tenemos.', en: 'Sorry, we don\'t have it.' },
+  ],
+  'HVP-007': [ // Tengo una pregunta
+    { sp: 'Claro, ¿en qué le puedo ayudar?', en: 'Of course, how can I help you?' },
+    { sp: 'Con gusto. Dígame.', en: 'Gladly. Tell me.' },
+  ],
+};
+
 // Domain metadata
 const DOMAINS = {
   D1: { name: 'Survival Spanish', icon: '🆘', desc: 'Greetings, introductions, polite phrases, asking for help' },
@@ -3729,6 +3781,113 @@ function checkStoryAnswer(storyId, optIndex) {
 // ===================================================
 // RENDERING — PRACTICE HUB
 // ===================================================
+
+function findPhraseMatches(input) {
+  var q = (input || '').toLowerCase().trim().replace(/[¿¡.,!?;:]/g, '');
+  if (!q) return [];
+  var spanishWords = ['hola','gracias','por','favor','que','como','donde','cuanto','puede','quiero','tengo','estoy','necesito','quisiera','disculpe','hablar','entiendo','bano','cuesta','ayuda','no','si','soy','me','le','la','el','los','las'];
+  var hasSpanishChars = /[áéíóúüñ¿¡]/.test(input);
+  var hasSpanishWord = q.split(/\s+/).some(function(w) { return spanishWords.indexOf(w) > -1; });
+  var searchSpanish = hasSpanishChars || hasSpanishWord;
+  var scored = CONTENT.map(function(item) {
+    var target = (searchSpanish ? item.spanish : item.english).toLowerCase().replace(/[¿¡.,!?;:]/g, '');
+    var qWords = q.split(/\s+/).filter(Boolean);
+    var tWords = target.split(/\s+/).filter(Boolean);
+    var matches = qWords.filter(function(w) { return tWords.indexOf(w) > -1; }).length;
+    var score = tWords.length ? matches / Math.max(qWords.length, tWords.length) : 0;
+    if (target === q) score = 2;
+    else if (target.indexOf(q) > -1) score += 0.5;
+    return { item: item, score: score };
+  }).filter(function(r) { return r.score > 0.1; })
+    .sort(function(a, b) { return b.score - a.score; });
+  return scored.slice(0, 3).map(function(r) { return r.item; });
+}
+
+function doTranslate(input) {
+  var results = document.getElementById('translate-results');
+  if (!results) return;
+  if (!input || !input.trim()) { results.innerHTML = ''; return; }
+  var matches = findPhraseMatches(input);
+  if (!matches.length) {
+    results.innerHTML = '<div class="card" style="text-align:center;color:var(--muted);font-size:0.85rem;padding:20px;">No match found. Try a different phrase or browse the Phrase Bank.</div>';
+    return;
+  }
+  var showPron = S.settings.pronunciationHelper;
+  var html = matches.map(function(item, i) {
+    var responses = PHRASE_RESPONSES[item.id] || [];
+    var responseHtml = responses.length
+      ? '<div style="border-top:1px solid var(--border);margin-top:12px;padding-top:12px;">' +
+          '<div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:0.6px;margin-bottom:8px;">They might respond:</div>' +
+          responses.map(function(r) {
+            return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">' +
+              '<button class="audio-btn-sm" data-speak="' + esc(r.sp) + '" onclick="speakSpanish(this.dataset.speak,this)">🔊</button>' +
+              '<div><div style="font-size:0.95rem;font-weight:700;color:var(--text);">' + esc(r.sp) + '</div>' +
+              '<div style="font-size:0.75rem;color:var(--muted);">' + esc(r.en) + '</div></div>' +
+            '</div>';
+          }).join('') +
+        '</div>'
+      : '';
+    return '<div class="card" style="' + (i > 0 ? 'margin-top:8px;opacity:0.8;' : '') + '">' +
+      (i > 0 ? '<div style="font-size:0.65rem;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;font-weight:700;">Also close:</div>' : '') +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">' +
+        '<div style="font-size:1.6rem;font-weight:800;color:var(--text);">' + esc(item.spanish) + '</div>' +
+        '<button class="audio-btn" data-speak="' + esc(item.spanish) + '" onclick="speakSpanish(this.dataset.speak,this)">🔊</button>' +
+      '</div>' +
+      (showPron && item.pron ? '<div style="font-size:0.82rem;color:var(--primary);font-style:italic;margin-bottom:4px;">' + esc(item.pron) + '</div>' : '') +
+      '<div style="font-size:0.85rem;color:var(--muted);margin-bottom:' + (item.example ? '8px' : '0') + ';">' + esc(item.english) + '</div>' +
+      (item.example ? '<div style="font-size:0.8rem;background:var(--bg);border-radius:8px;padding:8px 10px;"><span style="font-style:italic;color:var(--text);">' + esc(item.example) + '</span><span style="color:var(--muted);"> — ' + esc(item.exampleEn || '') + '</span></div>' : '') +
+      responseHtml +
+    '</div>';
+  }).join('');
+  results.innerHTML = html;
+}
+
+function startTranslateVoice() {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+  var btn = document.getElementById('translate-mic-btn');
+  if (!btn) return;
+  var orig = btn.textContent;
+  btn.textContent = '⏳'; btn.disabled = true;
+  var rec = new SR();
+  rec.lang = 'en-US';
+  rec.continuous = false;
+  rec.interimResults = false;
+  var done = false;
+  rec.onresult = function(e) {
+    done = true;
+    var t = e.results[0][0].transcript;
+    var inp = document.getElementById('translate-input');
+    if (inp) { inp.value = t; doTranslate(t); }
+    btn.textContent = orig; btn.disabled = false;
+  };
+  rec.onerror = function() { done = true; btn.textContent = orig; btn.disabled = false; };
+  rec.onend = function() { if (!done) { btn.textContent = orig; btn.disabled = false; } };
+  rec.start();
+}
+
+function showQuickTranslate() {
+  var hasSR = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+  var html =
+    '<div style="margin-bottom:10px;display:flex;align-items:center;gap:8px;">' +
+      '<button class="btn btn-secondary btn-sm" onclick="switchTab(\'practice\')">← Practice</button>' +
+      '<div style="flex:1;font-size:0.9rem;font-weight:700;color:var(--text);">Quick Translate</div>' +
+    '</div>' +
+    '<div class="card">' +
+      '<div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:0.6px;margin-bottom:10px;">Type or speak a phrase — English or Spanish</div>' +
+      '<div style="display:flex;gap:8px;">' +
+        '<input id="translate-input" type="text" placeholder="e.g. Where is the bathroom?" ' +
+          'style="flex:1;padding:10px 12px;border:2px solid var(--border);border-radius:10px;font-size:0.9rem;background:var(--bg);color:var(--text);outline:none;-webkit-appearance:none;" ' +
+          'oninput="doTranslate(this.value)">' +
+        (hasSR ? '<button id="translate-mic-btn" class="btn" style="width:44px;height:44px;padding:0;font-size:1.2rem;flex-shrink:0;border:2px solid var(--border);" onclick="startTranslateVoice()" title="Speak English">🎙️</button>' : '') +
+      '</div>' +
+      '<div style="font-size:0.72rem;color:var(--muted);margin-top:6px;">Tap the mic to speak in English and get the Spanish phrase instantly.</div>' +
+    '</div>' +
+    '<div id="translate-results" style="margin-top:8px;"></div>';
+  document.getElementById('main-content').innerHTML = html;
+  setTimeout(function() { var i = document.getElementById('translate-input'); if (i) i.focus(); }, 150);
+}
+
 function showPhraseBank(filter) {
   filter = filter || 'all';
   var allHvp = CONTENT.filter(function(c){ return c.hvp; });
@@ -3860,7 +4019,11 @@ function renderPractice() {
   var hvpOwned = getHvpOwned(), hvpTotal = CONTENT.filter(function(c){ return c.hvp; }).length;
   var pbBadge = hvpOwned > 0 ? '<span class="practice-hub-badge" style="background:var(--green);">' + hvpOwned + ' owned</span>' : '';
 
-  return '<div class="section-label">Phrase Ownership</div>' +
+  return '<div class="section-label">Phrase Tools</div>' +
+    '<div class="practice-hub-option" onclick="showQuickTranslate()">' +
+      '<span class="practice-hub-icon">🔤</span>' +
+      '<span class="practice-hub-text"><strong>Quick Translate</strong><span>Type or speak English · get Spanish + how to respond</span></span>' +
+    '</div>' +
     '<div class="practice-hub-option" onclick="showPhraseBank(\'all\')">' +
       '<span class="practice-hub-icon">⭐</span>' +
       '<span class="practice-hub-text"><strong>Phrase Bank</strong><span>High-value phrases — casual, polite, and real-life fast versions</span></span>' +
