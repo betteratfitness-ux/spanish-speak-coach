@@ -4225,9 +4225,14 @@ function showPhraseBank(filter) {
         ) : '';
 
         var whenHtml = hvp ? (
-          '<div style="font-size:0.75rem;color:var(--muted);margin-top:8px;line-height:1.4;">' +
-            '<strong style="color:var(--text);">Use when:</strong> ' + hvp.whenToUse.substring(0, 90) + (hvp.whenToUse.length > 90 ? '…' : '') +
-          '</div>'
+          hvp.whenToUse.length <= 90
+            ? '<div style="font-size:0.75rem;color:var(--muted);margin-top:8px;line-height:1.4;"><strong style="color:var(--text);">Use when:</strong> ' + esc(hvp.whenToUse) + '</div>'
+            : '<details style="font-size:0.75rem;color:var(--muted);margin-top:8px;">' +
+                '<summary style="cursor:pointer;line-height:1.4;list-style:none;-webkit-appearance:none;display:block;">' +
+                  '<strong style="color:var(--text);">Use when:</strong> ' + esc(hvp.whenToUse.substring(0, 88)) + '… <span style="color:var(--primary);font-weight:700;">more ↓</span>' +
+                '</summary>' +
+                '<div style="margin-top:5px;line-height:1.55;">' + esc(hvp.whenToUse) + '</div>' +
+              '</details>'
         ) : '';
 
         return '<div class="pb-card">' +
@@ -4667,7 +4672,13 @@ function lessonSetCtx(ctx) {
 
 function lessonOwnNext() {
   if (lessonState.hvpId) {
-    saveWorldContext(lessonState.hvpId, lessonState.hvpWorldCtx);
+    if (lessonState.hvpWorldCtx) {
+      saveWorldContext(lessonState.hvpId, lessonState.hvpWorldCtx);
+    } else {
+      if (!S.ownership[lessonState.hvpId]) S.ownership[lessonState.hvpId] = { worldContext: null, sawOwnCard: false };
+      S.ownership[lessonState.hvpId].sawOwnCard = true;
+      saveState();
+    }
     lessonState.xpEarned += 5;
   }
   lessonState.phase = 'practice';
@@ -4688,7 +4699,7 @@ function renderLessonLearn(ls, headerHtml) {
 
   return headerHtml +
     '<div class="card">' +
-      '<div class="lesson-phase-label">📖 Phase 1 of 4 — Learn It (' + (idx+1) + '/' + total + ')</div>' +
+      '<div class="lesson-phase-label">📖 Phase 1 of ' + (ls.hvpId ? '5' : '4') + ' — Learn It (' + (idx+1) + '/' + total + ')</div>' +
       '<div class="lesson-phrase-card">' +
         '<div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px;">' +
           '<div class="lesson-phrase-spanish">' + item.spanish + '</div>' +
@@ -4745,7 +4756,7 @@ function renderLessonPractice(ls, headerHtml) {
 
   return headerHtml +
     '<div class="card">' +
-      '<div class="lesson-phase-label">🧠 Phase 2 of 4 — Practice It (' + (idx+1) + '/' + total + ')</div>' +
+      '<div class="lesson-phase-label">🧠 Phase ' + (ls.hvpId ? '3 of 5' : '2 of 4') + ' — Practice It (' + (idx+1) + '/' + total + ')</div>' +
       '<div style="text-align:center;padding:16px 0 8px;">' +
         '<div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Say this in Spanish — out loud:</div>' +
         '<div style="font-size:1.6rem;font-weight:800;color:var(--text);margin-bottom:6px;">' + item.english + '</div>' +
@@ -4882,7 +4893,7 @@ function renderLessonSpeak(ls, headerHtml) {
 
   return headerHtml +
     '<div class="card">' +
-      '<div class="lesson-phase-label">🎙️ Phase 3 of 4 — Say It Out Loud (' + (idx+1) + '/' + total + ')</div>' +
+      '<div class="lesson-phase-label">🎙️ Phase ' + (ls.hvpId ? '4 of 5' : '3 of 4') + ' — Say It Out Loud (' + (idx+1) + '/' + total + ')</div>' +
       '<div style="text-align:center;padding:16px 0 8px;">' +
         '<div style="display:flex;align-items:center;justify-content:center;gap:10px;margin:10px 0;">' +
           '<div style="font-size:2rem;font-weight:800;color:var(--text);">' + item.spanish + '</div>' +
@@ -4933,7 +4944,7 @@ function renderLessonConvo(ls, headerHtml) {
 
   return headerHtml +
     '<div class="card">' +
-      '<div class="lesson-phase-label">💬 Phase 4 of 4 — Mini Conversation (' + (idx+1) + '/' + turns.length + ')</div>' +
+      '<div class="lesson-phase-label">💬 Phase ' + (ls.hvpId ? '5 of 5' : '4 of 4') + ' — Mini Conversation (' + (idx+1) + '/' + turns.length + ')</div>' +
       '<div style="margin-bottom:16px;">' +
         '<div class="convo-bubble-app">' +
           '<div>' + turn.app + '</div>' +
