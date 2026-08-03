@@ -680,6 +680,66 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
 .partner-prompt { background: var(--bg); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; }
 .partner-learner { background: #FFF5EE; border: 2px solid var(--primary); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; }
 @media (prefers-color-scheme: dark) { .partner-learner { background: rgba(205,92,10,0.12); } }
+
+/* CAN-DO GOALS */
+.cando-goal { border: 2px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+.cando-goal.achieved { border-color: var(--green); background: rgba(45,158,107,0.05); }
+.cando-goal.partial  { border-color: var(--gold); }
+.cando-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.cando-title { font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.cando-category { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--muted); }
+.cando-status { font-size: 0.72rem; font-weight: 800; padding: 3px 9px; border-radius: 99px; white-space: nowrap; flex-shrink: 0; }
+.cando-status.done { background: var(--green); color: white; }
+.cando-status.partial { background: var(--gold); color: #1A202C; }
+.cando-status.new { background: var(--border); color: var(--muted); }
+
+/* ROLEPLAY */
+.rp-card { background: var(--surface); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; border: 2px solid var(--border); cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s; }
+.rp-card:hover { border-color: var(--primary); box-shadow: var(--shadow); }
+.rp-card.rp-done { border-color: var(--green); }
+.rp-card-icon { font-size: 2rem; margin-bottom: 6px; }
+.rp-card-title { font-size: 1rem; font-weight: 800; margin-bottom: 3px; }
+.rp-card-meta { font-size: 0.75rem; color: var(--muted); }
+.rp-bubble { background: var(--bg); border-radius: 16px 16px 16px 4px; padding: 12px 16px; margin-bottom: 8px; display: inline-block; max-width: 90%; }
+.rp-bubble .sp { font-size: 0.97rem; font-weight: 700; color: var(--text); }
+.rp-bubble .en { font-size: 0.75rem; color: var(--muted); margin-top: 3px; }
+.rp-opt { width: 100%; text-align: left; background: var(--bg); border: 2px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 0.9rem; cursor: pointer; margin-bottom: 8px; transition: all 0.15s; font-weight: 600; color: var(--text); }
+.rp-opt:hover { border-color: var(--primary); background: #FFF5EE; }
+.rp-opt.rp-correct { background: #C6F6D5; border-color: var(--green); color: #22543D; }
+.rp-opt.rp-wrong   { background: #FED7D7; border-color: var(--red);   color: #9B2C2C; }
+.rp-opt.rp-repair  { border-color: var(--primary); color: var(--primary); border-style: dashed; }
+.rp-feedback { background: var(--bg); border-radius: 10px; padding: 12px 14px; margin: 10px 0; font-size: 0.85rem; line-height: 1.5; }
+.rp-complication { background: #FFF5EE; border: 2px solid var(--primary); border-radius: 10px; padding: 12px 14px; margin: 12px 0; font-size: 0.85rem; line-height: 1.5; }
+.rp-progress-dots { display: flex; gap: 5px; margin-bottom: 14px; }
+.rp-dot { flex: 1; height: 5px; border-radius: 99px; background: var(--border); transition: background 0.3s; }
+.rp-dot.done { background: var(--green); }
+.rp-dot.active { background: var(--primary); }
+.rp-score-bar { display: flex; gap: 6px; font-size: 0.75rem; color: var(--muted); font-weight: 600; margin-top: 6px; }
+
+/* FIELD MISSIONS */
+.fm-card { background: var(--surface); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; border: 2px solid var(--border); }
+.fm-card.fm-active { border-color: var(--primary); }
+.fm-card.fm-done { border-color: var(--green); background: rgba(45,158,107,0.04); }
+.fm-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+.fm-icon { font-size: 1.8rem; flex-shrink: 0; margin-top: 2px; }
+.fm-title { font-size: 1rem; font-weight: 800; }
+.fm-desc { font-size: 0.82rem; color: var(--muted); margin-top: 2px; line-height: 1.45; }
+.fm-log-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 6px; }
+.fm-log-btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+.fm-conf-btn { flex: 1; min-width: 60px; background: var(--bg); border: 2px solid var(--border); border-radius: 8px; padding: 8px 4px; text-align: center; cursor: pointer; font-size: 0.78rem; font-weight: 700; transition: all 0.15s; }
+.fm-conf-btn.selected { border-color: var(--primary); background: rgba(232,93,4,0.1); }
+
+/* DEBRIEF */
+.debrief-correction { background: #FFF5EE; border-left: 4px solid var(--primary); border-radius: 0 10px 10px 0; padding: 12px 14px; margin-bottom: 10px; line-height: 1.5; }
+.debrief-upgrade    { background: #F0FFF4; border-left: 4px solid var(--green);   border-radius: 0 10px 10px 0; padding: 12px 14px; margin-bottom: 10px; line-height: 1.5; }
+
+/* SESSION PICKER */
+.session-pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+.sp-opt { background: var(--bg); border: 2px solid var(--border); border-radius: 10px; padding: 12px 8px; text-align: center; cursor: pointer; transition: all 0.15s; }
+.sp-opt:hover { border-color: var(--primary); background: #FFF5EE; }
+.sp-opt.sp-selected { border-color: var(--primary); background: rgba(232,93,4,0.08); }
+.sp-time { font-size: 1.2rem; font-weight: 800; color: var(--primary); }
+.sp-label { font-size: 0.68rem; color: var(--muted); margin-top: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
 </style>
 </head>
 <body>
@@ -1399,6 +1459,240 @@ const GRAMMAR = [
 ];
 
 // ===================================================
+// CAN-DO GOALS — 9 functional communication goals
+// ===================================================
+var CAN_DO_GOALS = [
+  { id:'CDG-01', title:'I can introduce myself.', desc:'Say your name, ask someone theirs, and greet them politely.', category:'Social', difficulty:1, requiredPhrases:['D1-008','D1-009','D1-010','D1-001'] },
+  { id:'CDG-02', title:'I can order food at a restaurant.', desc:'Order a meal, ask what they have, and ask for the check.', category:'Food', difficulty:1, requiredPhrases:['D3-004','D3-005','D3-006','D3-007'] },
+  { id:'CDG-03', title:'I can ask for directions.', desc:'Ask where something is and understand a basic answer.', category:'Navigation', difficulty:2, requiredPhrases:['D3-001','D3-002','D3-003','D1-020'] },
+  { id:'CDG-04', title:'I can ask someone to slow down or repeat.', desc:'Use repair phrases when you need more time or did not understand.', category:'Communication', difficulty:1, requiredPhrases:['D1-018','D3-008','D1-017'] },
+  { id:'CDG-05', title:'I can explain a basic health problem.', desc:'Say what hurts, ask for a doctor, and handle a pharmacy visit.', category:'Health', difficulty:2, requiredPhrases:['D4-001','D4-002','D4-003'] },
+  { id:'CDG-06', title:'I can handle a hotel or appointment check-in.', desc:'Confirm a reservation, ask about your room, and handle basic requests.', category:'Travel', difficulty:2, requiredPhrases:['D1-011','D1-012','D1-020','D3-001'] },
+  { id:'CDG-07', title:'I can talk about my family.', desc:'Describe family members, say how many kids you have, and ask about theirs.', category:'Social', difficulty:1, requiredPhrases:['D2-004','D2-005','D2-006'] },
+  { id:'CDG-08', title:'I can complete a short work conversation.', desc:'Greet a colleague, say what you do, and discuss a basic task.', category:'Work', difficulty:2, requiredPhrases:['D16-001','D16-002','D16-003'] },
+  { id:'CDG-09', title:'I can keep talking after a mistake.', desc:'Use a phrase to acknowledge a mistake and continue the conversation.', category:'Communication', difficulty:1, requiredPhrases:['D1-016','D1-017','D3-008'] },
+];
+
+// ===================================================
+// ROLEPLAY SCENARIOS — 6 scripted conversation trees
+// ===================================================
+var ROLEPLAY_SCENARIOS = [
+  {
+    id:'RP-01', title:'At the Restaurant', icon:'🍽️', difficulty:1,
+    objective:'Order a meal and ask for the check.',
+    setting:'A Mexican restaurant in your neighborhood.',
+    yourRole:'A hungry customer.', theirRole:'The waiter (el mesero).',
+    targetPhrases:['D3-004','D3-005','D3-006'],
+    turns:[
+      { theirLine:'Buenas tardes. ¿Cuántas personas?', theirLineEn:'Good afternoon. How many people?',
+        opts:[
+          { text:'Solo para uno, por favor.', en:'Just for one, please.', type:'correct', feedback:'Clear and polite. The waiter will seat you right away.' },
+          { text:'¿Puede repetir más despacio?', en:'Can you repeat more slowly?', type:'repair', feedback:'Good repair phrase! Just know the waiter asked how many people.' },
+          { text:'La cuenta, por favor.', en:'The check, please.', type:'wrong', feedback:'That means the check — but you haven\'t ordered yet! Try "Solo para uno."' },
+          { text:'No sé.', en:"I don't know.", type:'wrong', feedback:'A bit awkward. Try "Solo para uno, por favor" (just one person).' }
+        ]
+      },
+      { theirLine:'¿Qué desea ordenar?', theirLineEn:'What would you like to order?',
+        complication:{ theirLine:'Lo siento, ese plato no está disponible hoy.', theirLineEn:'Sorry, that dish is not available today.', hint:'Try "¿Qué recomienda?" (What do you recommend?)' },
+        opts:[
+          { text:'Quisiera el pollo, por favor.', en:'I would like the chicken, please.', type:'correct', feedback:'"Quisiera" is polite and natural. Well done! (The waiter says they\'re out of chicken — see the complication below.)' },
+          { text:'¿Qué tiene de especial hoy?', en:'What is the special today?', type:'repair', feedback:'Great! Asking about the daily special is real-life Spanish.' },
+          { text:'No entiendo el menú.', en:"I don't understand the menu.", type:'repair', feedback:'Honest and appropriate! The waiter can help you.' },
+          { text:'Quiero comer.', en:'I want to eat.', type:'wrong', feedback:'Grammatically fine but too vague — you\'ll need to say which food. Try "Quisiera el pollo."' }
+        ]
+      },
+      { theirLine:'¿Algo más?', theirLineEn:'Anything else?',
+        opts:[
+          { text:'La cuenta, por favor.', en:'The check, please.', type:'correct', feedback:'Mission complete! You ordered, handled a complication, and asked for the check.' },
+          { text:'Sí, un agua, por favor.', en:'Yes, a water please.', type:'correct', feedback:'Great addition! Perfectly natural.' },
+          { text:'No, gracias. Estoy bien.', en:'No thank you. I\'m fine.', type:'correct', feedback:'Polite and clear.' },
+          { text:'No sé.', en:"I don't know.", type:'wrong', feedback:'"No, gracias" is much more natural here.' }
+        ]
+      }
+    ]
+  },
+  {
+    id:'RP-02', title:'Asking for Directions', icon:'🗺️', difficulty:1,
+    objective:'Ask where the pharmacy is and understand the answer.',
+    setting:'You\'re on a street corner, looking for a farmacia.',
+    yourRole:'A pedestrian who needs directions.', theirRole:'A local resident.',
+    targetPhrases:['D3-001','D3-002','D1-020'],
+    turns:[
+      { theirLine:'Buenos días.', theirLineEn:'Good morning.',
+        opts:[
+          { text:'Buenos días. Disculpe, ¿dónde está la farmacia?', en:'Good morning. Excuse me, where is the pharmacy?', type:'correct', feedback:'Perfect opener — greeting + excuse me + your question. Exactly right.' },
+          { text:'Hola. ¿Sabe dónde hay una farmacia?', en:'Hi. Do you know where there\'s a pharmacy?', type:'correct', feedback:'Slightly more casual but totally natural.' },
+          { text:'Farmacia.', en:'Pharmacy.', type:'wrong', feedback:'One word is hard to follow. Add "¿Dónde está la farmacia?" for a complete question.' },
+          { text:'Más despacio, por favor.', en:'Slower, please.', type:'repair', feedback:'They haven\'t said anything yet — but keeping that phrase ready is smart!' }
+        ]
+      },
+      { theirLine:'Siga recto dos cuadras y doble a la derecha.', theirLineEn:'Go straight two blocks and turn right.',
+        opts:[
+          { text:'¿Puede repetir más despacio, por favor?', en:'Can you repeat more slowly, please?', type:'repair', feedback:'Excellent! Asking for a repeat is exactly the right strategy. Real Spanish skill.' },
+          { text:'Entiendo. Dos cuadras y a la derecha.', en:'I understand. Two blocks and to the right.', type:'correct', feedback:'Confirming directions by repeating them back — that\'s advanced communication!' },
+          { text:'Gracias.', en:'Thank you.', type:'correct', feedback:'Simple and polite. You could also confirm what you heard.' },
+          { text:'No entiendo nada.', en:"I don't understand anything.", type:'repair', feedback:'Being honest is always okay! The person will likely slow down and gesture.' }
+        ]
+      },
+      { theirLine:'¿Entiende? ¿Necesita un mapa?', theirLineEn:'Do you understand? Do you need a map?',
+        opts:[
+          { text:'Sí, entiendo. ¡Muchas gracias!', en:'Yes, I understand. Thank you very much!', type:'correct', feedback:'Mission complete! You navigated a real conversation and got directions.' },
+          { text:'Sí, por favor. Un mapa me ayudaría.', en:'Yes please. A map would help me.', type:'correct', feedback:'Smart! Accepting help is a perfectly valid strategy.' },
+          { text:'Más o menos. Lo voy a intentar.', en:"More or less. I'll try.", type:'correct', feedback:'Honest and brave. "Más o menos" is a great filler phrase.' },
+          { text:'No sé.', en:"I don't know.", type:'wrong', feedback:'Try "Sí, entiendo" or "Un mapa, por favor."' }
+        ]
+      }
+    ]
+  },
+  {
+    id:'RP-03', title:'At the Doctor\'s Office', icon:'🏥', difficulty:2,
+    objective:'Explain what hurts and confirm the doctor\'s instructions.',
+    setting:'You\'re at a clinic. The doctor calls you in.',
+    yourRole:'A patient with a headache.', theirRole:'The doctor (el médico).',
+    targetPhrases:['D4-001','D4-002','D4-003'],
+    disclaimer:'⚠️ For real medical emergencies, always call 911 or seek immediate professional help. This is language practice only.',
+    turns:[
+      { theirLine:'¿Cómo se siente hoy?', theirLineEn:'How do you feel today?',
+        opts:[
+          { text:'Me duele la cabeza y tengo fiebre.', en:'My head hurts and I have a fever.', type:'correct', feedback:'Clear and complete. The doctor knows exactly what\'s wrong.' },
+          { text:'Me siento muy mal.', en:'I feel very bad.', type:'correct', feedback:'Good start. You\'ll likely be asked what hurts next.' },
+          { text:'¿Puede hablar más despacio, por favor?', en:'Can you speak more slowly, please?', type:'repair', feedback:'Great repair phrase! The doctor will be happy to slow down.' },
+          { text:'No entiendo.', en:"I don't understand.", type:'repair', feedback:'Honest — the doctor can rephrase or point to a body chart.' }
+        ]
+      },
+      { theirLine:'¿Desde cuándo tiene estos síntomas?', theirLineEn:'How long have you had these symptoms?',
+        opts:[
+          { text:'Desde ayer por la tarde.', en:'Since yesterday afternoon.', type:'correct', feedback:'Perfect. "Desde" (since) is an important word for medical conversations.' },
+          { text:'Tres días.', en:'Three days.', type:'correct', feedback:'Simple and clear. The doctor understands you.' },
+          { text:'¿Puede repetirlo, por favor?', en:'Can you repeat that, please?', type:'repair', feedback:'Good! The question was about time, so any time-related answer works.' },
+          { text:'No sé cómo decirlo.', en:"I don't know how to say it.", type:'repair', feedback:'Smart — the doctor will offer simpler options or a translator.' }
+        ]
+      },
+      { theirLine:'Tiene que descansar y tomar estos medicamentos.', theirLineEn:'You need to rest and take these medications.',
+        opts:[
+          { text:'Entiendo. ¿Cuántas veces al día?', en:'I understand. How many times a day?', type:'correct', feedback:'Excellent! Confirming dosage is critical in a medical visit. Mission complete!' },
+          { text:'Déjeme confirmar: ¿descansar y tomar medicamentos?', en:'Let me confirm: rest and take medication?', type:'correct', feedback:'Perfect repair and confirmation! Excellent communication skill.' },
+          { text:'¿Puede escribirlo, por favor?', en:'Can you write it down, please?', type:'repair', feedback:'Smart! Written instructions are always a great strategy in medical situations.' },
+          { text:'Sí, gracias.', en:'Yes, thank you.', type:'correct', feedback:'Simple acknowledgment works. You could also confirm what you heard.' }
+        ]
+      }
+    ]
+  },
+  {
+    id:'RP-04', title:'Meeting a New Neighbor', icon:'👋', difficulty:1,
+    objective:'Introduce yourself, ask about their family, and exchange pleasantries.',
+    setting:'You\'re passing your neighbor on the street for the first time.',
+    yourRole:'You, meeting your neighbor.', theirRole:'Your new neighbor.',
+    targetPhrases:['D1-008','D1-010','D2-004','D2-005'],
+    turns:[
+      { theirLine:'Hola, ¿es usted el nuevo vecino?', theirLineEn:'Hello, are you the new neighbor?',
+        opts:[
+          { text:'Sí, hola. Me llamo ___. Mucho gusto.', en:'Yes, hello. My name is ___. Nice to meet you.', type:'correct', feedback:'A perfect introduction! Name + "mucho gusto" is the classic opener.' },
+          { text:'Hola, mucho gusto.', en:'Hello, nice to meet you.', type:'correct', feedback:'Friendly and natural. You could add your name.' },
+          { text:'¿Puede hablar más despacio?', en:'Can you speak more slowly?', type:'repair', feedback:'They asked if you\'re the new neighbor — good to have repairs ready!' },
+          { text:'No entiendo.', en:"I don't understand.", type:'repair', feedback:'That\'s okay — they\'ll probably rephrase.' }
+        ]
+      },
+      { theirLine:'¿Tiene familia aquí?', theirLineEn:'Do you have family here?',
+        opts:[
+          { text:'Sí, tengo dos hijos.', en:'Yes, I have two children.', type:'correct', feedback:'Natural and friendly! This opens a real conversation.' },
+          { text:'Soy solo. ¿Y usted?', en:"I'm alone. And you?", type:'correct', feedback:'Good — asking them back keeps the conversation going!' },
+          { text:'¿Qué significa "familia"?', en:'What does "familia" mean?', type:'repair', feedback:'Asking for a word definition is a valid repair strategy. "Familia" means family.' },
+          { text:'No sé.', en:"I don't know.", type:'wrong', feedback:'A bit awkward. Try "Sí, tengo familia" or "No, soy solo."' }
+        ]
+      },
+      { theirLine:'Bienvenido. Si necesita algo, ¡avísenos!', theirLineEn:'Welcome. If you need anything, let us know!',
+        opts:[
+          { text:'Muchas gracias. ¡Es muy amable!', en:'Thank you very much. You\'re very kind!', type:'correct', feedback:'Warm and natural. Mission complete! You made a real connection.' },
+          { text:'Gracias. ¿Puede repetir más despacio?', en:'Thanks. Can you repeat more slowly?', type:'repair', feedback:'They were being welcoming — the key phrase was "si necesita algo, avísenos."' },
+          { text:'De nada.', en:"You're welcome.", type:'wrong', feedback:'"De nada" means you\'re welcome — but they didn\'t thank you. Try "Muchas gracias."' },
+          { text:'Igualmente. ¡Hasta luego!', en:'Likewise. Goodbye!', type:'correct', feedback:'Friendly close to the conversation.' }
+        ]
+      }
+    ]
+  },
+  {
+    id:'RP-05', title:'At the Store', icon:'🛍️', difficulty:1,
+    objective:'Ask about an item, find out the price, and complete a purchase.',
+    setting:'A small neighborhood store or market.',
+    yourRole:'A customer looking for something.', theirRole:'The store owner.',
+    targetPhrases:['D9-001','D9-002','D3-005'],
+    turns:[
+      { theirLine:'¡Buenas! ¿En qué le puedo ayudar?', theirLineEn:'Hello! How can I help you?',
+        opts:[
+          { text:'¿Tiene pan fresco?', en:'Do you have fresh bread?', type:'correct', feedback:'Direct and clear. "¿Tiene ___?" is one of the most useful shopping phrases.' },
+          { text:'Busco tomates, por favor.', en:"I'm looking for tomatoes, please.", type:'correct', feedback:'"Busco" (I\'m looking for) is a great shopping phrase.' },
+          { text:'¿Puede hablar más despacio?', en:'Can you speak more slowly?', type:'repair', feedback:'They just offered to help — but repair phrases are always valid!' },
+          { text:'No sé lo que quiero.', en:"I don't know what I want.", type:'wrong', feedback:'Honest, but hard for them to help. Try naming what you need.' }
+        ]
+      },
+      { theirLine:'Sí, los tenemos. ¿Cuántos quiere?', theirLineEn:'Yes, we have them. How many do you want?',
+        opts:[
+          { text:'Dos, por favor. ¿Cuánto cuesta?', en:'Two, please. How much does it cost?', type:'correct', feedback:'Perfect — you answered AND asked the follow-up price question.' },
+          { text:'Tres. ¿Cuánto es en total?', en:'Three. How much is the total?', type:'correct', feedback:'Good! "¿Cuánto es en total?" is great for markets.' },
+          { text:'¿Puede repetir?', en:'Can you repeat?', type:'repair', feedback:'They asked how many you want — "dos, por favor" works great.' },
+          { text:'No sé. Depende del precio.', en:"I don't know. It depends on the price.", type:'correct', feedback:'Smart! You\'re checking the price before committing.' }
+        ]
+      },
+      { theirLine:'Son quince pesos.', theirLineEn:"That's fifteen pesos.",
+        opts:[
+          { text:'Está bien. Aquí tiene.', en:"That's fine. Here you go.", type:'correct', feedback:'Mission complete! A smooth, natural store interaction.' },
+          { text:'¿Puede repetir el precio?', en:'Can you repeat the price?', type:'repair', feedback:'Always smart to confirm prices — especially with numbers.' },
+          { text:'Es mucho. ¿Tiene descuento?', en:"That's a lot. Do you have a discount?", type:'correct', feedback:'Bold! Asking for a discount at markets is completely normal.' },
+          { text:'¿Puedo pagar con tarjeta?', en:'Can I pay by card?', type:'correct', feedback:'Practical and useful.' }
+        ]
+      }
+    ]
+  },
+  {
+    id:'RP-06', title:'Scheduling an Appointment', icon:'📆', difficulty:2,
+    objective:'Make an appointment and confirm the date and time.',
+    setting:'You\'re calling a clinic or office to schedule a visit.',
+    yourRole:'Someone who needs an appointment.', theirRole:'The receptionist.',
+    targetPhrases:['D4-003','D2-007','D2-008'],
+    turns:[
+      { theirLine:'¿En qué le puedo ayudar?', theirLineEn:'How can I help you?',
+        opts:[
+          { text:'Quisiera hacer una cita, por favor.', en:'I would like to make an appointment, please.', type:'correct', feedback:'"Quisiera hacer una cita" — this phrase will get you far in any office.' },
+          { text:'Necesito una cita con el doctor.', en:'I need an appointment with the doctor.', type:'correct', feedback:'Clear and direct.' },
+          { text:'¿Puede hablar más despacio, por favor?', en:'Can you speak more slowly, please?', type:'repair', feedback:'Smart if you didn\'t catch it. They asked how they can help you.' },
+          { text:'Buenos días.', en:'Good morning.', type:'correct', feedback:'Good start! Now add "Quisiera hacer una cita."' }
+        ]
+      },
+      { theirLine:'¿Para qué fecha y hora le conviene?', theirLineEn:'What date and time works for you?',
+        opts:[
+          { text:'¿Tiene algo el martes por la mañana?', en:'Do you have anything Tuesday morning?', type:'correct', feedback:'Perfect! Giving a preferred time makes scheduling easy.' },
+          { text:'Lo antes posible, por favor.', en:'As soon as possible, please.', type:'correct', feedback:'Great phrase for urgent situations.' },
+          { text:'Déjeme confirmar: ¿me pregunta qué día quiero?', en:'Let me confirm: are you asking which day I want?', type:'repair', feedback:'Excellent communication repair! You\'re clarifying to make sure you understood.' },
+          { text:'¿Puede repetir la pregunta?', en:'Can you repeat the question?', type:'repair', feedback:'Good. The question was about your preferred date and time.' }
+        ]
+      },
+      { theirLine:'El jueves a las dos de la tarde. ¿Le queda bien?', theirLineEn:'Thursday at two in the afternoon. Does that work for you?',
+        opts:[
+          { text:'Sí, perfecto. Muchas gracias.', en:'Yes, perfect. Thank you very much.', type:'correct', feedback:'Mission complete! You scheduled an appointment entirely in Spanish.' },
+          { text:'¿Es el jueves o el martes?', en:'Is it Thursday or Tuesday?', type:'correct', feedback:'Smart to confirm the day. Days are easy to mix up.' },
+          { text:'Déjeme confirmar: ¿el jueves a las dos?', en:'Let me confirm: Thursday at two?', type:'correct', feedback:'Perfect confirmation. Always confirm times in Spanish!' },
+          { text:'¿Puede repetir más despacio?', en:'Can you repeat more slowly?', type:'repair', feedback:'Good — days and times can be hard to catch on the phone.' }
+        ]
+      }
+    ]
+  },
+];
+
+// ===================================================
+// FIELD MISSIONS — 7 real-world practice missions
+// ===================================================
+var FIELD_MISSIONS = [
+  { id:'FM-01', icon:'🗣️', title:'Say One Phrase to a Real Person', desc:'Use one Spanish phrase in a real conversation today — a greeting, a thank-you, a polite excuse me.', prepPhrases:['D1-001','D1-011','D1-012','D1-020'], prepNote:'Any one of these will work in almost any situation.', difficulty:1, mins:2 },
+  { id:'FM-02', icon:'🍽️', title:'Order Something in Spanish', desc:'At a café, food truck, or restaurant — order your meal entirely in Spanish.', prepPhrases:['D3-004','D3-005','D3-006','D3-007'], prepNote:'Practice these phrases before you go.', difficulty:2, mins:5 },
+  { id:'FM-03', icon:'🗺️', title:'Ask for Directions in Spanish', desc:'Ask a Spanish speaker where something is — a store, a street, a building.', prepPhrases:['D3-001','D3-002','D1-020'], prepNote:'Practice "Disculpe, ¿dónde está ___?" and repair phrases before you go.', difficulty:2, mins:5 },
+  { id:'FM-04', icon:'👋', title:'Introduce Yourself to Someone New', desc:'Start a conversation with a Spanish speaker — say your name, ask theirs, exchange a few words.', prepPhrases:['D1-008','D1-009','D1-010','D1-001'], prepNote:'Review greetings and your intro before you go.', difficulty:2, mins:5 },
+  { id:'FM-05', icon:'📱', title:'Send a Spanish Voice Message', desc:'Record a voice message in Spanish to someone who knows the language — a family member, friend, or even yourself.', prepPhrases:['D1-001','D1-007','D1-019'], prepNote:'Practice your greeting and sign-off phrase.', difficulty:1, mins:3 },
+  { id:'FM-06', icon:'🛒', title:'Complete a Store Transaction in Spanish', desc:'Ask for what you need, find out the price, and complete a purchase — all in Spanish.', prepPhrases:['D9-001','D9-002','D3-005'], prepNote:'Know your numbers and "¿Cuánto cuesta?" before you go.', difficulty:2, mins:5 },
+  { id:'FM-07', icon:'🏥', title:'Practice a Health Conversation', desc:'At a pharmacy or clinic, say what you need in Spanish. Or practice at home with a mirror — describe a symptom.', prepPhrases:['D4-001','D4-002','D4-003'], prepNote:'Practice saying what hurts and asking for help.', difficulty:3, mins:10, disclaimer:'For real emergencies, always contact medical professionals or call 911.' },
+];
+
+// ===================================================
 // DAILY LESSONS — 10-lesson curriculum
 // ===================================================
 const LESSONS = [
@@ -1735,6 +2029,10 @@ const DEFAULT_STATE = {
   storyProgress: {},  // { 'S1': { completed: true, attempts: 1 } }
   badges: [],         // array of earned badge ids
   partnerLog: {},     // { 'YYYY-MM-DD': true }
+  rpHistory: {},      // { 'RP-01': { completions:0, bestScore:0, lastDate:null } }
+  fmLog: {},          // { 'FM-01': [{ date, attempted, completed, stuck, confidence, notes }] }
+  repairStats: { total: 0, dates: {} },
+  sessionPref: 'standard', // 'quick'|'standard'|'deep'
 };
 
 function loadState() {
@@ -1750,6 +2048,10 @@ function loadState() {
     state.user      = Object.assign(structuredClone(DEFAULT_STATE.user),      saved.user      || {});
     state.ownership   = Object.assign(structuredClone(DEFAULT_STATE.ownership),   saved.ownership   || {});
     state.partnerLog  = Object.assign(structuredClone(DEFAULT_STATE.partnerLog),  saved.partnerLog  || {});
+    state.rpHistory   = Object.assign(structuredClone(DEFAULT_STATE.rpHistory),   saved.rpHistory   || {});
+    state.fmLog       = Object.assign(structuredClone(DEFAULT_STATE.fmLog),       saved.fmLog       || {});
+    state.repairStats = Object.assign(structuredClone(DEFAULT_STATE.repairStats), saved.repairStats || {});
+    if (saved.sessionPref) state.sessionPref = saved.sessionPref;
     return state;
   } catch(e) { return structuredClone(DEFAULT_STATE); }
 }
@@ -2874,35 +3176,381 @@ function recordReview(result, confidence) {
 // RENDERING — ROLEPLAY, REAL-LIFE, MASTERY, PROGRESS, SETTINGS
 // ===================================================
 function renderRoleplay() {
-  return `
-    <div class="placeholder-tab">
-      <div class="big-icon">🎭</div>
-      <h2>Roleplay Scenarios</h2>
-      <p>Real-life Spanish conversations: ordering food, asking directions, meeting someone, scheduling appointments, and more.</p>
-      <span class="coming">Phase 2</span>
-    </div>
-    <div class="card">
-      <div class="card-title">Coming in Phase 2</div>
-      <div style="font-size:0.85rem;color:var(--muted);line-height:1.6;">15 scenarios including:<br>
-      Greeting Someone · Ordering Food · Asking Directions · Meeting a New Person · Talking About Family · Scheduling · Travel Emergency · Small Talk</div>
-    </div>`;
+  var totalDone = 0;
+  var cards = ROLEPLAY_SCENARIOS.map(function(sc) {
+    var hist = S.rpHistory[sc.id] || {};
+    var done = hist.completions > 0;
+    if (done) totalDone++;
+    var diffLabel = sc.difficulty === 1 ? 'Beginner' : sc.difficulty === 2 ? 'Intermediate' : 'Advanced';
+    var diffColor = sc.difficulty === 1 ? 'var(--green)' : sc.difficulty === 2 ? 'var(--gold)' : 'var(--red)';
+    return '<div class="rp-card' + (done ? ' rp-done' : '') + '" onclick="startRoleplay(\'' + sc.id + '\')" role="button" tabindex="0" aria-label="Start roleplay: ' + sc.title + '">' +
+      '<div class="rp-card-icon">' + sc.icon + '</div>' +
+      '<div class="rp-card-title">' + sc.title + (done ? ' ✓' : '') + '</div>' +
+      '<div class="rp-card-meta" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
+        '<span style="color:' + diffColor + ';font-weight:700;">' + diffLabel + '</span>' +
+        '<span>·</span>' +
+        '<span>' + sc.turns.length + ' turns</span>' +
+        '<span>·</span>' +
+        '<span style="font-style:italic;">' + sc.objective + '</span>' +
+      '</div>' +
+      (done ? '<div style="font-size:0.72rem;color:var(--green);margin-top:6px;font-weight:700;">Best: ' + (hist.bestScore || 0) + '/' + sc.turns.length + ' · Played ' + (hist.completions || 1) + 'x</div>' : '') +
+    '</div>';
+  }).join('');
+
+  return '<div class="section-label">Roleplay Scenarios — ' + totalDone + '/' + ROLEPLAY_SCENARIOS.length + ' completed</div>' +
+    '<div class="nudge-card">Real conversations don\'t come with subtitles. Practice the flow here first — then try it in real life.</div>' +
+    cards +
+    '<div style="font-size:0.75rem;color:var(--muted);text-align:center;padding:8px 0;line-height:1.6;">Repair phrases (¿Puede repetir? · Más despacio · No entiendo) are always valid responses. Using them earns bonus credit.</div>';
+}
+
+// ===================================================
+// ROLEPLAY ENGINE
+// ===================================================
+var rpState = { scenarioId: null, turnIndex: 0, score: 0, repairUsed: 0, answered: false, complicationShown: false };
+
+function startRoleplay(id) {
+  var sc = ROLEPLAY_SCENARIOS.find(function(s){ return s.id === id; });
+  if (!sc) return;
+  rpState = { scenarioId: id, turnIndex: 0, score: 0, repairUsed: 0, answered: false, complicationShown: false };
+  renderRpScreen();
+}
+
+function renderRpScreen() {
+  var sc = ROLEPLAY_SCENARIOS.find(function(s){ return s.id === rpState.scenarioId; });
+  if (!sc) return;
+
+  if (rpState.turnIndex >= sc.turns.length) {
+    renderRpComplete(sc);
+    return;
+  }
+
+  var turn = sc.turns[rpState.turnIndex];
+  var dots = sc.turns.map(function(t, i) {
+    var cls = i < rpState.turnIndex ? 'done' : i === rpState.turnIndex ? 'active' : '';
+    return '<div class="rp-dot ' + cls + '"></div>';
+  }).join('');
+
+  var optsHtml = turn.opts.map(function(opt, i) {
+    var isRepair = opt.type === 'repair';
+    return '<button class="rp-opt' + (isRepair ? ' rp-repair' : '') + '" onclick="rpAnswer(' + i + ')" aria-label="' + esc(opt.en) + '">' +
+      esc(opt.text) +
+      '<div style="font-size:0.72rem;color:var(--muted);margin-top:3px;font-weight:400;">' + esc(opt.en) + '</div>' +
+      (isRepair ? '<div style="font-size:0.65rem;color:var(--primary);margin-top:2px;font-weight:700;">⟳ repair phrase</div>' : '') +
+    '</button>';
+  }).join('');
+
+  var disclaimerHtml = sc.disclaimer
+    ? '<div style="background:#FFF5EE;border-radius:8px;padding:8px 12px;font-size:0.75rem;color:var(--primary);margin-bottom:12px;line-height:1.5;">' + esc(sc.disclaimer) + '</div>'
+    : '';
+
+  document.getElementById('main-content').innerHTML =
+    '<div style="margin-bottom:12px;display:flex;align-items:center;gap:10px;">' +
+      '<button class="btn btn-secondary btn-sm" onclick="switchTab(\'roleplay\')">← Scenarios</button>' +
+      '<div style="font-size:0.8rem;font-weight:700;color:var(--text);">' + sc.icon + ' ' + sc.title + '</div>' +
+    '</div>' +
+    disclaimerHtml +
+    '<div class="card" style="margin-bottom:10px;">' +
+      '<div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:0.5px;margin-bottom:6px;">Your Mission</div>' +
+      '<div style="font-size:0.88rem;font-weight:700;color:var(--text);margin-bottom:4px;">' + esc(sc.objective) + '</div>' +
+      '<div style="font-size:0.75rem;color:var(--muted);">You are: ' + esc(sc.yourRole) + ' · They are: ' + esc(sc.theirRole) + '</div>' +
+      '<div style="font-size:0.72rem;color:var(--muted);margin-top:3px;font-style:italic;">' + esc(sc.setting) + '</div>' +
+    '</div>' +
+    '<div class="card">' +
+      '<div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:0.5px;margin-bottom:8px;">Turn ' + (rpState.turnIndex + 1) + ' of ' + sc.turns.length + '</div>' +
+      '<div class="rp-progress-dots" aria-hidden="true">' + dots + '</div>' +
+      '<div class="rp-bubble" style="margin-bottom:16px;">' +
+        '<div class="sp">' + esc(turn.theirLine) + '</div>' +
+        '<div class="en">' + esc(turn.theirLineEn) + '</div>' +
+        '<button class="audio-btn" style="margin-top:6px;width:24px;height:24px;font-size:0.7rem;" data-speak="' + esc(turn.theirLine) + '" onclick="speakSpanish(this.dataset.speak,this)" aria-label="Hear this phrase">🔊</button>' +
+      '</div>' +
+      '<div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px;letter-spacing:0.4px;">Choose your response:</div>' +
+      '<div id="rp-opts">' + optsHtml + '</div>' +
+      '<div id="rp-feedback-area"></div>' +
+    '</div>';
+}
+
+function rpAnswer(optIdx) {
+  if (rpState.answered) return;
+  rpState.answered = true;
+  var sc = ROLEPLAY_SCENARIOS.find(function(s){ return s.id === rpState.scenarioId; });
+  var turn = sc.turns[rpState.turnIndex];
+  var opt = turn.opts[optIdx];
+
+  var btns = document.querySelectorAll('.rp-opt');
+  btns.forEach(function(b) { b.disabled = true; });
+  var chosen = btns[optIdx];
+  if (!chosen) return;
+
+  var isCorrect = opt.type === 'correct';
+  var isRepair  = opt.type === 'repair';
+  chosen.classList.add(isCorrect ? 'rp-correct' : isRepair ? 'rp-repair' : 'rp-wrong');
+
+  if (isCorrect) rpState.score++;
+  if (isRepair) {
+    rpState.repairUsed++;
+    S.repairStats.total = (S.repairStats.total || 0) + 1;
+    S.repairStats.dates[today()] = (S.repairStats.dates[today()] || 0) + 1;
+    saveState();
+  }
+
+  var feedbackColor = isCorrect ? '#C6F6D5' : isRepair ? '#FFF5EE' : '#FED7D7';
+  var feedbackBorder = isCorrect ? 'var(--green)' : isRepair ? 'var(--primary)' : 'var(--red)';
+  var area = document.getElementById('rp-feedback-area');
+  if (!area) return;
+
+  var complicationHtml = '';
+  if (isCorrect && turn.complication && !rpState.complicationShown) {
+    rpState.complicationShown = true;
+    complicationHtml =
+      '<div class="rp-complication">' +
+        '<div style="font-size:0.7rem;font-weight:800;text-transform:uppercase;color:var(--primary);letter-spacing:0.5px;margin-bottom:4px;">⚡ Complication!</div>' +
+        '<div class="rp-bubble" style="margin-bottom:6px;">' +
+          '<div class="sp">' + esc(turn.complication.theirLine) + '</div>' +
+          '<div class="en">' + esc(turn.complication.theirLineEn) + '</div>' +
+        '</div>' +
+        '<div style="font-size:0.78rem;color:var(--primary);font-weight:600;">💡 Hint: ' + esc(turn.complication.hint) + '</div>' +
+      '</div>';
+  }
+
+  area.innerHTML =
+    '<div class="rp-feedback" style="background:' + feedbackColor + ';border-left:3px solid ' + feedbackBorder + ';">' +
+      (isRepair ? '⟳ Repair used! ' : isCorrect ? '✓ ' : '✗ ') + esc(opt.feedback) +
+    '</div>' +
+    complicationHtml +
+    '<button class="btn btn-primary btn-full" onclick="rpNext()">' +
+      (rpState.turnIndex + 1 < sc.turns.length ? 'Next Turn →' : 'See Results →') +
+    '</button>';
+}
+
+function rpNext() {
+  rpState.turnIndex++;
+  rpState.answered = false;
+  rpState.complicationShown = false;
+  renderRpScreen();
+}
+
+function renderRpComplete(sc) {
+  var total = sc.turns.length;
+  var pct = Math.round(rpState.score / total * 100);
+  var msg = pct === 100 ? 'Perfect mission! You nailed every turn.' :
+            pct >= 67  ? 'Strong work. You communicated successfully.' :
+            pct >= 33  ? 'Good start. Review the feedback and try again.' :
+                         'Keep practicing — every attempt builds real skill.';
+
+  if (!S.rpHistory[sc.id]) S.rpHistory[sc.id] = { completions: 0, bestScore: 0, lastDate: null };
+  S.rpHistory[sc.id].completions++;
+  S.rpHistory[sc.id].bestScore = Math.max(S.rpHistory[sc.id].bestScore || 0, rpState.score);
+  S.rpHistory[sc.id].lastDate = today();
+  S.stats.totalRoleplays = (S.stats.totalRoleplays || 0) + 1;
+  S.stats.xp = (S.stats.xp || 0) + (rpState.score * 10) + (rpState.repairUsed * 5);
+  checkBadges();
+  saveState();
+
+  document.getElementById('main-content').innerHTML =
+    '<div style="margin-bottom:12px;">' +
+      '<button class="btn btn-secondary btn-sm" onclick="switchTab(\'roleplay\')">← Scenarios</button>' +
+    '</div>' +
+    '<div class="card" style="text-align:center;">' +
+      '<div style="font-size:2.5rem;margin-bottom:8px;">' + (pct === 100 ? '🏆' : pct >= 67 ? '🌟' : '💪') + '</div>' +
+      '<div style="font-size:1.2rem;font-weight:800;margin-bottom:4px;">' + sc.title + ' — Done!</div>' +
+      '<div style="font-size:0.88rem;color:var(--muted);margin-bottom:16px;">' + esc(msg) + '</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">' +
+        '<div style="background:var(--bg);border-radius:8px;padding:10px;">' +
+          '<div style="font-size:1.3rem;font-weight:800;color:var(--primary);">' + rpState.score + '/' + total + '</div>' +
+          '<div style="font-size:0.65rem;color:var(--muted);">Correct</div>' +
+        '</div>' +
+        '<div style="background:var(--bg);border-radius:8px;padding:10px;">' +
+          '<div style="font-size:1.3rem;font-weight:800;color:var(--gold);">+' + ((rpState.score * 10) + (rpState.repairUsed * 5)) + '</div>' +
+          '<div style="font-size:0.65rem;color:var(--muted);">XP Earned</div>' +
+        '</div>' +
+        '<div style="background:var(--bg);border-radius:8px;padding:10px;">' +
+          '<div style="font-size:1.3rem;font-weight:800;color:var(--green);">' + rpState.repairUsed + '</div>' +
+          '<div style="font-size:0.65rem;color:var(--muted);">Repairs Used</div>' +
+        '</div>' +
+      '</div>' +
+      (rpState.repairUsed > 0 ? '<div style="background:#F0FFF4;border-radius:8px;padding:10px;font-size:0.78rem;color:var(--green);margin-bottom:10px;font-weight:600;">✓ You used repair phrases — that\'s real communication skill.</div>' : '') +
+    '</div>' +
+    '<div class="btn-row">' +
+      '<button class="btn btn-primary" onclick="startRoleplay(\'' + sc.id + '\')">Try Again</button>' +
+      '<button class="btn btn-secondary" onclick="switchTab(\'roleplay\')">All Scenarios</button>' +
+    '</div>';
 }
 
 function renderRealLife() {
-  return `
-    <div class="placeholder-tab">
-      <div class="big-icon">🏡</div>
-      <h2>Real-Life Practice</h2>
-      <p>Spanish becomes real when you use it with real people. Practice with your kids, partner, friends — or solo missions.</p>
-      <span class="coming">Phase 2</span>
-    </div>
-    <div class="nudge-card">
-      One phrase with a real person builds more courage than ten silent flashcards.
-    </div>
-    <div class="card">
-      <div class="card-title">Coming in Phase 2</div>
-      <div style="font-size:0.85rem;color:var(--muted);line-height:1.6;">Practice with kids · Partner quizzes · Solo missions · Family badges · Real-life confidence tracking</div>
-    </div>`;
+  var attempted = 0, completed = 0;
+  FIELD_MISSIONS.forEach(function(m) {
+    var logs = S.fmLog[m.id] || [];
+    if (logs.length > 0) attempted++;
+    if (logs.some(function(l){ return l.completed; })) completed++;
+  });
+
+  var cards = FIELD_MISSIONS.map(function(m) {
+    var logs = S.fmLog[m.id] || [];
+    var everDone = logs.some(function(l){ return l.completed; });
+    var lastLog = logs.length > 0 ? logs[logs.length - 1] : null;
+    var diffLabel = m.difficulty === 1 ? '⚡ Easy' : m.difficulty === 2 ? '🔥 Medium' : '💪 Hard';
+    var diffColor = m.difficulty === 1 ? 'var(--green)' : m.difficulty === 2 ? 'var(--gold)' : 'var(--red)';
+    return '<div class="fm-card' + (everDone ? ' fm-done' : '') + '" onclick="showFieldMission(\'' + m.id + '\')" role="button" tabindex="0" aria-label="' + esc(m.title) + '">' +
+      '<div style="display:flex;gap:10px;align-items:flex-start;">' +
+        '<div style="font-size:1.8rem;line-height:1;margin-top:2px;">' + m.icon + '</div>' +
+        '<div style="flex:1;">' +
+          '<div style="font-weight:800;font-size:0.92rem;margin-bottom:3px;">' + esc(m.title) + (everDone ? ' ✓' : '') + '</div>' +
+          '<div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;line-height:1.5;">' + esc(m.desc) + '</div>' +
+          '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
+            '<span style="font-size:0.68rem;font-weight:700;color:' + diffColor + ';">' + diffLabel + '</span>' +
+            '<span style="font-size:0.68rem;color:var(--muted);">~' + m.mins + ' min</span>' +
+            (lastLog ? '<span style="font-size:0.68rem;color:var(--muted);">Last: ' + esc(lastLog.date) + '</span>' : '') +
+          '</div>' +
+        '</div>' +
+        '<div style="font-size:1.2rem;color:var(--muted);padding-left:4px;">›</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  return '<div class="section-label">Field Missions — ' + completed + '/' + FIELD_MISSIONS.length + ' completed</div>' +
+    '<div class="nudge-card">One phrase with a real person builds more courage than ten silent flashcards.</div>' +
+    '<div class="card" style="padding:12px 14px;margin-bottom:10px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;">' +
+      '<div><div style="font-size:1.3rem;font-weight:800;color:var(--primary);">' + attempted + '</div><div style="font-size:0.65rem;color:var(--muted);">Attempted</div></div>' +
+      '<div><div style="font-size:1.3rem;font-weight:800;color:var(--green);">' + completed + '</div><div style="font-size:0.65rem;color:var(--muted);">Completed</div></div>' +
+      '<div><div style="font-size:1.3rem;font-weight:800;color:var(--gold);">' + (S.repairStats.total || 0) + '</div><div style="font-size:0.65rem;color:var(--muted);">Repairs Used</div></div>' +
+    '</div>' +
+    cards;
+}
+
+// ===================================================
+// FIELD MISSION ENGINE
+// ===================================================
+function showFieldMission(id) {
+  var m = FIELD_MISSIONS.find(function(x){ return x.id === id; });
+  if (!m) return;
+  renderFmDetail(m);
+}
+
+function renderFmDetail(m) {
+  var logs = S.fmLog[m.id] || [];
+  var everDone = logs.some(function(l){ return l.completed; });
+  var diffLabel = m.difficulty === 1 ? 'Easy' : m.difficulty === 2 ? 'Medium' : 'Hard';
+  var diffColor = m.difficulty === 1 ? 'var(--green)' : m.difficulty === 2 ? 'var(--gold)' : 'var(--red)';
+
+  var prepPhraseHtml = (m.prepPhrases || []).map(function(pid) {
+    var phrase = findPhrase(pid);
+    if (!phrase) return '';
+    return '<div style="background:var(--bg);border-radius:8px;padding:10px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px;">' +
+      '<div>' +
+        '<div style="font-weight:700;font-size:0.9rem;">' + esc(phrase.spanish) + '</div>' +
+        '<div style="font-size:0.75rem;color:var(--muted);">' + esc(phrase.english) + '</div>' +
+      '</div>' +
+      '<button class="audio-btn" style="width:28px;height:28px;font-size:0.75rem;flex-shrink:0;" data-speak="' + esc(phrase.spanish) + '" onclick="speakSpanish(this.dataset.speak,this)" aria-label="Hear phrase">🔊</button>' +
+    '</div>';
+  }).join('');
+
+  var disclaimerHtml = m.disclaimer
+    ? '<div style="background:#FFF5EE;border-radius:8px;padding:8px 12px;font-size:0.75rem;color:var(--primary);margin-bottom:12px;line-height:1.5;">' + esc(m.disclaimer) + '</div>'
+    : '';
+
+  var historyHtml = '';
+  if (logs.length > 0) {
+    historyHtml = '<div class="card" style="margin-top:12px;">' +
+      '<div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;color:var(--muted);letter-spacing:0.5px;margin-bottom:8px;">Past Attempts</div>' +
+      logs.slice().reverse().slice(0, 5).map(function(log) {
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:0.8rem;">' +
+          '<div>' +
+            '<span>' + esc(log.date) + '</span>' +
+            (log.completed ? '<span style="color:var(--green);font-weight:700;margin-left:8px;">✓ Done</span>' : '<span style="color:var(--muted);margin-left:8px;">Attempted</span>') +
+          '</div>' +
+          '<div style="color:var(--muted);font-size:0.72rem;">Confidence ' + (log.confidence || '—') + '/5</div>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+  }
+
+  document.getElementById('main-content').innerHTML =
+    '<div style="margin-bottom:12px;display:flex;align-items:center;gap:10px;">' +
+      '<button class="btn btn-secondary btn-sm" onclick="switchTab(\'reallife\')">← Missions</button>' +
+    '</div>' +
+    disclaimerHtml +
+    '<div class="card" style="margin-bottom:10px;">' +
+      '<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;">' +
+        '<div style="font-size:2.2rem;line-height:1;">' + m.icon + '</div>' +
+        '<div>' +
+          '<div style="font-weight:800;font-size:1.05rem;">' + esc(m.title) + '</div>' +
+          '<div style="font-size:0.72rem;font-weight:700;color:' + diffColor + ';margin-top:2px;">' + diffLabel + ' · ~' + m.mins + ' min</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="font-size:0.88rem;color:var(--muted);line-height:1.6;margin-bottom:12px;">' + esc(m.desc) + '</div>' +
+      '<div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;color:var(--muted);letter-spacing:0.5px;margin-bottom:6px;">Phrases to Prep</div>' +
+      (m.prepNote ? '<div style="font-size:0.78rem;color:var(--muted);margin-bottom:8px;font-style:italic;">' + esc(m.prepNote) + '</div>' : '') +
+      prepPhraseHtml +
+    '</div>' +
+    '<div class="card">' +
+      '<div style="font-size:0.85rem;font-weight:700;margin-bottom:10px;">After your mission, log what happened:</div>' +
+      '<div style="margin-bottom:10px;">' +
+        '<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">How did it go?</div>' +
+        '<div style="display:flex;gap:6px;">' +
+          '<button class="fm-conf-btn" id="fmc-attempted" onclick="fmSelect(\'attempted\')">Attempted it</button>' +
+          '<button class="fm-conf-btn" id="fmc-completed" onclick="fmSelect(\'completed\')">Completed it!</button>' +
+          '<button class="fm-conf-btn" id="fmc-stuck" onclick="fmSelect(\'stuck\')">Got stuck</button>' +
+        '</div>' +
+      '</div>' +
+      '<div style="margin-bottom:10px;">' +
+        '<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Confidence after (1 = low · 5 = strong):</div>' +
+        '<div style="display:flex;gap:6px;">' +
+          [1,2,3,4,5].map(function(n) {
+            return '<button class="fm-conf-btn" id="fmconf-' + n + '" onclick="fmConfidence(' + n + ')" style="flex:1;font-size:1rem;font-weight:800;">' + n + '</button>';
+          }).join('') +
+        '</div>' +
+      '</div>' +
+      '<button class="btn btn-primary btn-full" onclick="logFmResult(\'' + m.id + '\')">Save Mission Log</button>' +
+    '</div>' +
+    historyHtml;
+
+  window._fmEntry = { missionId: m.id, outcome: null, confidence: null };
+}
+
+function fmSelect(type) {
+  ['attempted','completed','stuck'].forEach(function(t) {
+    var b = document.getElementById('fmc-' + t);
+    if (b) b.classList.remove('selected');
+  });
+  var btn = document.getElementById('fmc-' + type);
+  if (btn) btn.classList.add('selected');
+  if (window._fmEntry) window._fmEntry.outcome = type;
+}
+
+function fmConfidence(n) {
+  [1,2,3,4,5].forEach(function(i) {
+    var b = document.getElementById('fmconf-' + i);
+    if (b) b.classList.remove('selected');
+  });
+  var btn = document.getElementById('fmconf-' + n);
+  if (btn) btn.classList.add('selected');
+  if (window._fmEntry) window._fmEntry.confidence = n;
+}
+
+function logFmResult(id) {
+  var entry = window._fmEntry || {};
+  if (!entry.outcome) { showToast('Tap how it went first!'); return; }
+  if (!entry.confidence) { showToast('Tap a confidence level!'); return; }
+
+  if (!S.fmLog[id]) S.fmLog[id] = [];
+  S.fmLog[id].push({
+    date: today(),
+    attempted: true,
+    completed: entry.outcome === 'completed',
+    stuck: entry.outcome === 'stuck',
+    confidence: entry.confidence
+  });
+
+  var xpGain = entry.outcome === 'completed' ? 30 : entry.outcome === 'attempted' ? 15 : 5;
+  S.stats.xp = (S.stats.xp || 0) + xpGain;
+  checkBadges();
+  saveState();
+  showToast(entry.outcome === 'completed' ? '🎉 Mission complete! +' + xpGain + ' XP' : '📝 Logged! +' + xpGain + ' XP');
+  switchTab('reallife');
+}
+
+function findPhrase(pid) {
+  return CONTENT.find(function(c){ return c.id === pid; }) || null;
 }
 
 function renderMastery() {
@@ -2954,6 +3602,65 @@ function renderMastery() {
       <span class="coming">Mastery Verify + Fluency Checks — Phase 3</span>
     </div>
   `;
+}
+
+function checkCanDoGoal(goal) {
+  var needed = goal.requiredPhrases;
+  if (!needed || needed.length === 0) return 'new';
+  var ownedCount = 0, solidCount = 0;
+  needed.forEach(function(pid) {
+    var p = S.progress[pid];
+    if (!p) return;
+    var conf = p.confidence || 1;
+    if (conf >= 4) ownedCount++;
+    else if (conf >= 3) solidCount++;
+  });
+  if (ownedCount === needed.length) return 'done';
+  if (ownedCount + solidCount >= Math.ceil(needed.length / 2)) return 'partial';
+  return 'new';
+}
+
+function renderCandoSection() {
+  var doneCt = 0, partialCt = 0, newCt = 0;
+  var goalCards = CAN_DO_GOALS.map(function(goal) {
+    var status = checkCanDoGoal(goal);
+    if (status === 'done') doneCt++;
+    else if (status === 'partial') partialCt++;
+    else newCt++;
+
+    var statusLabel = status === 'done' ? 'Achieved ✓' : status === 'partial' ? 'In Progress' : 'Not Yet';
+    var statusCls = status === 'done' ? 'done' : status === 'partial' ? 'partial' : 'new';
+
+    var phraseProgress = (goal.requiredPhrases || []).map(function(pid) {
+      var p = S.progress[pid];
+      var conf = p ? (p.confidence || 1) : 0;
+      var color = conf >= 4 ? 'var(--green)' : conf >= 3 ? 'var(--primary)' : conf >= 2 ? 'var(--gold)' : 'var(--border)';
+      return '<div style="width:12px;height:12px;border-radius:50%;background:' + color + ';flex-shrink:0;" title="' + pid + ' conf:' + conf + '"></div>';
+    }).join('');
+
+    return '<div class="cando-goal ' + status + '">' +
+      '<div class="cando-top">' +
+        '<div>' +
+          '<div class="cando-title">' + esc(goal.title) + '</div>' +
+          '<div class="cando-category">' + esc(goal.category) + '</div>' +
+        '</div>' +
+        '<span class="cando-status ' + statusCls + '">' + statusLabel + '</span>' +
+      '</div>' +
+      '<div style="font-size:0.78rem;color:var(--muted);margin:6px 0;line-height:1.5;">' + esc(goal.desc) + '</div>' +
+      '<div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;">' +
+        '<span style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px;margin-right:3px;">Key phrases:</span>' +
+        phraseProgress +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  return '<div class="section-label">Can-Do Goals — ' + doneCt + '/' + CAN_DO_GOALS.length + ' achieved</div>' +
+    '<div class="card" style="margin-bottom:10px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;padding:12px;">' +
+      '<div><div style="font-size:1.3rem;font-weight:800;color:var(--green);">' + doneCt + '</div><div style="font-size:0.65rem;color:var(--muted);">Achieved</div></div>' +
+      '<div><div style="font-size:1.3rem;font-weight:800;color:var(--gold);">' + partialCt + '</div><div style="font-size:0.65rem;color:var(--muted);">In Progress</div></div>' +
+      '<div><div style="font-size:1.3rem;font-weight:800;color:var(--muted);">' + newCt + '</div><div style="font-size:0.65rem;color:var(--muted);">Not Yet</div></div>' +
+    '</div>' +
+    goalCards;
 }
 
 function renderProgress() {
@@ -3139,7 +3846,25 @@ function renderProgress() {
       '<button class="btn" onclick="showTeacherView()" style="width:100%;">📊 View Teacher Report</button>' +
     '</div>';
 
-  return ownershipSummary + scoreBreakdown + xpCard + badgesHTML + statsGrid + domainMap + starsHistory + teacherBtn;
+  var candoSection = renderCandoSection();
+
+  var missionsSection = (function() {
+    var attempted = 0, completed = 0;
+    FIELD_MISSIONS.forEach(function(m) {
+      var logs = S.fmLog[m.id] || [];
+      if (logs.length > 0) attempted++;
+      if (logs.some(function(l){ return l.completed; })) completed++;
+    });
+    var rpDone = Object.values(S.rpHistory).filter(function(h){ return h.completions > 0; }).length;
+    return '<div class="section-label">Real-World Activity</div>' +
+      '<div class="card" style="margin-bottom:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;padding:12px;">' +
+        '<div><div style="font-size:1.3rem;font-weight:800;color:var(--green);">' + completed + '</div><div style="font-size:0.65rem;color:var(--muted);">Missions Done</div></div>' +
+        '<div><div style="font-size:1.3rem;font-weight:800;color:var(--primary);">' + rpDone + '</div><div style="font-size:0.65rem;color:var(--muted);">Roleplays Done</div></div>' +
+        '<div><div style="font-size:1.3rem;font-weight:800;color:var(--gold);">' + (S.repairStats.total || 0) + '</div><div style="font-size:0.65rem;color:var(--muted);">Repairs Used</div></div>' +
+      '</div>';
+  })();
+
+  return candoSection + ownershipSummary + scoreBreakdown + xpCard + badgesHTML + statsGrid + missionsSection + domainMap + starsHistory + teacherBtn;
 }
 
 function showTeacherView() {
@@ -3474,6 +4199,15 @@ function checkBadges() {
       }
     } catch(e) {}
   });
+}
+
+function showToast(msg) {
+  var t = document.createElement('div');
+  t.style.cssText = 'position:fixed;top:72px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--text);color:#fff;padding:10px 20px;border-radius:12px;font-weight:700;font-size:0.88rem;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.25);transition:transform 0.3s ease,opacity 0.3s ease;white-space:nowrap;';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  requestAnimationFrame(function(){ t.style.transform='translateX(-50%) translateY(0)'; });
+  setTimeout(function(){ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(-10px)'; setTimeout(function(){ t.remove(); }, 400); }, 2500);
 }
 
 function showBadgeToast(badge) {
@@ -4224,16 +4958,23 @@ function showPhraseBank(filter) {
           '</div>'
         ) : '';
 
-        var whenHtml = hvp ? (
-          hvp.whenToUse.length <= 90
-            ? '<div style="font-size:0.75rem;color:var(--muted);margin-top:8px;line-height:1.4;"><strong style="color:var(--text);">Use when:</strong> ' + esc(hvp.whenToUse) + '</div>'
-            : '<details style="font-size:0.75rem;color:var(--muted);margin-top:8px;">' +
-                '<summary style="cursor:pointer;line-height:1.4;list-style:none;-webkit-appearance:none;display:block;">' +
-                  '<strong style="color:var(--text);">Use when:</strong> ' + esc(hvp.whenToUse.substring(0, 88)) + '… <span style="color:var(--primary);font-weight:700;">more ↓</span>' +
-                '</summary>' +
-                '<div style="margin-top:5px;line-height:1.55;">' + esc(hvp.whenToUse) + '</div>' +
-              '</details>'
-        ) : '';
+        var whenHtml = (function() {
+          if (!hvp) return '';
+          var text = hvp.whenToUse;
+          var dotIdx = text.indexOf('. ');
+          var base = 'font-size:0.75rem;color:var(--muted);margin-top:8px;line-height:1.4;';
+          if (dotIdx === -1) {
+            return '<div style="' + base + '"><strong style="color:var(--text);">Use when:</strong> ' + esc(text) + '</div>';
+          }
+          var first = text.substring(0, dotIdx + 1);
+          var rest  = text.substring(dotIdx + 2);
+          return '<details style="' + base + '">' +
+            '<summary style="cursor:pointer;list-style:none;-webkit-appearance:none;display:block;">' +
+              '<strong style="color:var(--text);">Use when:</strong> ' + esc(first) + ' <span style="color:var(--primary);font-weight:700;">more ↓</span>' +
+            '</summary>' +
+            '<div style="margin-top:5px;line-height:1.55;">' + esc(rest) + '</div>' +
+          '</details>';
+        })();
 
         return '<div class="pb-card">' +
           '<div class="pb-card-top">' +
@@ -4339,6 +5080,25 @@ function renderPractice() {
       '<span class="practice-hub-text"><strong>Review Deck</strong><span>Phrases you missed — brought back at the right time to stick</span></span>' +
       dueBadge +
     '</div>' +
+
+    '<div class="section-label" style="margin-top:20px;">Conversations & Real Life</div>' +
+
+    (function() {
+      var rpDone = Object.values(S.rpHistory || {}).filter(function(h){ return h.completions > 0; }).length;
+      var fmDone = Object.values(S.fmLog || {}).filter(function(logs){ return logs.some(function(l){ return l.completed; }); }).length;
+      var rpBadge = rpDone > 0 ? '<span class="practice-hub-badge" style="background:var(--primary);">' + rpDone + '/' + ROLEPLAY_SCENARIOS.length + ' done</span>' : '';
+      var fmBadge = fmDone > 0 ? '<span class="practice-hub-badge" style="background:var(--green);">' + fmDone + '/' + FIELD_MISSIONS.length + ' done</span>' : '';
+      return '<div class="practice-hub-option" onclick="switchTab(\'roleplay\')">' +
+          '<span class="practice-hub-icon">🎭</span>' +
+          '<span class="practice-hub-text"><strong>Roleplay Scenarios</strong><span>6 scripted conversations — restaurant, directions, doctor, more</span></span>' +
+          rpBadge +
+        '</div>' +
+        '<div class="practice-hub-option" onclick="switchTab(\'reallife\')">' +
+          '<span class="practice-hub-icon">🏡</span>' +
+          '<span class="practice-hub-text"><strong>Field Missions</strong><span>Real-world tasks you do with actual people · log what happened</span></span>' +
+          fmBadge +
+        '</div>';
+    })() +
 
     '<div class="section-label" style="margin-top:20px;">All 30 Lessons</div>' +
     (function() {
@@ -5003,6 +5763,79 @@ function renderLessonComplete(ls) {
       '</div>'
     : '<div style="font-size:0.85rem;color:var(--muted);margin-top:10px;text-align:center;">You\'ve completed all 10 lessons. More coming soon!</div>';
 
+  // Build debrief: find a phrase the user struggled with and a natural upgrade
+  var debriefHtml = '';
+  (function() {
+    // Find lowest-confidence phrase from this lesson
+    var weakest = null, weakestConf = 6;
+    (lesson.itemIds || []).forEach(function(pid) {
+      var p = S.progress[pid];
+      var conf = p ? (p.confidence || 1) : 1;
+      if (conf < weakestConf) { weakestConf = conf; weakest = pid; }
+    });
+
+    // Find a phrase the user got right that's worth upgrading (conf 3 → push to own it)
+    var upgradeTarget = null;
+    (lesson.itemIds || []).forEach(function(pid) {
+      var p = S.progress[pid];
+      var conf = p ? (p.confidence || 1) : 1;
+      if (conf === 3 && !upgradeTarget) upgradeTarget = pid;
+    });
+
+    if (!weakest && !upgradeTarget) return;
+
+    var debriefItems = '';
+
+    if (weakest) {
+      var wp = findPhrase(weakest) || {};
+      debriefItems +=
+        '<div class="debrief-correction">' +
+          '<div style="font-size:0.7rem;font-weight:800;text-transform:uppercase;color:var(--primary);margin-bottom:4px;">Focus Here Next Time</div>' +
+          '<div style="font-weight:700;font-size:0.95rem;">' + esc(wp.spanish || weakest) + '</div>' +
+          '<div style="font-size:0.78rem;color:var(--muted);">' + esc(wp.english || '') + '</div>' +
+          (wp.spanish ? '<button class="audio-btn" style="margin-top:6px;width:24px;height:24px;font-size:0.7rem;" data-speak="' + esc(wp.spanish) + '" onclick="speakSpanish(this.dataset.speak,this)" aria-label="Hear phrase">🔊</button>' : '') +
+        '</div>';
+    }
+
+    if (upgradeTarget) {
+      var up = findPhrase(upgradeTarget) || {};
+      debriefItems +=
+        '<div class="debrief-upgrade">' +
+          '<div style="font-size:0.7rem;font-weight:800;text-transform:uppercase;color:var(--green);margin-bottom:4px;">Almost Yours — One More Rep</div>' +
+          '<div style="font-weight:700;font-size:0.95rem;">' + esc(up.spanish || upgradeTarget) + '</div>' +
+          '<div style="font-size:0.78rem;color:var(--muted);">' + esc(up.english || '') + '</div>' +
+          '<div style="font-size:0.75rem;color:var(--green);margin-top:4px;">Say it again right now to push it to "Own It".</div>' +
+          (up.spanish ? '<button class="audio-btn" style="margin-top:6px;width:24px;height:24px;font-size:0.7rem;" data-speak="' + esc(up.spanish) + '" onclick="speakSpanish(this.dataset.speak,this)" aria-label="Hear phrase">🔊</button>' : '') +
+        '</div>';
+    }
+
+    if (debriefItems) {
+      debriefHtml =
+        '<div class="card" style="margin-top:12px;">' +
+          '<div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;color:var(--muted);letter-spacing:0.5px;margin-bottom:10px;">After-Action Review</div>' +
+          debriefItems +
+        '</div>';
+    }
+  })();
+
+  // Can-do goals unlocked by this lesson
+  var unlockedGoals = CAN_DO_GOALS.filter(function(g) {
+    var status = checkCanDoGoal(g);
+    return status === 'done' || status === 'partial';
+  });
+  var candoUnlockHtml = unlockedGoals.length > 0
+    ? '<div class="card" style="margin-top:12px;background:#F0FFF4;border:2px solid var(--green);">' +
+        '<div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;color:var(--green);margin-bottom:8px;">Can-Do Skills Progress</div>' +
+        unlockedGoals.map(function(g) {
+          var status = checkCanDoGoal(g);
+          return '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(45,158,107,0.2);">' +
+            '<span style="font-size:0.82rem;">' + esc(g.title) + '</span>' +
+            '<span style="font-size:0.7rem;font-weight:700;color:var(--green);">' + (status === 'done' ? '✓ Achieved' : '↑ Progress') + '</span>' +
+          '</div>';
+        }).join('') +
+      '</div>'
+    : '';
+
   return '<div class="card" style="text-align:center;">' +
     '<div style="font-size:3rem;margin-bottom:8px;">🌟</div>' +
     '<div style="font-size:1.3rem;font-weight:800;margin-bottom:4px;">Lesson Complete!</div>' +
@@ -5023,6 +5856,8 @@ function renderLessonComplete(ls) {
     '</div>' +
     nextHtml +
     '</div>' +
+    debriefHtml +
+    candoUnlockHtml +
     '<div class="btn-row" style="margin-top:14px;">' +
       '<button class="btn btn-primary" onclick="switchTab(\'today\')">Back to Today</button>' +
       '<button class="btn btn-secondary" onclick="switchTab(\'practice\')">More Practice</button>' +
