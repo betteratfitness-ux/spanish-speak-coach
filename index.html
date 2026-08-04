@@ -2608,31 +2608,67 @@ function openGrammarLesson(id) {
 }
 
 function openDomain(key) {
-  const d = DOMAINS[key];
-  const items = CONTENT.filter(c => c.domain === key);
-  const html = `
-    <div style="margin-bottom:12px;">
-      <button class="btn btn-secondary btn-sm" onclick="switchTab('learn')">← Back to Domains</button>
-    </div>
-    <div class="card">
-      <div style="font-size:1.5rem;margin-bottom:4px;">${d.icon}</div>
-      <div class="card-heading">${key}: ${d.name}</div>
-      <div style="font-size:0.82rem;color:var(--muted);margin-bottom:12px;">${d.desc}</div>
-      <button class="btn btn-primary btn-sm" onclick="startDrillDomain('${key}')">Practice This Domain</button>
-    </div>
-    ${items.map(item => renderLearnItem(item)).join('')}
-  `;
+  var d = DOMAINS[key];
+  var items = CONTENT.filter(function(c){ return c.domain === key; });
+  var stateCounts = { mastered: 0, reviewing: 0, learning: 0, unseen: 0 };
+  items.forEach(function(item) { stateCounts[getMemoryState(item.id)]++; });
+
+  var stateBar =
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px;text-align:center;">' +
+      [
+        { key:'mastered',  label:'Own It', color:'var(--green)' },
+        { key:'reviewing', label:'Solid',  color:'var(--primary)' },
+        { key:'learning',  label:'Fuzzy',  color:'var(--gold)' },
+        { key:'unseen',    label:'New',    color:'var(--muted)' },
+      ].map(function(s) {
+        return '<div style="background:var(--bg);border-radius:8px;padding:8px 4px;">' +
+          '<div style="font-size:1.1rem;font-weight:800;color:' + s.color + ';">' + stateCounts[s.key] + '</div>' +
+          '<div style="font-size:0.62rem;color:var(--muted);font-weight:700;text-transform:uppercase;">' + s.label + '</div>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+
+  var html =
+    '<div style="margin-bottom:12px;">' +
+      '<button class="btn btn-secondary btn-sm" onclick="switchTab(\'learn\')">← Back to Domains</button>' +
+    '</div>' +
+    '<div class="card">' +
+      '<div style="font-size:1.5rem;margin-bottom:4px;">' + d.icon + '</div>' +
+      '<div class="card-heading">' + key + ': ' + d.name + '</div>' +
+      '<div style="font-size:0.82rem;color:var(--muted);margin-bottom:10px;">' + d.desc + '</div>' +
+      stateBar +
+      '<button class="btn btn-primary btn-sm" onclick="startDrillDomain(\'' + key + '\')">Practice This Domain</button>' +
+    '</div>' +
+    items.map(function(item){ return renderLearnItem(item); }).join('');
+
   document.getElementById('main-content').innerHTML = html;
+  window.scrollTo(0, 0);
+}
+
+function memStateTag(id) {
+  var state = getMemoryState(id);
+  var cfg = {
+    mastered: { label: 'Own It',    color: 'var(--green)',   bg: 'rgba(45,158,107,0.12)' },
+    reviewing:{ label: 'Solid',     color: 'var(--primary)', bg: 'rgba(232,93,4,0.1)' },
+    learning: { label: 'Fuzzy',     color: '#B7791F',        bg: 'rgba(255,183,3,0.15)' },
+    unseen:   { label: 'New',       color: 'var(--muted)',   bg: 'var(--border)' }
+  }[state];
+  return '<span style="font-size:0.68rem;font-weight:800;padding:2px 8px;border-radius:99px;background:' + cfg.bg + ';color:' + cfg.color + ';">' + cfg.label + '</span>';
+}
+
+function memStateBorderColor(id) {
+  var state = getMemoryState(id);
+  return state === 'mastered' ? 'var(--green)' : state === 'reviewing' ? 'var(--primary)' : state === 'learning' ? 'var(--gold)' : 'var(--border)';
 }
 
 function renderLearnItem(item) {
   const prog = getItemProgress(item.id);
   const showPron = S.settings.pronunciationHelper;
   return `
-    <div class="card" style="border-left:3px solid var(--border);">
+    <div class="card" style="border-left:3px solid ${memStateBorderColor(item.id)};">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">
         <span class="domain-tag tag-${item.domain}">${item.domain}</span>
-        ${prog.lastReviewed ? '<span style="font-size:0.7rem;color:var(--green);font-weight:700;">✓ Practiced</span>' : ''}
+        ${memStateTag(item.id)}
       </div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
         <div style="font-size:1.2rem;font-weight:800;color:var(--text);">${item.spanish}</div>
@@ -2777,6 +2813,68 @@ function startDrillDomain(domainKey) {
   const items = CONTENT.filter(c => c.domain === domainKey).sort(() => Math.random() - 0.5).slice(0, 10);
   modeState = { mode: 'listen-repeat', items, index: 0, results: [], revealed: false, showHint: false, backTab: 'learn' };
   renderModeCard();
+}
+
+function startLessonDrill(lessonId, count) {
+  var lesson = LESSONS.find(function(l){ return l.id === lessonId; });
+  if (!lesson) return;
+  var pool = lesson.itemIds
+    .map(function(id){ return CONTENT.find(function(c){ return c.id === id; }); })
+    .filter(Boolean)
+    .sort(function(){ return Math.random() - 0.5; });
+  var items = pool.slice(0, count || pool.length);
+  modeState = { mode: 'listen-repeat', items: items, index: 0, results: [], revealed: false, showHint: false, backTab: 'practice' };
+  renderModeCard();
+}
+
+function showLessonPicker(lessonId) {
+  var lesson = LESSONS.find(function(l){ return l.id === lessonId; });
+  if (!lesson) return;
+  var total = lesson.itemIds.length;
+  var quickN = Math.min(3, total);
+
+  // Memory state summary for these specific phrases
+  var stateCounts = { mastered:0, reviewing:0, learning:0, unseen:0 };
+  lesson.itemIds.forEach(function(id){ stateCounts[getMemoryState(id)]++; });
+  var stateRow =
+    '<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">' +
+    [['Own It','var(--green)',stateCounts.mastered],['Solid','var(--primary)',stateCounts.reviewing],
+     ['Fuzzy','var(--gold)',stateCounts.learning],['New','var(--muted)',stateCounts.unseen]]
+    .map(function(s){
+      return '<span style="font-size:0.72rem;font-weight:700;padding:2px 9px;border-radius:99px;background:var(--bg);color:' + s[1] + ';">' + s[2] + ' ' + s[0] + '</span>';
+    }).join('') +
+    '</div>';
+
+  document.getElementById('main-content').innerHTML =
+    '<div style="margin-bottom:12px;">' +
+      '<button class="btn btn-secondary btn-sm" onclick="switchTab(\'practice\')">← Practice</button>' +
+    '</div>' +
+    '<div class="card" style="margin-bottom:14px;">' +
+      '<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:0.5px;margin-bottom:4px;">Drill Lesson Phrases</div>' +
+      '<div style="font-size:1.05rem;font-weight:800;margin-bottom:2px;">' + lesson.icon + ' Day ' + lesson.day + ' — ' + esc(lesson.topic) + '</div>' +
+      '<div style="font-size:0.8rem;color:var(--muted);margin-bottom:10px;">' + total + ' phrases</div>' +
+      stateRow +
+      '<div style="font-size:0.78rem;color:var(--muted);">How many do you want to drill?</div>' +
+    '</div>' +
+    '<div class="session-pick">' +
+      '<div class="sp-opt" onclick="startLessonDrill(\'' + lessonId + '\',' + quickN + ')">' +
+        '<div class="sp-time">' + quickN + '</div>' +
+        '<div class="sp-label">Quick</div>' +
+        '<div style="font-size:0.65rem;color:var(--muted);margin-top:3px;">~3 min</div>' +
+      '</div>' +
+      '<div class="sp-opt sp-selected" onclick="startLessonDrill(\'' + lessonId + '\',' + total + ')">' +
+        '<div class="sp-time">' + total + '</div>' +
+        '<div class="sp-label">All</div>' +
+        '<div style="font-size:0.65rem;color:var(--muted);margin-top:3px;">~' + total + ' min</div>' +
+      '</div>' +
+      (total > 3 ? '<div class="sp-opt" onclick="showSessionPicker(\'en-to-es\')">' +
+        '<div class="sp-time">→</div>' +
+        '<div class="sp-label">Other mode</div>' +
+        '<div style="font-size:0.65rem;color:var(--muted);margin-top:3px;">Change drill type</div>' +
+      '</div>' : '') +
+    '</div>' +
+    '<div class="nudge-card">Say each phrase out loud — not just in your head.</div>';
+  window.scrollTo(0, 0);
 }
 
 function quickSpeak(itemId) {
@@ -5210,10 +5308,23 @@ function renderPractice() {
         var completedCount = g.lessons.filter(function(l){ return S.user.lessonDates && S.user.lessonDates[l.id]; }).length;
         var grid = g.lessons.map(function(l) {
           var done = S.user.lessonDates && S.user.lessonDates[l.id];
-          return '<div class="card" style="padding:10px;cursor:pointer;border:2px solid ' + (done ? 'var(--green)' : 'var(--border)') + ';background:' + (done ? 'rgba(72,199,142,0.08)' : 'var(--card)') + ';" onclick="startLesson(\'' + l.id + '\')">' +
+          var cardAction = done ? 'showLessonPicker(\'' + l.id + '\')' : 'startLesson(\'' + l.id + '\')';
+          var stateHints = '';
+          if (done) {
+            var lCounts = { mastered:0, reviewing:0, learning:0, unseen:0 };
+            (l.itemIds || []).forEach(function(pid){ lCounts[getMemoryState(pid)]++; });
+            stateHints = '<div style="display:flex;gap:3px;margin-top:5px;flex-wrap:wrap;">' +
+              (lCounts.mastered > 0 ? '<span style="font-size:0.6rem;color:var(--green);font-weight:700;">' + lCounts.mastered + ' Own It</span>' : '') +
+              (lCounts.reviewing > 0 ? '<span style="font-size:0.6rem;color:var(--primary);font-weight:700;">' + (lCounts.mastered > 0 ? ' · ' : '') + lCounts.reviewing + ' Solid</span>' : '') +
+              (lCounts.learning > 0 ? '<span style="font-size:0.6rem;color:var(--gold);font-weight:700;"> · ' + lCounts.learning + ' Fuzzy</span>' : '') +
+            '</div>';
+          }
+          return '<div class="card" style="padding:10px;cursor:pointer;border:2px solid ' + (done ? 'var(--green)' : 'var(--border)') + ';background:' + (done ? 'rgba(72,199,142,0.08)' : 'var(--card)') + ';" onclick="' + cardAction + '">' +
             '<div style="font-size:1.2rem;margin-bottom:3px;">' + l.icon + (done ? ' ✓' : '') + '</div>' +
             '<div style="font-size:0.75rem;font-weight:700;color:var(--primary);">Day ' + l.day + '</div>' +
             '<div style="font-size:0.7rem;color:var(--muted);line-height:1.3;">' + l.topic + '</div>' +
+            stateHints +
+            (done ? '<div style="font-size:0.6rem;color:var(--muted);margin-top:4px;">Tap to drill →</div>' : '') +
           '</div>';
         }).join('');
         return '<div style="font-size:0.8rem;font-weight:700;color:var(--muted);margin:14px 0 8px;display:flex;justify-content:space-between;">' +
@@ -5959,7 +6070,7 @@ function renderLessonComplete(ls) {
     candoUnlockHtml +
     '<div class="btn-row" style="margin-top:14px;">' +
       '<button class="btn btn-primary" onclick="switchTab(\'today\')">Back to Today</button>' +
-      '<button class="btn btn-secondary" onclick="switchTab(\'practice\')">More Practice</button>' +
+      '<button class="btn btn-secondary" onclick="showLessonPicker(\'' + lesson.id + '\')">Drill These Phrases</button>' +
     '</div>';
 }
 
