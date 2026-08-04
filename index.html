@@ -5643,7 +5643,7 @@ let goalsStep = 0;
 
 function showGoals() {
   document.getElementById('goals-overlay').classList.remove('hidden');
-  goalsStep = 0;
+  goalsStep = -1;
   renderGoalsScreen();
 }
 
@@ -5651,7 +5651,36 @@ function hideGoals() {
   document.getElementById('goals-overlay').classList.add('hidden');
 }
 
+function goalsWelcomeDone() {
+  var name = (document.getElementById('onboard-name').value || '').trim();
+  if (name) { S.user.name = name; saveState(); }
+  goalsStep = 0;
+  renderGoalsScreen();
+}
+
 function renderGoalsScreen() {
+  var headerSub = document.querySelector('.goals-header p');
+
+  if (goalsStep === -1) {
+    if (headerSub) headerSub.style.display = 'none';
+    document.getElementById('goals-body').innerHTML =
+      '<div style="text-align:center;padding:24px 0 28px;">' +
+        '<div style="font-size:2.8rem;margin-bottom:16px;">🎙️</div>' +
+        '<div style="font-size:1.5rem;font-weight:800;color:white;line-height:1.3;margin-bottom:12px;">You\'re going to speak<br>Spanish in real life.</div>' +
+        '<div style="font-size:0.95rem;color:#A0AEC0;line-height:1.5;">Not someday. In 30 days.</div>' +
+      '</div>' +
+      '<div style="margin-bottom:24px;">' +
+        '<label style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#A0AEC0;display:block;margin-bottom:10px;">What\'s your name?</label>' +
+        '<input id="onboard-name" type="text" placeholder="First name" autocomplete="given-name" ' +
+          'style="width:100%;background:#2D3748;border:2px solid #4A5568;border-radius:10px;padding:14px 16px;color:white;font-size:1rem;font-weight:600;outline:none;transition:border-color 0.2s;" ' +
+          'onfocus="this.style.borderColor=\'var(--primary)\'" onblur="this.style.borderColor=\'#4A5568\'" ' +
+          'onkeydown="if(event.key===\'Enter\')goalsWelcomeDone()">' +
+      '</div>' +
+      '<button class="btn btn-primary btn-full" onclick="goalsWelcomeDone()" style="font-size:1rem;padding:16px;">Let\'s Go →</button>';
+    return;
+  }
+
+  if (headerSub) headerSub.style.display = '';
   const step = GOALS_STEPS[goalsStep];
   var optsHtml = step.opts.map(function(o) {
     return '<button class="goals-opt" onclick="goalsAnswer(\'' + o.field + '\',\'' + o.val + '\')">' +
@@ -6696,20 +6725,19 @@ function renderDiagResults() {
     </div>
 
     <div style="margin-top:20px;display:flex;flex-direction:column;gap:8px;">
-      <button class="btn btn-primary btn-full" onclick="finishDiagnostic('${cfg.firstMode}','${cfg.firstLesson}')">Start My First Practice →</button>
-      <button class="btn btn-secondary btn-full" onclick="finishDiagnostic(null,null)">Go to Dashboard</button>
+      <button class="btn btn-primary btn-full" onclick="finishDiagnostic(true)">Start Day 1 →</button>
+      <button class="btn btn-secondary btn-full" onclick="finishDiagnostic(false)">Go to Dashboard</button>
     </div>
     <div style="height:20px;"></div>
   `;
 }
 
-function finishDiagnostic(mode, domain) {
+function finishDiagnostic(startLesson) {
   hideDiagnostic();
   updateStreak();
-  if (mode && domain) {
-    // Go directly to Speak tab and start the recommended mode
-    switchTab('speak');
-    startMode(mode);
+  if (startLesson) {
+    switchTab('today');
+    showLessonBrief('L01');
   } else {
     switchTab('today');
   }
