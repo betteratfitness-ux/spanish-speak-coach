@@ -770,7 +770,14 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
     <div class="modal-subtitle">Real-life Spanish phrases — right now, when you need them. Tap any phrase to hear it.</div>
     <button class="btn btn-primary btn-full" style="margin-bottom:12px;" onclick="startRepairDrill()">🔁 Drill Rescue Phrases — Speak From Memory</button>
 
-    <div class="panic-group">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+      <button class="sos-chip" data-ctx="general"     style="padding:6px 12px;border-radius:99px;border:none;font-size:0.78rem;font-weight:700;cursor:pointer;background:var(--primary);color:#fff;" onclick="setSosCtx('general')">💬 General</button>
+      <button class="sos-chip" data-ctx="restaurant"  style="padding:6px 12px;border-radius:99px;border:none;font-size:0.78rem;font-weight:700;cursor:pointer;background:var(--border);color:var(--text);" onclick="setSosCtx('restaurant')">🍽️ Restaurant</button>
+      <button class="sos-chip" data-ctx="directions"  style="padding:6px 12px;border-radius:99px;border:none;font-size:0.78rem;font-weight:700;cursor:pointer;background:var(--border);color:var(--text);" onclick="setSosCtx('directions')">🗺️ Directions</button>
+      <button class="sos-chip" data-ctx="health"      style="padding:6px 12px;border-radius:99px;border:none;font-size:0.78rem;font-weight:700;cursor:pointer;background:var(--border);color:var(--text);" onclick="setSosCtx('health')">🏥 Health</button>
+    </div>
+
+    <div class="panic-group" data-ctx="general,directions,health">
       <div class="panic-group-title">I Don't Understand</div>
       <div class="panic-phrase"><div class="sp">No entiendo.</div><div class="en">I don't understand.</div><div class="ph">no en-TYEN-do</div></div>
       <div class="panic-phrase"><div class="sp">¿Puede repetir, por favor?</div><div class="en">Can you repeat, please?</div><div class="ph">PWEH-deh reh-peh-TEER</div></div>
@@ -779,7 +786,7 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
       <div class="panic-phrase"><div class="sp">Un momento, por favor.</div><div class="en">One moment, please.</div><div class="ph">oon mo-MEN-to</div></div>
     </div>
 
-    <div class="panic-group">
+    <div class="panic-group" data-ctx="general,health">
       <div class="panic-group-title">I Need Help</div>
       <div class="panic-phrase"><div class="sp">Necesito ayuda.</div><div class="en">I need help.</div><div class="ph">neh-seh-SEE-to ah-YOO-dah</div></div>
       <div class="panic-phrase"><div class="sp">¿Dónde está el baño?</div><div class="en">Where is the bathroom?</div><div class="ph">DON-deh es-TAH el BAHN-yo</div></div>
@@ -788,7 +795,7 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
       <div class="panic-phrase"><div class="sp">Necesito un médico.</div><div class="en">I need a doctor.</div><div class="ph">neh-seh-SEE-to oon MEH-dee-ko</div></div>
     </div>
 
-    <div class="panic-group">
+    <div class="panic-group" data-ctx="general,restaurant,directions">
       <div class="panic-group-title">Polite Phrases</div>
       <div class="panic-phrase"><div class="sp">Gracias por su paciencia.</div><div class="en">Thank you for your patience.</div><div class="ph">GRAH-syas por soo pah-SYEN-syah</div></div>
       <div class="panic-phrase"><div class="sp">Disculpe.</div><div class="en">Excuse me.</div><div class="ph">dees-KOOL-peh</div></div>
@@ -796,7 +803,7 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
       <div class="panic-phrase"><div class="sp">Por favor.</div><div class="en">Please.</div><div class="ph">por fah-VOR</div></div>
     </div>
 
-    <div class="panic-group">
+    <div class="panic-group" data-ctx="general,restaurant">
       <div class="panic-group-title">Ordering Food</div>
       <div class="panic-phrase"><div class="sp">Quiero ___, por favor.</div><div class="en">I want ___, please.</div><div class="ph">KYEH-ro</div></div>
       <div class="panic-phrase"><div class="sp">La cuenta, por favor.</div><div class="en">The check, please.</div><div class="ph">lah KWEN-tah</div></div>
@@ -2521,7 +2528,7 @@ function renderTodayCanDoCard() {
     '<div style="height:100%;width:' + pct + '%;background:var(--green);border-radius:3px;transition:width 0.4s;"></div>' +
   '</div>';
 
-  return '<div class="card" style="border-left:4px solid var(--green);margin-bottom:14px;cursor:pointer;" onclick="switchTab(\'mastery\')">' +
+  return '<div class="card" style="border-left:4px solid var(--green);margin-bottom:14px;cursor:pointer;" onclick="showGoalDrill(\'' + bestGoal.id + '\')">' +
     '<div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;color:var(--green);letter-spacing:0.5px;margin-bottom:4px;">🎯 Next Can-Do Goal · ' + bestGoal.category + '</div>' +
     '<div style="font-weight:700;font-size:0.92rem;margin-bottom:2px;">' + esc(bestGoal.title) + '</div>' +
     '<div style="font-size:0.72rem;color:var(--muted);margin-bottom:8px;">' + owned + ' of ' + needed.length + ' phrases solid</div>' +
@@ -3873,6 +3880,80 @@ function checkCanDoGoal(goal) {
   return 'new';
 }
 
+function showGoalDrill(goalId) {
+  var goal = CAN_DO_GOALS.find(function(g){ return g.id === goalId; });
+  if (!goal) return switchTab('mastery');
+  var status = checkCanDoGoal(goal);
+  var needed = goal.requiredPhrases || [];
+  var phrases = needed.map(function(pid){ return CONTENT.find(function(c){ return c.id === pid; }); }).filter(Boolean);
+  var unowned = phrases.filter(function(item){ return getMemoryState(item.id) !== 'mastered'; });
+
+  var stateCfgMap = {
+    mastered:  { label:'Own It', color:'var(--green)',   bg:'rgba(45,158,107,0.12)' },
+    reviewing: { label:'Solid',  color:'var(--primary)', bg:'rgba(232,93,4,0.1)' },
+    learning:  { label:'Fuzzy',  color:'#B7791F',        bg:'rgba(255,183,3,0.15)' },
+    unseen:    { label:'New',    color:'var(--muted)',   bg:'var(--border)' }
+  };
+
+  var phraseRows = phrases.map(function(item) {
+    var cfg = stateCfgMap[getMemoryState(item.id)];
+    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">' +
+      '<div style="flex:1;">' +
+        '<div style="font-weight:700;font-size:0.95rem;">' + esc(item.spanish) + '</div>' +
+        '<div style="font-size:0.72rem;color:var(--muted);">' + esc(item.english) + '</div>' +
+      '</div>' +
+      '<span style="font-size:0.65rem;font-weight:800;padding:2px 8px;border-radius:99px;background:' + cfg.bg + ';color:' + cfg.color + ';white-space:nowrap;">' + cfg.label + '</span>' +
+    '</div>';
+  }).join('');
+
+  var statusBadge = status === 'done'
+    ? '<span style="background:rgba(45,158,107,0.15);color:var(--green);font-weight:800;font-size:0.72rem;padding:3px 10px;border-radius:99px;">Achieved ✓</span>'
+    : status === 'partial'
+    ? '<span style="background:rgba(255,183,3,0.2);color:#B7791F;font-weight:800;font-size:0.72rem;padding:3px 10px;border-radius:99px;">In Progress</span>'
+    : '<span style="background:var(--border);color:var(--muted);font-weight:800;font-size:0.72rem;padding:3px 10px;border-radius:99px;">Not Yet</span>';
+
+  var drillBtns = '';
+  if (status === 'done') {
+    drillBtns = '<button class="btn btn-secondary" style="width:100%;" onclick="startGoalDrillMode(\'' + goalId + '\',\'all\')">Review All ' + phrases.length + ' Phrases</button>';
+  } else if (unowned.length > 0) {
+    drillBtns =
+      '<button class="btn btn-primary" style="width:100%;font-size:1rem;padding:14px;margin-bottom:10px;" onclick="startGoalDrillMode(\'' + goalId + '\',\'weak\')">Drill ' + unowned.length + ' Phrase' + (unowned.length !== 1 ? 's' : '') + ' Not Yet Owned →</button>' +
+      (phrases.length > unowned.length ? '<button class="btn btn-secondary" style="width:100%;" onclick="startGoalDrillMode(\'' + goalId + '\',\'all\')">Drill All ' + phrases.length + ' Phrases</button>' : '');
+  } else {
+    drillBtns = '<button class="btn btn-primary" style="width:100%;font-size:1rem;padding:14px;" onclick="startGoalDrillMode(\'' + goalId + '\',\'all\')">Drill All ' + phrases.length + ' Phrases →</button>';
+  }
+
+  document.getElementById('main-content').innerHTML =
+    '<button class="btn btn-secondary btn-sm" style="margin-bottom:16px;" onclick="switchTab(\'mastery\')">← Can-Do Goals</button>' +
+    '<div class="card" style="margin-bottom:12px;">' +
+      '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px;">' +
+        '<div>' +
+          '<div style="font-size:0.68rem;font-weight:800;text-transform:uppercase;color:var(--muted);letter-spacing:0.5px;margin-bottom:3px;">' + esc(goal.category) + '</div>' +
+          '<div style="font-size:1.05rem;font-weight:800;line-height:1.3;">' + esc(goal.title) + '</div>' +
+        '</div>' +
+        statusBadge +
+      '</div>' +
+      '<div style="font-size:0.78rem;color:var(--muted);margin-bottom:12px;line-height:1.5;">' + esc(goal.desc) + '</div>' +
+      '<div style="font-size:0.7rem;font-weight:800;text-transform:uppercase;color:var(--muted);letter-spacing:0.5px;margin-bottom:2px;">Phrases for this goal</div>' +
+      phraseRows +
+    '</div>' +
+    drillBtns;
+}
+
+function startGoalDrillMode(goalId, which) {
+  var goal = CAN_DO_GOALS.find(function(g){ return g.id === goalId; });
+  if (!goal) return;
+  var needed = goal.requiredPhrases || [];
+  var all = needed.map(function(pid){ return CONTENT.find(function(c){ return c.id === pid; }); }).filter(Boolean);
+  var items = which === 'weak'
+    ? all.filter(function(item){ return getMemoryState(item.id) !== 'mastered'; })
+    : all;
+  if (items.length === 0) { showToast('All phrases owned!'); switchTab('mastery'); return; }
+  items = items.slice().sort(function(){ return Math.random() - 0.5; });
+  modeState = { mode: 'listen-repeat', items: items, index: 0, results: [], revealed: false, showHint: false, backTab: 'mastery' };
+  renderModeCard();
+}
+
 function renderCandoSection() {
   var doneCt = 0, partialCt = 0, newCt = 0;
   var goalCards = CAN_DO_GOALS.map(function(goal) {
@@ -3891,7 +3972,7 @@ function renderCandoSection() {
       return '<div style="width:12px;height:12px;border-radius:50%;background:' + color + ';flex-shrink:0;" title="' + pid + ' conf:' + conf + '"></div>';
     }).join('');
 
-    return '<div class="cando-goal ' + status + '">' +
+    return '<div class="cando-goal ' + status + '" style="cursor:pointer;" onclick="showGoalDrill(\'' + goal.id + '\')">' +
       '<div class="cando-top">' +
         '<div>' +
           '<div class="cando-title">' + esc(goal.title) + '</div>' +
@@ -3900,9 +3981,12 @@ function renderCandoSection() {
         '<span class="cando-status ' + statusCls + '">' + statusLabel + '</span>' +
       '</div>' +
       '<div style="font-size:0.78rem;color:var(--muted);margin:6px 0;line-height:1.5;">' + esc(goal.desc) + '</div>' +
-      '<div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;">' +
-        '<span style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px;margin-right:3px;">Key phrases:</span>' +
-        phraseProgress +
+      '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">' +
+        '<div style="display:flex;gap:5px;align-items:center;">' +
+          '<span style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px;margin-right:3px;">Key phrases:</span>' +
+          phraseProgress +
+        '</div>' +
+        (status !== 'done' ? '<span style="font-size:0.72rem;color:var(--primary);font-weight:700;">Drill phrases →</span>' : '<span style="font-size:0.72rem;color:var(--green);font-weight:700;">Review →</span>') +
       '</div>' +
     '</div>';
   }).join('');
@@ -4019,6 +4103,57 @@ function renderProgress() {
       '</div>' +
       '<div style="font-size:0.68rem;color:var(--muted);margin-top:8px;">Based on what you\'ve actually done — no self-rating.</div>' +
     '</div>';
+
+  // Week trend card
+  var weekTrend = (function() {
+    var now = new Date();
+    var days = [];
+    for (var i = 0; i < 14; i++) {
+      var d = new Date(now); d.setDate(d.getDate() - i);
+      days.push(d.toISOString().slice(0, 10));
+    }
+    var thisWeek = days.slice(0, 7);
+    var lastWeek = days.slice(7, 14);
+
+    function weekStats(weekDays) {
+      var activeDays = 0, starsEarned = 0;
+      weekDays.forEach(function(d) {
+        var entry = S.dailyStars[d];
+        if (entry) {
+          var count = Object.values(entry).filter(Boolean).length;
+          if (count > 0) activeDays++;
+          starsEarned += count;
+        }
+      });
+      return { activeDays: activeDays, starsEarned: starsEarned };
+    }
+
+    var tw = weekStats(thisWeek);
+    var lw = weekStats(lastWeek);
+
+    function trend(a, b) {
+      if (b === 0 && a === 0) return '';
+      if (b === 0) return '<span style="color:var(--green);font-size:0.7rem;font-weight:700;">NEW</span>';
+      if (a > b) return '<span style="color:var(--green);font-size:0.7rem;font-weight:700;">↑ ' + (a - b) + '</span>';
+      if (a < b) return '<span style="color:var(--primary);font-size:0.7rem;font-weight:700;">↓ ' + (b - a) + '</span>';
+      return '<span style="color:var(--muted);font-size:0.7rem;">—</span>';
+    }
+
+    return '<div class="card" style="margin-bottom:14px;">' +
+      '<div style="font-weight:800;font-size:0.95rem;margin-bottom:10px;">This Week vs Last Week</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;">' +
+        '<div></div>' +
+        '<div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;color:var(--muted);">This Week</div>' +
+        '<div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;color:var(--muted);">Last Week</div>' +
+        '<div style="font-size:0.75rem;color:var(--muted);text-align:left;">Days practiced</div>' +
+        '<div style="font-weight:800;color:var(--primary);">' + tw.activeDays + '/7 ' + trend(tw.activeDays, lw.activeDays) + '</div>' +
+        '<div style="color:var(--muted);">' + lw.activeDays + '/7</div>' +
+        '<div style="font-size:0.75rem;color:var(--muted);text-align:left;">Stars earned</div>' +
+        '<div style="font-weight:800;color:var(--gold);">' + tw.starsEarned + ' ' + trend(tw.starsEarned, lw.starsEarned) + '</div>' +
+        '<div style="color:var(--muted);">' + lw.starsEarned + '</div>' +
+      '</div>' +
+    '</div>';
+  })();
 
   var xpCard =
     '<div class="card" style="margin-bottom:14px;">' +
@@ -4140,7 +4275,7 @@ function renderProgress() {
       '</div>';
   })();
 
-  return candoSection + ownershipSummary + scoreBreakdown + xpCard + badgesHTML + statsGrid + missionsSection + domainMap + starsHistory + teacherBtn;
+  return candoSection + ownershipSummary + scoreBreakdown + weekTrend + xpCard + badgesHTML + statsGrid + missionsSection + domainMap + starsHistory + teacherBtn;
 }
 
 function showTeacherView() {
@@ -4426,34 +4561,46 @@ function resetApp() {
 // ===================================================
 function showPanic() {
   document.getElementById('panic-overlay').classList.remove('hidden');
+  setSosCtx('general');
   S.stats.panicOpens = (S.stats.panicOpens || 0) + 1;
   saveState();
   checkBadges();
 }
 function closePanic() { document.getElementById('panic-overlay').classList.add('hidden'); }
 
+function setSosCtx(ctx) {
+  document.querySelectorAll('.sos-chip').forEach(function(c) {
+    c.style.background = c.dataset.ctx === ctx ? 'var(--primary)' : 'var(--border)';
+    c.style.color = c.dataset.ctx === ctx ? '#fff' : 'var(--text)';
+  });
+  document.querySelectorAll('.panic-group[data-ctx]').forEach(function(g) {
+    var ctxs = g.dataset.ctx.split(',');
+    g.style.display = ctx === 'general' || ctxs.includes(ctx) ? '' : 'none';
+  });
+}
+
 // ===================================================
 // BADGES & XP
 // ===================================================
 const BADGES = [
-  { id:'B01', icon:'👣', name:'First Step',      desc:'Complete your first speak rep',          check:()=> S.stats.totalSpeakReps >= 1 },
-  { id:'B02', icon:'🔥', name:'On a Roll',       desc:'Reach a 3-day streak',                   check:()=> S.streak.current >= 3 },
-  { id:'B03', icon:'⚔️', name:'Week Warrior',    desc:'Reach a 7-day streak',                   check:()=> S.streak.current >= 7 },
-  { id:'B04', icon:'📅', name:'Consistent',      desc:'Reach a 14-day streak',                  check:()=> S.streak.current >= 14 },
-  { id:'B05', icon:'🚀', name:'Unstoppable',     desc:'Reach a 30-day streak',                  check:()=> S.streak.current >= 30 },
-  { id:'B06', icon:'📖', name:'Story Reader',    desc:'Complete your first story',              check:()=> Object.values(S.storyProgress||{}).some(p=>p.completed) },
-  { id:'B07', icon:'🏆', name:'Story Master',    desc:'Complete all stories',                   check:()=> Object.values(S.storyProgress||{}).filter(p=>p.completed).length >= STORIES.length },
-  { id:'B08', icon:'🎙️', name:'Speaker',         desc:'Log 25 speak reps',                      check:()=> S.stats.totalSpeakReps >= 25 },
-  { id:'B09', icon:'💬', name:'Fluent Rep',      desc:'Log 100 speak reps',                     check:()=> S.stats.totalSpeakReps >= 100 },
-  { id:'B10', icon:'🧩', name:'Chunk Collector', desc:'Practice 10 word chunks',               check:()=> Object.keys(S.progress).filter(id=>id.startsWith('CH-')&&S.progress[id].lastReviewed).length >= 10 },
-  { id:'B11', icon:'📚', name:'Grammar Nerd',    desc:'Read all grammar lessons',               check:()=> (S.stats.grammarRead||0) >= GRAMMAR.length },
-  { id:'B12', icon:'⚡', name:'Panic-Proof',     desc:'Open the Panic Sheet 5 times',           check:()=> (S.stats.panicOpens||0) >= 5 },
-  { id:'B13', icon:'🔄', name:'Review Warrior',  desc:'Complete 50 review reps',                check:()=> S.stats.totalReviewReps >= 50 },
-  { id:'B14', icon:'⭐', name:'5-Star Day',      desc:'Earn all 5 Daily Stars in one day',      check:()=> Object.values(S.dailyStars).some(d=>d.speak&&d.listen&&d.recall&&d.conversation&&d.comeback) },
-  { id:'B15', icon:'💪', name:'Comeback Kid',    desc:'Complete 3 comeback sessions',           check:()=> S.stats.comebacks >= 3 },
-  { id:'B16', icon:'🎯', name:'Sharp Shooter',   desc:'Reach a practice score of 40',           check:()=> calcPracticeScore() >= 40 },
-  { id:'B17', icon:'🌟', name:'High Achiever',   desc:'Reach a practice score of 75',           check:()=> calcPracticeScore() >= 75 },
-  { id:'B18', icon:'🧠', name:'Deep Learner',    desc:'Practice items in 5 different domains',  check:()=> new Set(Object.keys(S.progress).map(id=>{const c=CONTENT.find(x=>x.id===id);return c?.domain;}).filter(Boolean)).size >= 5 },
+  { id:'B01', icon:'👣', name:'First Step',      desc:'Said Spanish out loud for the first time',                               check:()=> S.stats.totalSpeakReps >= 1 },
+  { id:'B02', icon:'🔥', name:'On a Roll',       desc:'3 days in a row — the habit is forming',                                 check:()=> S.streak.current >= 3 },
+  { id:'B03', icon:'⚔️', name:'Week Warrior',    desc:'A full week without stopping. You\'re building something real.',          check:()=> S.streak.current >= 7 },
+  { id:'B04', icon:'📅', name:'Consistent',      desc:'Two weeks. No luck — this is discipline.',                               check:()=> S.streak.current >= 14 },
+  { id:'B05', icon:'🚀', name:'Unstoppable',     desc:'30 days straight. Most people quit in week one. You didn\'t.',            check:()=> S.streak.current >= 30 },
+  { id:'B06', icon:'📖', name:'Story Reader',    desc:'Read your first story in Spanish — context is how language sticks',      check:()=> Object.values(S.storyProgress||{}).some(p=>p.completed) },
+  { id:'B07', icon:'🏆', name:'Story Master',    desc:'Every story finished. You\'ve heard real Spanish in real situations.',    check:()=> Object.values(S.storyProgress||{}).filter(p=>p.completed).length >= STORIES.length },
+  { id:'B08', icon:'🎙️', name:'Speaker',         desc:'25 times you chose to speak out loud instead of just reading',           check:()=> S.stats.totalSpeakReps >= 25 },
+  { id:'B09', icon:'💬', name:'Voice of 100',    desc:'100 speak reps. Your mouth knows these phrases now.',                    check:()=> S.stats.totalSpeakReps >= 100 },
+  { id:'B10', icon:'🧩', name:'Chunk Collector', desc:'Practiced 10 word chunks — the fastest path to fluent-sounding Spanish', check:()=> Object.keys(S.progress).filter(id=>id.startsWith('CH-')&&S.progress[id].lastReviewed).length >= 10 },
+  { id:'B11', icon:'📚', name:'Grammar Nerd',    desc:'Read every grammar note. Now you understand the why, not just the what.', check:()=> (S.stats.grammarRead||0) >= GRAMMAR.length },
+  { id:'B12', icon:'⚡', name:'Panic-Proof',     desc:'Opened the SOS sheet 5 times — you always know where to look',           check:()=> (S.stats.panicOpens||0) >= 5 },
+  { id:'B13', icon:'🔄', name:'Review Warrior',  desc:'50 review reps — you\'re fighting forgetting on purpose',                check:()=> S.stats.totalReviewReps >= 50 },
+  { id:'B14', icon:'⭐', name:'5-Star Day',      desc:'Spoke, listened, recalled, conversed, and came back — all in one day',   check:()=> Object.values(S.dailyStars).some(d=>d.speak&&d.listen&&d.recall&&d.conversation&&d.comeback) },
+  { id:'B15', icon:'💪', name:'Comeback Kid',    desc:'Returned after gaps 3 times. Consistency isn\'t about never missing.',   check:()=> S.stats.comebacks >= 3 },
+  { id:'B16', icon:'🎯', name:'Sharp Shooter',   desc:'Practice score hit 40 — you\'re past the beginner plateau',              check:()=> calcPracticeScore() >= 40 },
+  { id:'B17', icon:'🌟', name:'High Achiever',   desc:'Practice score hit 75 — your Spanish is actually working in real life',  check:()=> calcPracticeScore() >= 75 },
+  { id:'B18', icon:'🧠', name:'Deep Learner',    desc:'Explored 5 different areas of Spanish — food, travel, health, and more', check:()=> new Set(Object.keys(S.progress).map(id=>{const c=CONTENT.find(x=>x.id===id);return c?.domain;}).filter(Boolean)).size >= 5 },
 ];
 
 function awardXP(amount) {
