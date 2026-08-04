@@ -768,6 +768,7 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
     <div class="modal-handle"></div>
     <div class="modal-title">⚡ Panic Sheet</div>
     <div class="modal-subtitle">Real-life Spanish phrases — right now, when you need them. Tap any phrase to hear it.</div>
+    <button class="btn btn-primary btn-full" style="margin-bottom:12px;" onclick="startRepairDrill()">🔁 Drill Rescue Phrases — Speak From Memory</button>
 
     <div class="panic-group">
       <div class="panic-group-title">I Don't Understand</div>
@@ -1691,6 +1692,9 @@ var FIELD_MISSIONS = [
   { id:'FM-06', icon:'🛒', title:'Complete a Store Transaction in Spanish', desc:'Ask for what you need, find out the price, and complete a purchase — all in Spanish.', prepPhrases:['D9-001','D9-002','D3-005'], prepNote:'Know your numbers and "¿Cuánto cuesta?" before you go.', difficulty:2, mins:5 },
   { id:'FM-07', icon:'🏥', title:'Practice a Health Conversation', desc:'At a pharmacy or clinic, say what you need in Spanish. Or practice at home with a mirror — describe a symptom.', prepPhrases:['D4-001','D4-002','D4-003'], prepNote:'Practice saying what hurts and asking for help.', difficulty:3, mins:10, disclaimer:'For real emergencies, always contact medical professionals or call 911.' },
 ];
+
+// Core rescue phrases — memorize these for real-life panic moments
+var REPAIR_PHRASE_IDS = ['HVP-002','HVP-003','D1-018','D1-017','D1-016','D1-020','D3-008'];
 
 // ===================================================
 // DAILY LESSONS — 10-lesson curriculum
@@ -2868,6 +2872,17 @@ function startLessonDrill(lessonId, count) {
   renderModeCard();
 }
 
+function startRepairDrill() {
+  closePanic();
+  var items = REPAIR_PHRASE_IDS
+    .map(function(id){ return CONTENT.find(function(c){ return c.id === id; }); })
+    .filter(Boolean)
+    .sort(function(){ return Math.random() - 0.5; });
+  modeState = { mode: 'speak-memory', items: items, index: 0, results: [], revealed: false, showHint: false, backTab: 'practice' };
+  switchTab('practice');
+  renderModeCard();
+}
+
 function showLessonPicker(lessonId) {
   var lesson = LESSONS.find(function(l){ return l.id === lessonId; });
   if (!lesson) return;
@@ -4028,23 +4043,46 @@ function renderProgress() {
     }).join('') +
     '</div>';
 
+  var sfmRepsN = S.stats.speakFromMemoryReps || 0;
+  var convoTotalN = S.stats.convoTotal || 0;
+  var convoCorrectN = S.stats.convoCorrect || 0;
+  var convoPctN = convoTotalN >= 3 ? Math.round(convoCorrectN / convoTotalN * 100) + '%' : '—';
+
   var statsGrid =
     '<div class="section-label">Stats</div>' +
     '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px;">' +
-    [
-      ['🔥','Streak', S.streak.current + ' days'],
-      ['⭐','Stars Earned', totalStars],
-      ['🎙️','Speak Reps', S.stats.totalSpeakReps],
-      ['📚','Review Reps', S.stats.totalReviewReps],
-      ['🔄','Comebacks', S.stats.comebacks],
-      ['🧠','Practice Score', score],
-    ].map(function(row) {
-      return '<div class="card" style="text-align:center;padding:14px;">' +
-        '<div style="font-size:1.4rem;">' + row[0] + '</div>' +
-        '<div style="font-size:1.3rem;font-weight:800;color:var(--primary);">' + row[2] + '</div>' +
-        '<div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;font-weight:700;">' + row[1] + '</div>' +
-      '</div>';
-    }).join('') +
+      '<div class="card" style="text-align:center;padding:14px;">' +
+        '<div style="font-size:1.4rem;">🔥</div>' +
+        '<div style="font-size:1.3rem;font-weight:800;color:var(--primary);">' + S.streak.current + '</div>' +
+        '<div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;font-weight:700;">Day Streak</div>' +
+      '</div>' +
+      '<div class="card" style="text-align:center;padding:14px;">' +
+        '<div style="font-size:1.4rem;">⭐</div>' +
+        '<div style="font-size:1.3rem;font-weight:800;color:var(--primary);">' + totalStars + '</div>' +
+        '<div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;font-weight:700;">Stars Earned</div>' +
+      '</div>' +
+      '<div class="card" style="text-align:center;padding:14px;">' +
+        '<div style="font-size:1.4rem;">🎙️</div>' +
+        '<div style="font-size:1.3rem;font-weight:800;color:var(--primary);">' + (S.stats.totalSpeakReps || 0) + '</div>' +
+        '<div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;font-weight:700;">Speak Reps</div>' +
+        (sfmRepsN > 0 ? '<div style="font-size:0.65rem;color:var(--green);font-weight:700;margin-top:2px;">' + sfmRepsN + ' from memory</div>' : '') +
+      '</div>' +
+      '<div class="card" style="text-align:center;padding:14px;">' +
+        '<div style="font-size:1.4rem;">💬</div>' +
+        '<div style="font-size:1.3rem;font-weight:800;color:var(--primary);">' + convoPctN + '</div>' +
+        '<div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;font-weight:700;">Convo Accuracy</div>' +
+        (convoTotalN > 0 ? '<div style="font-size:0.65rem;color:var(--muted);margin-top:2px;">' + convoTotalN + ' answered</div>' : '') +
+      '</div>' +
+      '<div class="card" style="text-align:center;padding:14px;">' +
+        '<div style="font-size:1.4rem;">📚</div>' +
+        '<div style="font-size:1.3rem;font-weight:800;color:var(--primary);">' + (S.stats.totalReviewReps || 0) + '</div>' +
+        '<div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;font-weight:700;">Review Reps</div>' +
+      '</div>' +
+      '<div class="card" style="text-align:center;padding:14px;">' +
+        '<div style="font-size:1.4rem;">🔄</div>' +
+        '<div style="font-size:1.3rem;font-weight:800;color:var(--primary);">' + (S.stats.comebacks || 0) + '</div>' +
+        '<div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;font-weight:700;">Comebacks</div>' +
+      '</div>' +
     '</div>';
 
   var domainMap =
@@ -5335,6 +5373,10 @@ function renderPractice() {
           '<span class="practice-hub-icon">🏡</span>' +
           '<span class="practice-hub-text"><strong>Field Missions</strong><span>Real-world tasks you do with actual people · log what happened</span></span>' +
           fmBadge +
+        '</div>' +
+        '<div class="practice-hub-option" onclick="startRepairDrill()">' +
+          '<span class="practice-hub-icon">🔁</span>' +
+          '<span class="practice-hub-text"><strong>Rescue Phrase Drill</strong><span>7 phrases you need when things go wrong — drill until automatic</span></span>' +
         '</div>';
     })() +
 
