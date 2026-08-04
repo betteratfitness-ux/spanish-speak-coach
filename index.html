@@ -2395,7 +2395,7 @@ function renderToday() {
         '<div class="daily-lesson-day">📅 Today — Day ' + lesson.day + ' of ' + LESSONS.length + '</div>' +
         '<div class="daily-lesson-topic">' + lesson.icon + ' ' + lesson.topic + '</div>' +
         '<div class="daily-lesson-desc">' + lesson.desc + '</div>' +
-        '<button class="daily-lesson-btn" onclick="startLesson(\'' + lesson.id + '\')">▶ Start Today\'s Spanish</button>' +
+        '<button class="daily-lesson-btn" onclick="showLessonBrief(\'' + lesson.id + '\')">▶ Start Today\'s Spanish</button>' +
       '</div>';
 
   // Quick stats row — renamed "Fluency" → "Score"
@@ -2475,16 +2475,57 @@ function renderToday() {
       '</div>' +
     '</div>';
 
+  var canDoCard = renderTodayCanDoCard();
+
   return '<div class="section-label">📅 ' + new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}) + '</div>' +
     comebackCard +
     backupCard +
     lessonCard +
     statsRow +
+    canDoCard +
     reviewCard +
     starsCard +
     partnerCard +
     nudgeCard +
     emergencyCard;
+}
+
+function renderTodayCanDoCard() {
+  var bestGoal = null;
+  var bestScore = -1;
+  CAN_DO_GOALS.forEach(function(goal) {
+    var status = checkCanDoGoal(goal);
+    if (status === 'done') return;
+    var needed = goal.requiredPhrases || [];
+    var owned = needed.filter(function(pid) {
+      var p = S.progress[pid];
+      return p && (p.confidence || 1) >= 3;
+    }).length;
+    var score = status === 'partial' ? 100 + owned : owned;
+    if (score > bestScore) { bestScore = score; bestGoal = goal; }
+  });
+  if (!bestGoal) return '';
+
+  var needed = bestGoal.requiredPhrases || [];
+  var owned = needed.filter(function(pid) {
+    var p = S.progress[pid];
+    return p && (p.confidence || 1) >= 3;
+  }).length;
+  var status = checkCanDoGoal(bestGoal);
+  var pct = needed.length > 0 ? Math.round(owned / needed.length * 100) : 0;
+  var barFill = '<div style="height:6px;border-radius:3px;background:var(--border);overflow:hidden;margin-bottom:6px;">' +
+    '<div style="height:100%;width:' + pct + '%;background:var(--green);border-radius:3px;transition:width 0.4s;"></div>' +
+  '</div>';
+
+  return '<div class="card" style="border-left:4px solid var(--green);margin-bottom:14px;cursor:pointer;" onclick="switchTab(\'mastery\')">' +
+    '<div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;color:var(--green);letter-spacing:0.5px;margin-bottom:4px;">🎯 Next Can-Do Goal · ' + bestGoal.category + '</div>' +
+    '<div style="font-weight:700;font-size:0.92rem;margin-bottom:2px;">' + esc(bestGoal.title) + '</div>' +
+    '<div style="font-size:0.72rem;color:var(--muted);margin-bottom:8px;">' + owned + ' of ' + needed.length + ' phrases solid</div>' +
+    barFill +
+    (status === 'partial'
+      ? '<div style="font-size:0.72rem;color:var(--green);font-weight:700;">Almost there! Keep practicing.</div>'
+      : '<div style="font-size:0.72rem;color:var(--muted);">Practice the phrases in this goal to unlock it.</div>') +
+  '</div>';
 }
 
 // ===================================================
@@ -5472,6 +5513,44 @@ function isTodayLessonDone() {
   const lesson = getCurrentLesson();
   const done = S.user.lessonDates || {};
   return done[lesson.id] === today();
+}
+
+function showLessonBrief(lessonId) {
+  var lesson = LESSONS.find(function(l){ return l.id === lessonId; });
+  if (!lesson) return startLesson(lessonId);
+  var items = lesson.itemIds.map(function(id){ return CONTENT.find(function(c){ return c.id === id; }); }).filter(Boolean);
+  var previewPhrases = items.slice(0, 4).map(function(item){
+    return '<div style="display:flex;align-items:baseline;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">' +
+      '<div style="flex:1;">' +
+        '<div style="font-weight:700;font-size:0.95rem;">' + esc(item.spanish) + '</div>' +
+        '<div style="font-size:0.7rem;color:var(--primary);font-style:italic;">' + esc(item.pron) + '</div>' +
+      '</div>' +
+      '<div style="font-size:0.8rem;color:var(--muted);flex-shrink:0;">' + esc(item.english) + '</div>' +
+    '</div>';
+  }).join('');
+  var remainder = items.length > 4
+    ? '<div style="font-size:0.72rem;color:var(--muted);padding-top:6px;">+ ' + (items.length - 4) + ' more phrases</div>'
+    : '';
+  document.getElementById('main-content').innerHTML =
+    '<button class="btn btn-secondary btn-sm" style="margin-bottom:16px;" onclick="switchTab(\'today\')">← Today</button>' +
+    '<div class="card" style="margin-bottom:12px;">' +
+      '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">' +
+        '<div style="font-size:2.2rem;line-height:1;">' + lesson.icon + '</div>' +
+        '<div>' +
+          '<div style="font-size:0.68rem;font-weight:800;text-transform:uppercase;color:var(--muted);letter-spacing:0.5px;">Day ' + lesson.day + ' of ' + LESSONS.length + '</div>' +
+          '<div style="font-size:1.15rem;font-weight:800;line-height:1.2;">' + esc(lesson.topic) + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:16px;font-size:0.75rem;color:var(--muted);margin-bottom:14px;">' +
+        '<span>⏱ ~10 min</span>' +
+        '<span>💬 ' + items.length + ' phrases</span>' +
+        (lesson.convo && lesson.convo.length > 0 ? '<span>🎙️ Mini convo</span>' : '') +
+      '</div>' +
+      '<div style="font-size:0.7rem;font-weight:800;text-transform:uppercase;color:var(--muted);letter-spacing:0.5px;margin-bottom:2px;">You\'ll learn</div>' +
+      previewPhrases +
+      remainder +
+    '</div>' +
+    '<button class="btn btn-primary" style="width:100%;font-size:1rem;padding:14px;" onclick="startLesson(\'' + lessonId + '\')">Let\'s Go →</button>';
 }
 
 function startLesson(lessonId) {
