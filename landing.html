@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spanish Speak Coach — Speak Spanish in Real Life</title>
+<meta name="description" content="A 30-day speaking coach for people who are serious about finally using their Spanish. No account. No download. Free to start.">
+<style>
+/* ── TOKENS ──────────────────────────────────────────────── */
+:root {
+  --ink: #0F0E0C;
+  --ink-soft: #1E1C18;
+  --ground: #F5F1EB;
+  --surface: #FDFCFA;
+  --fire: #E85D04;
+  --ember: #B84800;
+  --ash: #5A534D;
+  --ash-light: #8A837C;
+  --border: #E0D8CF;
+  --on-dark: #F5F0E8;
+  --on-dark-muted: #A89F97;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ground: #1A1714;
+    --surface: #231F1C;
+    --ash: #9C9490;
+    --ash-light: #6E6864;
+    --border: #2E2A26;
+    --on-dark: #F5F0E8;
+  }
+}
+:root[data-theme="light"] {
+  --ground: #F5F1EB;
+  --surface: #FDFCFA;
+  --ash: #5A534D;
+  --ash-light: #8A837C;
+  --border: #E0D8CF;
+}
+:root[data-theme="dark"] {
+  --ground: #1A1714;
+  --surface: #231F1C;
+  --ash: #9C9490;
+  --ash-light: #6E6864;
+  --border: #2E2A26;
+}
+
+/* ── RESET ───────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--ground);
+  color: var(--ink);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── TYPE SCALE ──────────────────────────────────────────── */
+.label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ash-light);
+}
+
+.label--fire { color: var(--fire); }
+
+/* ── LAYOUT ──────────────────────────────────────────────── */
+.wrap {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ── HEADER ──────────────────────────────────────────────── */
+.site-header {
+  background: var(--ink);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.site-header .wordmark {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--on-dark-muted);
+  letter-spacing: 0.04em;
+}
+
+.site-header .open-link {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--fire);
+  text-decoration: none;
+  border: 1px solid rgba(232,93,4,0.45);
+  padding: 6px 14px;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+}
+.site-header .open-link:hover { background: var(--fire); color: #fff; }
+
+/* ── HERO ────────────────────────────────────────────────── */
+.hero {
+  background: var(--ink);
+  padding: 72px 24px 80px;
+  text-align: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.hero-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 99px;
+  padding: 5px 14px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--on-dark-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+
+.hero-speak {
+  font-size: clamp(5.5rem, 20vw, 14rem);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 0.88;
+  color: var(--fire);
+  display: block;
+  margin-bottom: 20px;
+}
+
+.hero-headline {
+  font-size: clamp(1.5rem, 4vw, 2.6rem);
+  font-weight: 800;
+  color: var(--on-dark);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  text-wrap: balance;
+  margin-bottom: 12px;
+}
+
+.hero-sub {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  color: var(--on-dark-muted);
+  margin-bottom: 40px;
+  text-wrap: balance;
+}
+
+.btn-hero {
+  display: inline-block;
+  background: var(--fire);
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  padding: 16px 32px;
+  border-radius: 10px;
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  transition: background 0.15s, transform 0.1s;
+  box-shadow: 0 4px 20px rgba(232,93,4,0.35);
+}
+.btn-hero:hover { background: var(--ember); transform: translateY(-1px); box-shadow: 0 6px 24px rgba(232,93,4,0.4); }
+.btn-hero:active { transform: translateY(0); }
+
+.hero-fine {
+  margin-top: 16px;
+  font-size: 0.78rem;
+  color: var(--on-dark-muted);
+  letter-spacing: 0.02em;
+}
+
+/* ── FOR WHO ─────────────────────────────────────────────── */
+.section-for-who {
+  background: var(--surface);
+  padding: 72px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.for-who-inner {
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+.for-who-inner .label { margin-bottom: 16px; display: block; }
+
+.for-who-inner h2 {
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  line-height: 1.2;
+  text-wrap: balance;
+  margin-bottom: 20px;
+}
+
+:root[data-theme="dark"] .for-who-inner h2,
+@media (prefers-color-scheme: dark) {
+  .for-who-inner h2 { color: var(--on-dark); }
+}
+
+.for-who-inner p {
+  font-size: 1.05rem;
+  color: var(--ash);
+  line-height: 1.75;
+  margin-bottom: 14px;
+}
+
+.for-who-inner p:last-child { margin-bottom: 0; }
+
+.for-who-inner strong { color: var(--ink); font-weight: 700; }
+
+/* ── HOW IT WORKS ────────────────────────────────────────── */
+.section-how {
+  background: var(--ground);
+  padding: 80px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-how .label { display: block; text-align: center; margin-bottom: 14px; }
+
+.section-how h2 {
+  font-size: clamp(1.5rem, 3.5vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-align: center;
+  text-wrap: balance;
+  color: var(--ink);
+  margin-bottom: 52px;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  max-width: 780px;
+  margin: 0 auto;
+}
+
+@media (max-width: 600px) {
+  .steps { grid-template-columns: 1fr; gap: 28px; }
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.step-icon {
+  font-size: 1.75rem;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+
+.step-num {
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--fire);
+}
+
+.step h3 {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.step p {
+  font-size: 0.88rem;
+  color: var(--ash);
+  line-height: 1.65;
+}
+
+/* Dark mode text fixes for steps */
+@media (prefers-color-scheme: dark) {
+  .section-how h2, .step h3 { color: var(--on-dark); }
+}
+:root[data-theme="dark"] .section-how h2,
+:root[data-theme="dark"] .step h3 { color: var(--on-dark); }
+
+/* ── FEATURES ────────────────────────────────────────────── */
+.section-features {
+  background: var(--surface);
+  padding: 80px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-features .label { display: block; text-align: center; margin-bottom: 14px; }
+
+.section-features h2 {
+  font-size: clamp(1.5rem, 3.5vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-align: center;
+  text-wrap: balance;
+  color: var(--ink);
+  margin-bottom: 48px;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  max-width: 780px;
+  margin: 0 auto;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+@media (max-width: 600px) {
+  .features-grid { grid-template-columns: 1fr 1fr; }
+}
+
+.feature-tile {
+  background: var(--surface);
+  padding: 24px 20px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.feature-tile:nth-child(3n) { border-right: none; }
+.feature-tile:nth-last-child(-n+3) { border-bottom: none; }
+
+@media (max-width: 600px) {
+  .feature-tile:nth-child(3n) { border-right: 1px solid var(--border); }
+  .feature-tile:nth-last-child(-n+3) { border-bottom: 1px solid var(--border); }
+  .feature-tile:nth-child(2n) { border-right: none; }
+  .feature-tile:nth-last-child(-n+2) { border-bottom: none; }
+}
+
+.feature-tile-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+.feature-tile h3 {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--ink);
+  margin-bottom: 5px;
+  letter-spacing: -0.01em;
+}
+
+.feature-tile p {
+  font-size: 0.78rem;
+  color: var(--ash);
+  line-height: 1.6;
+}
+
+@media (prefers-color-scheme: dark) {
+  .section-features h2, .feature-tile h3 { color: var(--on-dark); }
+}
+:root[data-theme="dark"] .section-features h2,
+:root[data-theme="dark"] .feature-tile h3 { color: var(--on-dark); }
+
+/* ── QUOTE ───────────────────────────────────────────────── */
+.section-quote {
+  background: var(--ground);
+  padding: 72px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.quote-inner {
+  max-width: 560px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.quote-mark {
+  font-size: 3rem;
+  line-height: 1;
+  color: var(--fire);
+  margin-bottom: 12px;
+  font-family: Georgia, serif;
+}
+
+.quote-text {
+  font-size: clamp(1.1rem, 3vw, 1.45rem);
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.45;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+  margin-bottom: 20px;
+}
+
+.quote-attr {
+  font-size: 0.78rem;
+  color: var(--ash);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+
+@media (prefers-color-scheme: dark) {
+  .quote-text { color: var(--on-dark); }
+}
+:root[data-theme="dark"] .quote-text { color: var(--on-dark); }
+
+/* ── CTA ─────────────────────────────────────────────────── */
+.section-cta {
+  background: var(--ink-soft);
+  padding: 96px 24px;
+  text-align: center;
+}
+
+.section-cta .label--fire { margin-bottom: 16px; display: block; }
+
+.section-cta h2 {
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  font-weight: 900;
+  color: var(--on-dark);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  text-wrap: balance;
+  margin-bottom: 12px;
+}
+
+.section-cta h2 span { color: var(--fire); }
+
+.section-cta p {
+  font-size: 1rem;
+  color: var(--on-dark-muted);
+  margin-bottom: 36px;
+  text-wrap: balance;
+}
+
+.cta-fine {
+  margin-top: 16px;
+  font-size: 0.78rem;
+  color: var(--on-dark-muted);
+  opacity: 0.7;
+}
+
+/* ── FOOTER ──────────────────────────────────────────────── */
+.site-footer {
+  background: var(--ink);
+  padding: 28px 24px;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--on-dark-muted);
+  opacity: 0.6;
+}
+
+/* ── DIVIDER RULE ────────────────────────────────────────── */
+.step + .step {
+  padding-left: 0;
+}
+
+@media (min-width: 601px) {
+  .step:not(:last-child) {
+    padding-right: 32px;
+    border-right: 1px solid var(--border);
+  }
+}
+
+/* ── REDUCED MOTION ──────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .btn-hero, .site-header .open-link { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <span class="wordmark">🇪🇸 Spanish Speak Coach</span>
+  <a href="index.html" class="open-link">Open App →</a>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-flag">🎙️ &nbsp;A 30-Day Speaking Coach</div>
+  <span class="hero-speak">speak.</span>
+  <h1 class="hero-headline">Spanish in real life.</h1>
+  <p class="hero-sub">Not someday. In 30 days.</p>
+  <a href="index.html" class="btn-hero">Start Speaking Spanish →</a>
+  <p class="hero-fine">No account &nbsp;·&nbsp; No download &nbsp;·&nbsp; Free to start</p>
+</section>
+
+<!-- FOR WHO -->
+<section class="section-for-who">
+  <div class="for-who-inner">
+    <span class="label">Who it's for</span>
+    <h2>Built for people who've been here before.</h2>
+    <p>You took a class. You downloaded an app. You made some flashcards. You can say "hola" and order at a Mexican restaurant. But you <strong>freeze when a real conversation starts</strong> — and you've been meaning to fix that for a while.</p>
+    <p>This is for that moment. You're not starting from zero. You're starting from <strong>restart</strong>. And a restart is faster than a beginning.</p>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section-how">
+  <div class="wrap">
+    <span class="label">How it works</span>
+    <h2>Three things you do every day.</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-icon">📅</div>
+        <div class="step-num">Day 1 of 30</div>
+        <h3>One lesson, every day</h3>
+        <p>Ten minutes. Eight phrases. You never have to decide what to study — just show up and it tells you exactly what to do.</p>
+      </div>
+      <div class="step">
+        <div class="step-icon">🎙️</div>
+        <div class="step-num">Your mouth does the reps</div>
+        <h3>Say the words out loud</h3>
+        <p>You hear it, then you say it, then you produce it from memory with no hints. Your mouth learns the sounds — not just your eyes.</p>
+      </div>
+      <div class="step">
+        <div class="step-icon">🌎</div>
+        <div class="step-num">Before you need it</div>
+        <h3>Practice real conversations</h3>
+        <p>Roleplay scenarios, field missions, rescue phrases. You walk through the full arc of a conversation before you're in one. No surprises.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section-features">
+  <div class="wrap">
+    <span class="label">What's inside</span>
+    <h2>Everything you need to actually speak.</h2>
+    <div class="features-grid">
+      <div class="feature-tile">
+        <div class="feature-tile-icon">📚</div>
+        <h3>30-Day Curriculum</h3>
+        <p>A clear path from Day 1 to Day 30. You always know what's next.</p>
+      </div>
+      <div class="feature-tile">
+        <div class="feature-tile-icon">🔁</div>
+        <h3>Spaced Repetition</h3>
+        <p>Phrases you've missed come back at exactly the right time to stick.</p>
+      </div>
+      <div class="feature-tile">
+        <div class="feature-tile-icon">🎭</div>
+        <h3>Roleplay Scenarios</h3>
+        <p>6 scripted conversations — restaurant, doctor, directions, hotel, and more.</p>
+      </div>
+      <div class="feature-tile">
+        <div class="feature-tile-icon">🌍</div>
+        <h3>Field Missions</h3>
+        <p>Real tasks to complete with real Spanish speakers, with a log when you're done.</p>
+      </div>
+      <div class="feature-tile">
+        <div class="feature-tile-icon">⚡</div>
+        <h3>SOS Panic Sheet</h3>
+        <p>The phrases you need mid-conversation, right now, organized by situation.</p>
+      </div>
+      <div class="feature-tile">
+        <div class="feature-tile-icon">✅</div>
+        <h3>Can-Do Goals</h3>
+        <p>Track real outcomes — "I can order food," "I can ask for directions."</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- QUOTE -->
+<section class="section-quote">
+  <div class="quote-inner">
+    <div class="quote-mark">"</div>
+    <p class="quote-text">Your starting point is not a judgment. It is your map.</p>
+    <p class="quote-attr">Spanish Speak Coach &nbsp;·&nbsp; Day 1 Diagnostic</p>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section-cta">
+  <span class="label label--fire">Ready?</span>
+  <h2>Start speaking <span>today.</span></h2>
+  <p>Free. Works in your browser. No account needed.<br>Your first lesson is 10 minutes.</p>
+  <a href="index.html" class="btn-hero">Open Spanish Speak Coach →</a>
+  <p class="cta-fine">Works on any phone or computer &nbsp;·&nbsp; Your progress saves automatically</p>
+</section>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  Spanish Speak Coach &nbsp;·&nbsp; A Better Fitness project
+</footer>
+
+</body>
+</html>
