@@ -2248,8 +2248,32 @@ function dismissComeback() {
   switchTab('today');
 }
 
+function startComebackWarmup() {
+  // Find phrases from the last completed lesson
+  var lastLessonId = null;
+  var dates = S.user.lessonDates || {};
+  var sortedLessons = LESSONS.filter(function(l) { return dates[l.id]; })
+    .sort(function(a, b) { return a.day - b.day; });
+  var lastLesson = sortedLessons[sortedLessons.length - 1];
+
+  var warmupItems;
+  if (lastLesson) {
+    warmupItems = lastLesson.itemIds
+      .map(function(id) { return CONTENT.find(function(c) { return c.id === id; }); })
+      .filter(Boolean)
+      .sort(function() { return Math.random() - 0.5; })
+      .slice(0, 5);
+  } else {
+    // No lesson done yet — use lowest-confidence items
+    warmupItems = getModeItems(5, null);
+  }
+
+  dismissComeback(); // clear the flag
+  modeState = { mode: 'listen-repeat', items: warmupItems, index: 0, results: [], revealed: false, showHint: false, backTab: 'today' };
+  renderModeCard();
+}
+
 function dismissBackupReminder() {
-  S.stats.backupReminderDismissed = true;
   S.stats.lastBackupPrompt = today();
   saveState();
   switchTab('today');
@@ -2280,13 +2304,12 @@ function renderToday() {
       : 'You\'ve been away for ' + days + ' days. That happens. Coming back is the hard part — and you did it.';
     comebackCard =
       '<div class="card" style="border-left:4px solid var(--green);margin-bottom:14px;background:rgba(72,199,142,0.06);">' +
-        '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">' +
-          '<div>' +
-            '<div style="font-weight:700;font-size:0.95rem;color:var(--green);">Welcome back.</div>' +
-            '<div style="font-size:0.82rem;color:var(--text);margin-top:4px;line-height:1.5;">' + msg + '</div>' +
-            '<div style="font-size:0.78rem;color:var(--muted);margin-top:6px;">Your review queue is capped at 7 today — not everything at once.</div>' +
-          '</div>' +
-          '<button class="btn btn-secondary btn-sm" style="flex-shrink:0;" onclick="dismissComeback()">Got it</button>' +
+        '<div style="font-weight:700;font-size:0.95rem;color:var(--green);margin-bottom:5px;">Welcome back. 👋</div>' +
+        '<div style="font-size:0.82rem;color:var(--text);margin-bottom:6px;line-height:1.5;">' + msg + '</div>' +
+        '<div style="font-size:0.78rem;color:var(--muted);margin-bottom:12px;">Your review queue is capped at 7 today — not everything at once.</div>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+          '<button class="btn btn-primary btn-sm" onclick="startComebackWarmup()">▶ 5-Min Warm-Up</button>' +
+          '<button class="btn btn-secondary btn-sm" onclick="dismissComeback()">Skip to today\'s lesson</button>' +
         '</div>' +
       '</div>';
   }
@@ -2295,7 +2318,7 @@ function renderToday() {
   var backupCard = '';
   var lastPrompt = S.stats.lastBackupPrompt;
   var daysSincePrompt = lastPrompt ? Math.round((new Date(today()) - new Date(lastPrompt)) / 86400000) : 999;
-  if (activeDays >= 7 && !S.stats.backupReminderDismissed && daysSincePrompt >= 30) {
+  if (activeDays >= 7 && daysSincePrompt >= 30) {
     backupCard =
       '<div class="card" style="border-left:4px solid var(--primary);margin-bottom:14px;">' +
         '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">' +
@@ -2326,13 +2349,48 @@ function renderToday() {
   ).join('');
 
   // Daily lesson card
+  // Next-step cards shown after lesson is done
+  var nextStepsHtml = '';
+  if (lessonDone) {
+    var nextRp = ROLEPLAY_SCENARIOS.find(function(sc) { return !(S.rpHistory[sc.id] && S.rpHistory[sc.id].completions > 0); });
+    var nextFm = FIELD_MISSIONS.find(function(m) { return !(S.fmLog[m.id] && S.fmLog[m.id].some(function(l){ return l.completed; })); });
+    var rpDone = Object.values(S.rpHistory).filter(function(h){ return h.completions > 0; }).length;
+    var suggestions = [];
+    if (nextRp) suggestions.push(
+      '<div class="card" style="display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;" onclick="switchTab(\'roleplay\')">' +
+        '<div style="font-size:1.6rem;line-height:1;">🎭</div>' +
+        '<div style="flex:1;">' +
+          '<div style="font-weight:700;font-size:0.88rem;">' + esc(nextRp.title) + '</div>' +
+          '<div style="font-size:0.72rem;color:var(--muted);">Roleplay · ' + rpDone + '/' + ROLEPLAY_SCENARIOS.length + ' done</div>' +
+        '</div>' +
+        '<div style="color:var(--muted);">›</div>' +
+      '</div>'
+    );
+    if (nextFm) suggestions.push(
+      '<div class="card" style="display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;" onclick="switchTab(\'reallife\')">' +
+        '<div style="font-size:1.6rem;line-height:1;">' + nextFm.icon + '</div>' +
+        '<div style="flex:1;">' +
+          '<div style="font-weight:700;font-size:0.88rem;">' + esc(nextFm.title) + '</div>' +
+          '<div style="font-size:0.72rem;color:var(--muted);">Field Mission · ~' + nextFm.mins + ' min · ' + (nextFm.difficulty === 1 ? 'Easy' : 'Medium') + '</div>' +
+        '</div>' +
+        '<div style="color:var(--muted);">›</div>' +
+      '</div>'
+    );
+    if (suggestions.length > 0) {
+      nextStepsHtml =
+        '<div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;color:var(--muted);letter-spacing:0.5px;margin:8px 0 6px;">What\'s Next</div>' +
+        suggestions.join('');
+    }
+  }
+
   const lessonCard = lessonDone
     ? '<div class="daily-lesson-card">' +
         '<div class="daily-lesson-day">Day ' + lesson.day + ' — ' + lesson.topic + '</div>' +
         '<div class="daily-lesson-topic">' + lesson.icon + ' Lesson Complete!</div>' +
         '<div class="daily-lesson-done">✓ You finished today\'s lesson. Great work.</div>' +
         '<button class="daily-lesson-btn" style="margin-top:10px;background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.4);" onclick="switchTab(\'practice\')">More Practice →</button>' +
-      '</div>'
+      '</div>' +
+      nextStepsHtml
     : '<div class="daily-lesson-card">' +
         '<div class="daily-lesson-day">📅 Today — Day ' + lesson.day + ' of ' + LESSONS.length + '</div>' +
         '<div class="daily-lesson-topic">' + lesson.icon + ' ' + lesson.topic + '</div>' +
@@ -2668,10 +2726,51 @@ function getModeItems(count = 10, domainFilter = null) {
   return scored.sort((a, b) => b.score - a.score).slice(0, count).map(s => s.item);
 }
 
-function startMode(mode, domainFilter = null, backTab = 'speak') {
-  const items = getModeItems(10, domainFilter);
+function startMode(mode, domainFilter, backTab, count) {
+  domainFilter = domainFilter || null;
+  backTab = backTab || 'speak';
+  var n = count != null ? count : 10;
+  const items = getModeItems(n, domainFilter);
   modeState = { mode, items, index: 0, results: [], revealed: false, showHint: false, backTab };
   renderModeCard();
+}
+
+function showSessionPicker(mode) {
+  var modeNames = {
+    'listen-repeat': 'Listen → Repeat',
+    'en-to-es': 'English → Spanish',
+    'es-to-en': 'Spanish → English',
+    'speak-memory': 'Speak From Memory',
+    'speed-round': 'Speed Round'
+  };
+  var modeName = modeNames[mode] || mode;
+  document.getElementById('main-content').innerHTML =
+    '<div style="margin-bottom:12px;">' +
+      '<button class="btn btn-secondary btn-sm" onclick="switchTab(\'practice\')">← Practice</button>' +
+    '</div>' +
+    '<div class="card" style="text-align:center;margin-bottom:16px;">' +
+      '<div style="font-size:1.1rem;font-weight:800;margin-bottom:4px;">' + esc(modeName) + '</div>' +
+      '<div style="font-size:0.82rem;color:var(--muted);">How much time do you have?</div>' +
+    '</div>' +
+    '<div class="session-pick">' +
+      '<div class="sp-opt" onclick="startMode(\'' + mode + '\',null,\'practice\',5)">' +
+        '<div class="sp-time">5</div>' +
+        '<div class="sp-label">Quick</div>' +
+        '<div style="font-size:0.65rem;color:var(--muted);margin-top:3px;">~5 min</div>' +
+      '</div>' +
+      '<div class="sp-opt sp-selected" onclick="startMode(\'' + mode + '\',null,\'practice\',10)">' +
+        '<div class="sp-time">10</div>' +
+        '<div class="sp-label">Standard</div>' +
+        '<div style="font-size:0.65rem;color:var(--muted);margin-top:3px;">~10 min</div>' +
+      '</div>' +
+      '<div class="sp-opt" onclick="startMode(\'' + mode + '\',null,\'practice\',20)">' +
+        '<div class="sp-time">20</div>' +
+        '<div class="sp-label">Deep</div>' +
+        '<div style="font-size:0.65rem;color:var(--muted);margin-top:3px;">~20 min</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="nudge-card">Your mouth needs reps, not just eyes. Say every phrase out loud.</div>';
+  window.scrollTo(0, 0);
 }
 
 function startDrillDomain(domainKey) {
@@ -2691,7 +2790,7 @@ function quickSpeak(itemId) {
 function modeShell(index, total, inner) {
   const pct = Math.round((index / total) * 100);
   const backTab = modeState?.backTab || 'speak';
-  const backLabel = backTab === 'learn' ? '← Learn' : '← Speak';
+  const backLabel = backTab === 'learn' ? '← Learn' : backTab === 'practice' ? '← Practice' : backTab === 'today' ? '← Today' : '← Speak';
   return `
     <div style="margin-bottom:10px;display:flex;align-items:center;gap:8px;">
       <button class="btn btn-secondary btn-sm" onclick="switchTab('${backTab}')">${backLabel}</button>
@@ -5048,29 +5147,29 @@ function renderPractice() {
     '<div class="section-label" style="margin-top:4px;">Practice Modes</div>' +
     '<div class="nudge-card">Your mouth needs reps, not just eyes. Pick a mode and speak every single card.</div>' +
 
-    '<div class="practice-hub-option" onclick="startMode(\'listen-repeat\')">' +
+    '<div class="practice-hub-option" onclick="showSessionPicker(\'listen-repeat\')">' +
       '<span class="practice-hub-icon">👂</span>' +
       '<span class="practice-hub-text"><strong>Listen → Repeat</strong><span>See a phrase · hear it · say it · rate confidence</span></span>' +
     '</div>' +
 
-    '<div class="practice-hub-option" onclick="startMode(\'en-to-es\')">' +
+    '<div class="practice-hub-option" onclick="showSessionPicker(\'en-to-es\')">' +
       '<span class="practice-hub-icon">🧠</span>' +
       '<span class="practice-hub-text"><strong>English → Spanish</strong><span>See English · produce Spanish out loud · check yourself</span></span>' +
     '</div>' +
 
-    '<div class="practice-hub-option" onclick="startMode(\'es-to-en\')">' +
+    '<div class="practice-hub-option" onclick="showSessionPicker(\'es-to-en\')">' +
       '<span class="practice-hub-icon">🔄</span>' +
       '<span class="practice-hub-text"><strong>Spanish → English</strong><span>See Spanish · say the meaning · then say the Spanish again</span></span>' +
     '</div>' +
 
-    '<div class="practice-hub-option" onclick="startMode(\'speak-memory\')">' +
+    '<div class="practice-hub-option" onclick="showSessionPicker(\'speak-memory\')">' +
       '<span class="practice-hub-icon">🎯</span>' +
       '<span class="practice-hub-text"><strong>Speak From Memory</strong><span>No hints. Produce from memory. Highest-value drill.</span></span>' +
     '</div>' +
 
-    '<div class="practice-hub-option" onclick="startMode(\'speed-round\')">' +
+    '<div class="practice-hub-option" onclick="showSessionPicker(\'speed-round\')">' +
       '<span class="practice-hub-icon">⚡</span>' +
-      '<span class="practice-hub-text"><strong>Speed Round</strong><span>10 fast prompts. Build instinct-level response speed.</span></span>' +
+      '<span class="practice-hub-text"><strong>Speed Round</strong><span>Fast prompts. Build instinct-level response speed.</span></span>' +
     '</div>' +
 
     '<div class="section-label" style="margin-top:20px;">Review & Spaced Repetition</div>' +
