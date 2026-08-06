@@ -807,6 +807,18 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
 .s2-phase-chip.now { background:rgba(45,158,107,0.12); color:var(--green); }
 .s2-phase-chip.soon { background:rgba(232,93,4,0.1); color:var(--primary); }
 .s2-phase-chip.later { background:var(--border); color:var(--muted); }
+
+/* Listening Drills */
+.ld-play-wrap { text-align:center; padding:24px 0 18px; }
+.ld-play-btn { width:76px; height:76px; border-radius:50%; background:var(--primary); color:white; font-size:2rem; border:none; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; box-shadow:0 6px 20px rgba(232,93,4,0.35); transition:transform 0.12s,box-shadow 0.12s; }
+.ld-play-btn:active { transform:scale(0.92); box-shadow:0 2px 8px rgba(232,93,4,0.25); }
+.ld-hint { font-size:0.72rem; color:var(--muted); text-align:center; margin-top:10px; }
+.ld-think-box { background:var(--bg); border-radius:10px; padding:14px; text-align:center; margin:16px 0; }
+.ld-reveal-box { background:rgba(232,93,4,0.06); border:2px solid rgba(232,93,4,0.4); border-radius:12px; padding:18px; text-align:center; margin-bottom:14px; }
+.ld-spanish { font-size:2rem; font-weight:900; color:var(--text); line-height:1.2; margin-bottom:6px; }
+.ld-english { font-size:0.92rem; color:var(--muted); }
+.ld-pron { font-size:0.78rem; color:var(--primary); font-style:italic; margin-top:6px; }
+.ld-again-btn { background:none; border:1px solid var(--border); border-radius:20px; padding:6px 16px; font-size:0.8rem; color:var(--muted); cursor:pointer; display:inline-flex; align-items:center; gap:6px; margin-bottom:14px; }
 </style>
 </head>
 <body>
@@ -3477,6 +3489,40 @@ function renderModeCard() {
       `}`;
   }
 
+  // ── LISTENING CHALLENGE ───────────────────────────────
+  if (mode === 'listen') {
+    var li = item;
+    inner = revealed ? `
+      <div class="card-title">👂 Listening Challenge</div>
+      <div class="ld-reveal-box">
+        <div class="ld-spanish">${esc(li.spanish)}</div>
+        <div class="ld-english">${esc(li.english)}</div>
+        ${li.pron ? `<div class="ld-pron">${esc(li.pron)}</div>` : ''}
+      </div>
+      <div style="text-align:center;margin-bottom:14px;">
+        <button class="ld-again-btn" data-speak="${esc(li.spanish)}" onclick="speakSpanish(this.dataset.speak,this)">🔊 Hear it again</button>
+      </div>
+      ${li.example ? `<div style="background:var(--bg);border-radius:8px;padding:10px 12px;font-size:0.82rem;margin-bottom:14px;"><em>${esc(li.example)}</em><br><span style="color:var(--muted);">${esc(li.exampleEn)}</span></div>` : ''}
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-green" style="flex:1;" onclick="recordListenResult('correct')">✓ Got It</button>
+        <button class="btn" style="flex:1;background:#FEEBC8;color:#7B341E;" onclick="recordListenResult('guessed')">~ Mostly</button>
+        <button class="btn" style="flex:1;background:#FED7D7;color:#9B2C2C;" onclick="recordListenResult('missed')">✗ Missed</button>
+      </div>
+    ` : `
+      <div class="card-title">👂 Listening Challenge</div>
+      <div style="font-size:0.78rem;color:var(--muted);text-align:center;">Audio only — no text. What did you hear?</div>
+      <div class="ld-play-wrap">
+        <button class="ld-play-btn" id="ld-play-btn" data-speak="${esc(li.spanish)}" onclick="speakSpanish(this.dataset.speak,this)">🔊</button>
+        <div class="ld-hint">Tap to replay · listen as many times as you need</div>
+      </div>
+      <div class="ld-think-box">
+        <div style="font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:5px;">What did you hear?</div>
+        <div style="font-size:0.85rem;color:var(--text);">Form the phrase in your head · then reveal</div>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="revealAnswer()">I Think I Heard It → Reveal</button>
+    `;
+  }
+
   // ── SENTENCE BUILDER ──────────────────────────────────
   if (mode === 'build') {
     var sp = item; // item is a SENTENCE_PROMPT object
@@ -3518,6 +3564,10 @@ function renderModeCard() {
   // Auto-play the Spanish phrase when card loads in listen-repeat mode
   if (mode === 'listen-repeat' && S.settings.autoPlayAudio && !modeState.revealed) {
     setTimeout(() => speakSpanish(item.spanish), 200);
+  }
+  // Always auto-play for Listening Challenge — that's the whole point
+  if (mode === 'listen' && !modeState.revealed) {
+    setTimeout(() => speakSpanish(item.spanish), 450);
   }
 }
 
@@ -3578,6 +3628,31 @@ function recordSentenceResult(result) {
   renderModeCard();
 }
 
+function startListenDrills(backTab) {
+  backTab = backTab || 'practice';
+  // Pull from phrases the user has encountered; fall back to all content
+  var encountered = CONTENT.filter(function(c) { return S.progress && S.progress[c.id]; });
+  var pool = encountered.length >= 15 ? encountered : CONTENT;
+  var items = pool.slice().sort(function() { return Math.random() - 0.5; }).slice(0, 10);
+  modeState = { mode: 'listen', items: items, index: 0, results: [], revealed: false, backTab: backTab, listenStarAwarded: false };
+  renderModeCard();
+}
+
+function recordListenResult(result) {
+  var xpMap = { correct: 10, guessed: 6, missed: 2 };
+  S.stats.xp = (S.stats.xp || 0) + xpMap[result];
+  S.stats.listenDrillReps = (S.stats.listenDrillReps || 0) + 1;
+  if (result !== 'missed' && !modeState.listenStarAwarded) {
+    awardStar('listen');
+    modeState.listenStarAwarded = true;
+  }
+  modeState.results.push({ id: modeState.items[modeState.index].id, result: result });
+  modeState.index += 1;
+  modeState.revealed = false;
+  saveState();
+  renderModeCard();
+}
+
 function startSentenceBuilder(backTab) {
   backTab = backTab || 'speak';
   var items = SENTENCE_PROMPTS.slice().sort(function(){ return Math.random() - 0.5; }).slice(0, 10);
@@ -3601,7 +3676,7 @@ function renderModeComplete() {
     .filter(Boolean).slice(0, 3);
 
   const emoji = correct === total ? '🌟' : correct > total / 2 ? '✅' : '💪';
-  const modeLabel = { 'listen-repeat':'Listen → Repeat','en-to-es':'English → Spanish','es-to-en':'Spanish → English','speak-memory':'Speak From Memory','speed-round':'Speed Round','build':'Sentence Builder' }[mode] || mode;
+  const modeLabel = { 'listen-repeat':'Listen → Repeat','en-to-es':'English → Spanish','es-to-en':'Spanish → English','speak-memory':'Speak From Memory','speed-round':'Speed Round','build':'Sentence Builder','listen':'Listening Challenge' }[mode] || mode;
 
   document.getElementById('main-content').innerHTML = `
     <div class="card" style="text-align:center;">
@@ -4362,7 +4437,8 @@ function renderStage2TodayCard() {
     missionLine +
     '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
       '<button class="btn btn-primary btn-sm" onclick="showStage2Overview()">My Roadmap →</button>' +
-      '<button class="btn btn-secondary btn-sm" onclick="startSentenceBuilder(\'today\')">Sentence Builder</button>' +
+      '<button class="btn btn-secondary btn-sm" onclick="startListenDrills(\'today\')">Listening</button>' +
+      '<button class="btn btn-secondary btn-sm" onclick="startSentenceBuilder(\'today\')">Sentences</button>' +
       '<button class="btn btn-secondary btn-sm" onclick="startReadingTasks()">Reading</button>' +
     '</div>' +
   '</div>';
@@ -4397,6 +4473,7 @@ function renderStage2Overview() {
 
   var habits = [
     { icon:'🧠', title:'Review phrases', desc:'5 min · phrases you\'ve missed or haven\'t seen lately', action:'startReviewSession()', label:'Review' },
+    { icon:'🎧', title:'Listening Challenge', desc:'10 phrases · audio only · train your ear without the text crutch', action:'startListenDrills(\'today\')', label:'Listen' },
     { icon:'✍️', title:'Sentence Builder', desc:'10 prompts · produce full sentences from real situations', action:'startSentenceBuilder(\'today\')', label:'Build' },
     { icon:'📖', title:'Reading Task', desc:'One real text · WhatsApp, menus, signs, emails', action:'startReadingTasks()', label:'Read' },
     { icon:'🎭', title:'Roleplay Scenario', desc:'A scripted conversation · say the right thing at the right time', action:'switchTab(\'roleplay\')', label:'Practice' },
@@ -6443,6 +6520,16 @@ function renderPractice() {
       '<span class="practice-hub-icon">👂</span>' +
       '<span class="practice-hub-text"><strong>Listen → Repeat</strong><span>See a phrase · hear it · say it · rate confidence</span></span>' +
     '</div>' +
+
+    (function() {
+      var reps = S.stats.listenDrillReps || 0;
+      var badge = reps > 0 ? '<span class="practice-hub-badge" style="background:var(--primary);">' + reps + ' reps</span>' : '';
+      return '<div class="practice-hub-option" onclick="startListenDrills(\'practice\')">' +
+        '<span class="practice-hub-icon">🎧</span>' +
+        '<span class="practice-hub-text"><strong>Listening Challenge</strong><span>Audio only — no text · hear a phrase · say what you heard · then reveal</span></span>' +
+        badge +
+      '</div>';
+    })() +
 
     '<div class="practice-hub-option" onclick="showSessionPicker(\'en-to-es\')">' +
       '<span class="practice-hub-icon">🧠</span>' +
