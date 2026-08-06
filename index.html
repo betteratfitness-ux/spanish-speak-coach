@@ -819,6 +819,11 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
 .ld-english { font-size:0.92rem; color:var(--muted); }
 .ld-pron { font-size:0.78rem; color:var(--primary); font-style:italic; margin-top:6px; }
 .ld-again-btn { background:none; border:1px solid var(--border); border-radius:20px; padding:6px 16px; font-size:0.8rem; color:var(--muted); cursor:pointer; display:inline-flex; align-items:center; gap:6px; margin-bottom:14px; }
+/* Cultural Notes */
+.cultural-note { background:linear-gradient(135deg,rgba(13,148,136,0.09),rgba(13,148,136,0.04)); border:2px solid rgba(13,148,136,0.28); border-radius:var(--radius); padding:14px; margin-top:12px; }
+.cn-eyebrow { font-size:0.6rem; font-weight:900; text-transform:uppercase; letter-spacing:1px; color:#0D9488; margin-bottom:5px; }
+.cn-body { font-size:0.84rem; color:var(--text); line-height:1.62; }
+
 /* Mini-Challenge Card */
 .mc-card { overflow:hidden; padding:0; }
 .mc-header { background:linear-gradient(135deg,#7B2FBE 0%,#9D3FDE 100%); padding:9px 14px; display:flex; align-items:center; justify-content:space-between; }
@@ -3012,6 +3017,45 @@ function getNudge() {
     "You do not need a perfect day. You need one speaking rep.",
   ];
   return nudges.length > 0 ? nudges[0] : fallback[Math.floor(Math.random() * fallback.length)];
+}
+
+var CULTURAL_NOTES = {
+  D1:  { emoji:'🤝', headline:'Greetings Are Non-Negotiable', note:'In most Spanish-speaking countries, walking into a shop or someone\'s home without greeting everyone in the room is considered genuinely rude — even if they\'re strangers. A quick "¡Buenos días!" acknowledges people as people, not furniture. The greeting isn\'t small talk; it\'s respect.' },
+  D2:  { emoji:'🍽️', headline:'Lunch Is the Main Event', note:'In much of Latin America and Spain, lunch (la comida) is the biggest meal of the day — not dinner. It often runs 2–3 hours and doubles as family time. Many businesses still close from 2–4pm for this reason. If someone invites you to lunch, clear your afternoon.' },
+  D3:  { emoji:'🧾', headline:'Ask for the Bill — It Won\'t Come to You', note:'In Spanish-speaking restaurants, the check is never brought to you automatically — that would be seen as rushing you out. The table is yours for as long as you like. When you\'re ready, catch the server\'s eye and say "¿Nos trae la cuenta?" You have to ask.' },
+  D4:  { emoji:'💊', headline:'The Pharmacy Is Also Your Doctor', note:'In much of Latin America, the pharmacy (la farmacia) is a first line of healthcare. Pharmacists regularly diagnose common ailments and recommend medications without requiring a prescription. It\'s faster, cheaper, and often just as effective for everyday health issues.' },
+  D5:  { emoji:'☕', headline:'Relationships Before Business', note:'In Latin American professional culture, trust comes before transactions. Expect the first meeting to involve coffee, family questions, and personal conversation — not a pitch deck. Jumping straight to business signals that you don\'t value the relationship, which means the deal won\'t happen anyway.' },
+  D6:  { emoji:'💬', headline:'Disagreement Has a Softer Script', note:'Openly contradicting someone in Spanish-speaking cultures can feel confrontational. Locals soften disagreement with phrases like "Puede ser, pero..." (Could be, but...) or "Lo que pasa es que..." (The thing is...). The goal is to redirect, not debate. Agreement and harmony are social values.' },
+  D7:  { emoji:'👤', headline:'Tú vs. Usted — It Really Matters', note:'Spanish has two words for "you" — tú (informal) and usted (formal). Using tú with an elder or a stranger can read as disrespectful in many countries. The safe move: always start with usted and wait for the other person to invite you to switch. They will, if it feels right.' },
+  D8:  { emoji:'🔢', headline:'Numbers Are Written Differently', note:'In most Spanish-speaking countries, periods and commas swap roles compared to English. One million is written "1.000.000" and one-and-a-half is "1,5." This trips up a lot of English speakers reading price tags and phone numbers. Now you\'re warned.' },
+  D9:  { emoji:'🛍️', headline:'Haggling Is Part of the Experience', note:'In markets across Latin America, the first price is rarely the final price. Offering 50–60% of the asking price and negotiating from there is completely normal — even expected. Fixed-price stores are different, but in markets, haggling is a social ritual, not a confrontation.' },
+  D10: { emoji:'❤️', headline:'Shame and Honor Are Alive in the Language', note:'The Spanish word "vergüenza" (shame/embarrassment) carries deep cultural weight. Saying someone "no tiene vergüenza" — has no shame — is a serious character judgment, not just mild criticism. Dignity, family reputation, and community perception are woven into how people speak about each other.' },
+  D11: { emoji:'🚌', headline:'Wave the Bus Down — It Won\'t Stop Otherwise', note:'In many Latin American cities, buses don\'t stop unless you actively flag them. Wave your arm out firmly to signal you want to board. And when you\'re ready to exit, shout "¡Aquí!" (Here!) or knock loudly — the driver won\'t stop if they don\'t know you want off.' },
+  D12: { emoji:'🏡', headline:'Home Means the Whole Family', note:'Extended family living is the norm in much of Latin America — grandparents, cousins, and aunts under one roof is common and expected, not a hardship. Moving out before marriage (especially for women) is still fairly unusual in many communities. "Home" is a collective noun.' },
+  D13: { emoji:'⏳', headline:'Two Past Tenses, One Feeling', note:'Spanish has two past tenses: the preterite (for completed, bounded events) and the imperfect (for ongoing states and habits). Native speakers switch between them in a single sentence without thinking. The trick: preterite = what happened, imperfect = what was happening. Your ear will learn it before your brain does.' },
+  D14: { emoji:'🚨', headline:'Community Comes Before 911', note:'Emergency numbers in Latin America (usually 911 or local equivalents) exist, but response times vary wildly. In practice, locals often call a trusted neighbor, family member, or community figure first. Social networks are the real emergency infrastructure in many areas.' },
+  D15: { emoji:'⚽', headline:'Fútbol Is Not a Sport — It\'s a Religion', note:'In Latin America, football (soccer) occupies the emotional space that religion and family share everywhere else. When a major team plays, streets empty, flags appear on cars, and grown adults weep openly at a loss. Knowing even one team name gives you an instant conversation with almost any Spanish speaker.' },
+  D16: { emoji:'🏢', headline:'Coworkers Are Actually Friends', note:'In Spanish-speaking workplaces, the boundary between professional and personal is deliberately thin. Colleagues are expected to know each other\'s families, celebrate birthdays together, and genuinely care about each other\'s lives. Warmth and closeness aren\'t unprofessional — they\'re what professionalism looks like.' },
+  D17: { emoji:'📖', headline:'Stories Are Meant to Take Time', note:'In Spanish-speaking cultures, storytelling is a prized art. When sharing something that happened, don\'t rush to the point — build the scene, add detail, let it breathe. A good story told well is a gift. Getting to the punchline too fast signals you don\'t value the moment or the listener.' },
+  D18: { emoji:'⏰', headline:'"Ahorita" Means Many Things', note:'"Ahorita" technically means "right now" in Mexican Spanish — but in practice, it can mean "in a while," "soon-ish," "later today," or politely "probably never." The difference is entirely in the tone and context. Welcome to one of the most lovably ambiguous words in the language.' },
+  D19: { emoji:'🌺', headline:'Everyone at the Market Has a Nickname for You', note:'Market vendors in Latin America address customers as "joven" (young one), "güera/güero" (light-haired), "princesa," "reina," or "mi amor" — regardless of whether any of it applies. It\'s cheerful salesmanship, not commentary on your appearance. Smile and engage; they genuinely enjoy the interaction.' },
+  D20: { emoji:'🪞', headline:'Nicknames About Looks Are Terms of Endearment', note:'In Latin American culture, calling someone "Gordito/a" (chubby), "Flaco/a" (skinny), or "Negro/a" (dark one) between friends and family is affectionate, not insulting. These are common nicknames used with warmth. Context and relationship define the meaning — English-speaker discomfort is real, but the intent is love.' },
+  D21: { emoji:'🏥', headline:'Bring Family to the Doctor', note:'In much of Latin America, medical appointments are not solo events. Family members routinely accompany patients for support, to ask questions, and to help communicate. Doctors are expected to be warm and explanatory — a cold, clinical delivery feels dismissive and untrustworthy.' },
+  D22: { emoji:'📍', headline:'Landmarks Replace Street Numbers', note:'In smaller Latin American towns and some neighborhoods, street addresses use landmarks rather than numbers: "Past the green church, turn left at the blue school, second gate on the right." GPS maps often don\'t have these addresses — locals and their directions are your best navigation tool.' },
+  D23: { emoji:'🌶️', headline:'Mexican Food Is UNESCO Heritage', note:'Mexican cuisine is one of only two culinary traditions recognized as UNESCO Intangible Cultural Heritage. A traditional mole can contain 30+ ingredients and take days to prepare. Food in Mexico isn\'t just sustenance — it\'s cultural identity, family memory, and ceremony, all on one plate.' },
+  D24: { emoji:'🎉', headline:'Arriving "On Time" Is Actually Rude', note:'Showing up exactly at the invited hour to a Latin American party signals that you\'re impatient or overly eager. The cultural norm is to arrive 30–60 minutes after the stated time — the party doesn\'t truly begin until enough people have gathered. The invitation time is more of an earliest-possible suggestion.' },
+  D25: { emoji:'🎓', headline:'Titles Signal Respect', note:'In formal Latin American professional settings, using someone\'s title matters. Calling an engineer "Ingeniero," a lawyer "Licenciado," or a doctor "Doctor" — even in casual conversation — signals respect for their expertise and status. Getting it right opens doors. Ignoring it can quietly close them.' },
+  D26: { emoji:'🌐', headline:'Spanglish Is a Real Language', note:'Code-switching between Spanish and English mid-sentence — called Spanglish — is common and natural in border communities and US Latino culture. It\'s not a sign of weakness in either language; it\'s a sophisticated skill with its own grammar and humor. If you ever find yourself doing it, you\'ve arrived.' },
+};
+
+function getCulturalNoteForLesson(lesson) {
+  if (!lesson) return null;
+  var note = CULTURAL_NOTES[lesson.domain];
+  if (!note && lesson.itemIds && lesson.itemIds.length) {
+    var first = CONTENT.find(function(c){ return c.id === lesson.itemIds[0]; });
+    if (first) note = CULTURAL_NOTES[first.domain];
+  }
+  return note || null;
 }
 
 var MINI_CHALLENGES = [
@@ -8212,6 +8256,16 @@ function renderLessonComplete(ls) {
       '</div>'
     : '';
 
+  // Cultural note for this lesson's domain
+  var cnData = getCulturalNoteForLesson(lesson);
+  var culturalNoteHtml = cnData
+    ? '<div class="cultural-note">' +
+        '<div class="cn-eyebrow">' + cnData.emoji + ' Did You Know?</div>' +
+        '<div style="font-weight:800;font-size:0.9rem;color:#0D9488;margin-bottom:5px;">' + esc(cnData.headline) + '</div>' +
+        '<div class="cn-body">' + esc(cnData.note) + '</div>' +
+      '</div>'
+    : '';
+
   var completeName = S.user.name ? S.user.name.trim().split(' ')[0] : '';
   return '<div class="card" style="text-align:center;">' +
     '<div style="font-size:3rem;margin-bottom:8px;">🌟</div>' +
@@ -8234,6 +8288,7 @@ function renderLessonComplete(ls) {
     '</div>' +
     nextHtml +
     '</div>' +
+    culturalNoteHtml +
     debriefHtml +
     candoUnlockHtml +
     '<div class="btn-row" style="margin-top:14px;">' +
