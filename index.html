@@ -899,6 +899,15 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
 .potd-tip { font-size:0.74rem; color:var(--muted); line-height:1.5; padding:8px 10px; background:var(--bg); border-radius:8px; margin-bottom:12px; }
 .potd-practice-btn { background:var(--primary); color:white; border:none; border-radius:20px; padding:8px 18px; font-size:0.8rem; font-weight:700; cursor:pointer; letter-spacing:0.3px; }
 .potd-practice-btn:hover { background:var(--primary-dark); }
+/* ── Voice Record & Compare ──────────────────────────── */
+.vc-wrap { margin-top:12px; padding:12px 14px; background:rgba(232,93,4,0.05); border-radius:10px; border:1px solid rgba(232,93,4,0.18); }
+.vc-label { font-size:0.68rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:var(--muted); margin-bottom:8px; }
+.vc-btn { display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:8px; font-size:0.82rem; font-weight:700; border:none; cursor:pointer; transition:opacity 0.15s; }
+.vc-btn.idle { background:#FFF5EE; color:var(--primary); }
+.vc-btn.play { background:#EBF8FF; color:#2B6CB0; }
+.vc-dot { width:8px; height:8px; border-radius:50%; background:#C53030; flex-shrink:0; animation:vc-pulse 1s ease-in-out infinite; }
+@keyframes vc-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.75)} }
+
 /* ── Word Tile Challenge ─────────────────────────────── */
 .tile-zone { min-height:58px; display:flex; flex-wrap:wrap; gap:8px; align-items:flex-start; padding:14px; background:rgba(0,0,0,0.04); border-radius:12px; border:2px dashed var(--border); margin-bottom:6px; transition:border-color 0.2s; }
 .tile-zone.has-tiles { border-color:var(--primary); background:rgba(232,93,4,0.04); }
@@ -3422,6 +3431,119 @@ function startPOTDPractice() {
   renderModeCard();
 }
 
+/* ── Voice Record & Compare ──────────────────────────── */
+var recorderState = { phase: 'idle', mediaRecorder: null, chunks: [], audioURL: null };
+
+function vcReset() {
+  if (recorderState.mediaRecorder && recorderState.mediaRecorder.state === 'recording') {
+    try { recorderState.mediaRecorder.stop(); } catch(e) {}
+  }
+  if (recorderState.audioURL) URL.revokeObjectURL(recorderState.audioURL);
+  recorderState = { phase: 'idle', mediaRecorder: null, chunks: [], audioURL: null };
+}
+
+function vcRefresh() {
+  var el = document.getElementById('vc');
+  if (el) el.innerHTML = vcInner();
+}
+
+function vcInner() {
+  var phase = recorderState.phase;
+  if (phase === 'recording') {
+    return '<div style="display:flex;align-items:center;gap:8px;padding:2px 0;">' +
+      '<div class="vc-dot"></div>' +
+      '<span style="font-size:0.85rem;font-weight:700;color:#C53030;">Recording…</span>' +
+      '<span style="font-size:0.75rem;color:var(--muted);margin-left:auto;">4 sec · speak the phrase</span>' +
+    '</div>';
+  }
+  if (phase === 'playing') {
+    return '<span style="font-size:0.82rem;color:var(--muted);">▶ Playing…</span>';
+  }
+  if (phase === 'review') {
+    var item = modeState && modeState.items ? modeState.items[modeState.index] : null;
+    var sp = item ? esc(item.spanish) : '';
+    return '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+      '<button class="vc-btn play" onclick="vcPlayComparison(\'' + sp + '\')">▶ Hear comparison</button>' +
+      '<button class="vc-btn idle" onclick="vcStart()">↺ Redo</button>' +
+    '</div>' +
+    '<div style="font-size:0.68rem;color:var(--muted);margin-top:5px;">Native first · then you · listen for the difference</div>';
+  }
+  // idle
+  return '<button class="vc-btn idle" onclick="vcStart()">🎙 Record yourself</button>' +
+    '<div style="font-size:0.68rem;color:var(--muted);margin-top:5px;">4 seconds · hear your pronunciation vs. native</div>';
+}
+
+async function vcStart() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    alert('Microphone recording is not supported in this browser.');
+    return;
+  }
+  try {
+    var stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    recorderState.chunks = [];
+    recorderState.phase = 'recording';
+    vcRefresh();
+
+    var mr = new MediaRecorder(stream);
+    recorderState.mediaRecorder = mr;
+
+    mr.ondataavailable = function(e) {
+      if (e.data && e.data.size > 0) recorderState.chunks.push(e.data);
+    };
+    mr.onstop = function() {
+      stream.getTracks().forEach(function(t) { t.stop(); });
+      if (recorderState.audioURL) URL.revokeObjectURL(recorderState.audioURL);
+      var blob = new Blob(recorderState.chunks, { type: 'audio/webm' });
+      recorderState.audioURL = URL.createObjectURL(blob);
+      recorderState.phase = 'review';
+      vcRefresh();
+    };
+
+    mr.start(100);
+    setTimeout(function() {
+      if (mr.state === 'recording') mr.stop();
+    }, 4000);
+  } catch(e) {
+    recorderState.phase = 'idle';
+    vcRefresh();
+    if (e.name !== 'NotAllowedError' && e.name !== 'PermissionDeniedError') {
+      alert('Could not access microphone: ' + e.message);
+    }
+  }
+}
+
+function vcPlayComparison(spanishText) {
+  if (!recorderState.audioURL || !spanishText) return;
+  recorderState.phase = 'playing';
+  vcRefresh();
+
+  var utt = new SpeechSynthesisUtterance(spanishText);
+  utt.lang = 'es-ES';
+  utt.rate = S.settings.audioSpeed || 0.9;
+  utt.pitch = 1;
+  utt.volume = 1;
+  if (typeof _spanishVoice !== 'undefined' && _spanishVoice) utt.voice = _spanishVoice;
+
+  var playRecording = function() {
+    setTimeout(function() {
+      var audio = new Audio(recorderState.audioURL);
+      audio.onended = function() { recorderState.phase = 'review'; vcRefresh(); };
+      audio.onerror  = function() { recorderState.phase = 'review'; vcRefresh(); };
+      audio.play().catch(function() { recorderState.phase = 'review'; vcRefresh(); });
+    }, 350);
+  };
+
+  utt.onend  = playRecording;
+  utt.onerror = function() { recorderState.phase = 'review'; vcRefresh(); };
+
+  if (speechSynthesis.speaking || speechSynthesis.pending) {
+    speechSynthesis.cancel();
+    setTimeout(function() { speechSynthesis.speak(utt); }, 80);
+  } else {
+    speechSynthesis.speak(utt);
+  }
+}
+
 /* ── Word Tile Challenge ─────────────────────────────── */
 var tileState = null;
 
@@ -4456,6 +4578,10 @@ function answerBox(item, showPron) {
       </div>
       ${showPron && item.pron ? `<div style="font-size:0.82rem;color:var(--primary);font-style:italic;margin-bottom:4px;">${item.pron}</div>` : ''}
       <div style="font-size:0.85rem;color:var(--muted);">${item.english}</div>
+    </div>
+    <div class="vc-wrap">
+      <div class="vc-label">🎙 Practice your pronunciation</div>
+      <div id="vc">${vcInner()}</div>
     </div>`;
 }
 
@@ -4714,6 +4840,7 @@ function renderModeCard() {
 }
 
 function revealAnswer() {
+  vcReset();
   modeState.revealed = true;
   renderModeCard();
 }
