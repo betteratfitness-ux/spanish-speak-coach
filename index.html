@@ -819,6 +819,23 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
 .ld-english { font-size:0.92rem; color:var(--muted); }
 .ld-pron { font-size:0.78rem; color:var(--primary); font-style:italic; margin-top:6px; }
 .ld-again-btn { background:none; border:1px solid var(--border); border-radius:20px; padding:6px 16px; font-size:0.8rem; color:var(--muted); cursor:pointer; display:inline-flex; align-items:center; gap:6px; margin-bottom:14px; }
+/* Mini-Challenge Card */
+.mc-card { overflow:hidden; padding:0; }
+.mc-header { background:linear-gradient(135deg,#7B2FBE 0%,#9D3FDE 100%); padding:9px 14px; display:flex; align-items:center; justify-content:space-between; }
+.mc-header-label { font-size:0.58rem; font-weight:900; text-transform:uppercase; letter-spacing:1px; color:rgba(255,255,255,0.75); }
+.mc-header-title { font-size:0.88rem; font-weight:800; color:white; margin-top:1px; }
+.mc-body { padding:14px 14px 12px; }
+.mc-situation { font-size:0.95rem; font-weight:700; color:var(--text); margin-bottom:14px; line-height:1.45; }
+.mc-phrase { font-size:1.15rem; font-weight:800; color:var(--text); text-align:center; line-height:1.45; padding:10px 4px 4px; }
+.mc-guide { font-size:0.72rem; color:#9D3FDE; font-style:italic; text-align:center; margin-bottom:14px; }
+.mc-choices { display:flex; flex-direction:column; gap:8px; margin-bottom:4px; }
+.mc-choice-btn { background:var(--surface); border:2px solid var(--border); border-radius:10px; padding:11px 14px; font-size:0.88rem; font-weight:600; color:var(--text); cursor:pointer; text-align:left; transition:border-color 0.12s; }
+.mc-choice-btn:hover:not(:disabled) { border-color:#9D3FDE; }
+.mc-choice-btn.mc-wrong { background:rgba(214,40,40,0.07); border-color:var(--red); color:var(--red); cursor:not-allowed; }
+.mc-done-card { text-align:center; padding:14px 14px 12px; }
+.mc-blank-sentence { font-size:1rem; text-align:center; margin-bottom:6px; line-height:2; }
+.mc-blank { display:inline-block; min-width:64px; border-bottom:2px solid #9D3FDE; color:#9D3FDE; font-weight:800; text-align:center; }
+
 /* Theme Packs */
 .theme-pack-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:4px; }
 .theme-pack-card { background:var(--surface); border:2px solid var(--border); border-radius:var(--radius); padding:14px 12px; cursor:pointer; transition:border-color 0.15s,transform 0.12s; }
@@ -2753,7 +2770,8 @@ const DEFAULT_STATE = {
     speakFromMemoryReps: 0, convoCorrect: 0, convoTotal: 0, reviewCorrect: 0, reviewTotal: 0,
     backupReminderDismissed: false, lastBackupPrompt: null, hvpPracticed: 0,
     lastGraceDay: null, graceDayUsedToday: false,
-    makeItUpStreak: 0, makeItUpExpiry: null },
+    makeItUpStreak: 0, makeItUpExpiry: null,
+    miniChallengeDone: {} },
   ownership: {},   // { itemId: { worldContext: null, sawOwnCard: false } }
   reviewDeck: [],    // array of item ids
   mastery: {},       // { itemId: { mastered:false, masterDate:null } }
@@ -2994,6 +3012,119 @@ function getNudge() {
     "You do not need a perfect day. You need one speaking rep.",
   ];
   return nudges.length > 0 ? nudges[0] : fallback[Math.floor(Math.random() * fallback.length)];
+}
+
+var MINI_CHALLENGES = [
+  { type:'tt',  icon:'👅', title:'Tongue Twister',   phrase:'Tres tristes tigres comían trigo en un trigal.', guide:'tres TREES-tes TEE-gres ko-MEE-an...', explain:'Good work on those T and R sounds — they\'re everywhere in Spanish.' },
+  { type:'fib', icon:'🔤', title:'Fill in the Blank', before:'¿Cuánto', after:'?', hint:'Asking the price of something', choices:['tengo','cuesta','llamo'], correct:1, explain:'"¿Cuánto cuesta?" = "How much does it cost?" — use this every time you shop.' },
+  { type:'qs',  icon:'🎯', title:'Quick Scenario',    situation:'Someone sneezes next to you. What do you say?', choices:['¡Buenas tardes!','¿Qué pasa?','¡Salud!'], correct:2, explain:'"¡Salud!" means "Health!" — the Spanish Bless you.' },
+  { type:'fib', icon:'🔤', title:'Fill in the Blank', before:'Quisiera una mesa para', after:', por favor.', hint:'Requesting a table at a restaurant', choices:['tarde','bien','dos'], correct:2, explain:'"Quisiera una mesa para dos, por favor." — the complete restaurant opener.' },
+  { type:'qs',  icon:'🎯', title:'Quick Scenario',    situation:"You didn't catch what someone said. How do you ask them to repeat?", choices:['¿Puede repetir, por favor?','¿Cómo te llamas?','Tengo hambre.'], correct:0, explain:'"¿Puede repetir?" is your #1 survival phrase — use it freely.' },
+  { type:'tt',  icon:'👅', title:'Tongue Twister',   phrase:'Pedro Pérez Pereira, pobre pintor portugués, pinta pinturas por poco precio.', guide:'Pop those P sounds — almost no puff of air in Spanish', explain:'P sounds in Spanish are softer than English — no air burst.' },
+  { type:'fib', icon:'🔤', title:'Fill in the Blank', before:'¿Dónde está el', after:'?', hint:'Looking for the bathroom', choices:['baño','menú','cambio'], correct:0, explain:'"¿Dónde está el baño?" — know this one cold. You will need it.' },
+  { type:'qs',  icon:'🎯', title:'Quick Scenario',    situation:'You want to order a glass of water at a café.', choices:['¿Cuánto cuesta?','Una agua, por favor.','Me llamo Ana.'], correct:1, explain:'"Una agua, por favor." — simple and works everywhere.' },
+  { type:'fib', icon:'🔤', title:'Fill in the Blank', before:'¿Puede traerme', after:'?', hint:'Asking the waiter for the bill', choices:['la cuenta','el tiempo','un trabajo'], correct:0, explain:'"¿Puede traerme la cuenta?" = "Can you bring me the check?"' },
+  { type:'qs',  icon:'🎯', title:'Quick Scenario',    situation:'You bump into someone on the street by accident. What do you say?', choices:['Mucho gusto.','¿Cómo se llama?','¡Perdón!'], correct:2, explain:'"¡Perdón!" covers "Sorry" and "Excuse me" — one word, a hundred situations.' },
+  { type:'tt',  icon:'👅', title:'Tongue Twister',   phrase:'El cielo está enladrillado. ¿Quién lo desenladrillará?', guide:'en-la-dree-YA-do — now try it fast!', explain:'The -ll- in Spanish sounds like Y. Good for your ear and your mouth.' },
+  { type:'fib', icon:'🔤', title:'Fill in the Blank', before:'Buenas', after:'.', hint:'A greeting you\'d use after 8pm', choices:['tardes','días','noches'], correct:2, explain:'"Buenas noches" = Good evening / Good night. Días = morning, Tardes = afternoon.' },
+  { type:'qs',  icon:'🎯', title:'Quick Scenario',    situation:"Someone asks you ¿Cómo estás? — how do you say you're doing well?", choices:['Tengo hambre.','Muy bien, gracias.','No entiendo.'], correct:1, explain:'"Muy bien, gracias." = "Very well, thanks." — the go-to polite response.' },
+  { type:'tt',  icon:'👅', title:'Tongue Twister',   phrase:'Pablito clavó un clavito. ¿Qué clavito clavó Pablito?', guide:'kla-VO oon kla-VEE-to — crisp V sounds!', explain:'"Clavo" = nail. Trains your V and B — very close sounds in Spanish.' },
+];
+
+var mcState = { date: null, wrong: [] };
+function getMcWrong() {
+  var d = today();
+  if (mcState.date !== d) { mcState.date = d; mcState.wrong = []; }
+  return mcState.wrong;
+}
+
+function getDailyChallenge() {
+  var d = today();
+  var seed = d.split('-').reduce(function(a, p) { return a * 100 + parseInt(p, 10); }, 0);
+  return MINI_CHALLENGES[seed % MINI_CHALLENGES.length];
+}
+
+function isMiniChallengeDone() {
+  return !!(S.stats.miniChallengeDone && S.stats.miniChallengeDone[today()]);
+}
+
+function completeMiniChallenge() {
+  if (!S.stats.miniChallengeDone) S.stats.miniChallengeDone = {};
+  S.stats.miniChallengeDone[today()] = true;
+  S.stats.xp = (S.stats.xp || 0) + 5;
+  saveState();
+  var wrap = document.getElementById('mc-card-wrap');
+  if (wrap) wrap.innerHTML = renderMiniChallengeCard();
+}
+
+function checkMiniChallenge(idx) {
+  var ch = getDailyChallenge();
+  if (idx === ch.correct) {
+    completeMiniChallenge();
+  } else {
+    var wrong = getMcWrong();
+    if (wrong.indexOf(idx) === -1) wrong.push(idx);
+    var wrap = document.getElementById('mc-card-wrap');
+    if (wrap) wrap.innerHTML = renderMiniChallengeCard();
+  }
+}
+
+function renderMiniChallengeCard() {
+  var ch = getDailyChallenge();
+  var done = isMiniChallengeDone();
+
+  if (done) {
+    return '<div class="card mc-done-card">' +
+      '<div style="font-size:1.5rem;margin-bottom:6px;">✅</div>' +
+      '<div style="font-weight:800;color:var(--green);font-size:0.95rem;margin-bottom:6px;">Challenge Done! +5 XP</div>' +
+      (ch.explain ? '<div style="font-size:0.78rem;color:var(--muted);line-height:1.55;">' + esc(ch.explain) + '</div>' : '') +
+    '</div>';
+  }
+
+  var wrong = getMcWrong();
+  var inner = '';
+
+  if (ch.type === 'tt') {
+    inner =
+      '<div class="mc-phrase">' + esc(ch.phrase) + '</div>' +
+      (ch.guide ? '<div class="mc-guide">🔊 ' + esc(ch.guide) + '</div>' : '') +
+      '<button class="btn btn-primary btn-full" style="background:#9D3FDE;border-color:#9D3FDE;" onclick="completeMiniChallenge()">✓ I Said It 3 Times!</button>';
+  } else if (ch.type === 'fib') {
+    var sentenceHtml =
+      '<span>' + esc(ch.before) + '</span> ' +
+      '<span class="mc-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> ' +
+      '<span>' + esc(ch.after) + '</span>';
+    var choicesHtml = ch.choices.map(function(c, i) {
+      var isWrong = wrong.indexOf(i) !== -1;
+      return '<button class="mc-choice-btn' + (isWrong ? ' mc-wrong' : '') + '"' +
+        (isWrong ? ' disabled' : ' onclick="checkMiniChallenge(' + i + ')"') +
+        '>' + esc(c) + (isWrong ? ' ✗' : '') + '</button>';
+    }).join('');
+    inner =
+      '<div class="mc-blank-sentence">' + sentenceHtml + '</div>' +
+      (ch.hint ? '<div class="mc-guide">' + esc(ch.hint) + '</div>' : '') +
+      '<div class="mc-choices">' + choicesHtml + '</div>';
+  } else if (ch.type === 'qs') {
+    var qsHtml = ch.choices.map(function(c, i) {
+      var isWrong = wrong.indexOf(i) !== -1;
+      return '<button class="mc-choice-btn' + (isWrong ? ' mc-wrong' : '') + '"' +
+        (isWrong ? ' disabled' : ' onclick="checkMiniChallenge(' + i + ')"') +
+        '>' + esc(c) + (isWrong ? ' ✗' : '') + '</button>';
+    }).join('');
+    inner =
+      '<div class="mc-situation">' + esc(ch.situation) + '</div>' +
+      '<div class="mc-choices">' + qsHtml + '</div>';
+  }
+
+  return '<div class="card mc-card">' +
+    '<div class="mc-header">' +
+      '<div>' +
+        '<div class="mc-header-label">60-Second Challenge</div>' +
+        '<div class="mc-header-title">' + ch.icon + ' ' + esc(ch.title) + '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="mc-body">' + inner + '</div>' +
+  '</div>';
 }
 
 var THEME_PACKS = [
@@ -3383,6 +3514,9 @@ function renderToday() {
       '</div>' +
     '</div>';
 
+  // Mini-challenge card
+  var miniChallengeCard = '<div id="mc-card-wrap">' + renderMiniChallengeCard() + '</div>';
+
   var canDoCard = renderTodayCanDoCard();
   var missionCard = renderMissionTodayCard();
 
@@ -3399,6 +3533,7 @@ function renderToday() {
     comebackCard +
     backupCard +
     potdCard +
+    miniChallengeCard +
     missionCard +
     lessonCard +
     statsRow +
