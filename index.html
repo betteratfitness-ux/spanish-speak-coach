@@ -3012,25 +3012,81 @@ function practiceLevel(score) {
 function fluencyLevel(score) { return practiceLevel(score); } // backward-compat alias
 
 function getNudge() {
-  const stars = getTodayStars();
-  const speakReps = S.stats.totalSpeakReps;
-  const streak = S.streak.current;
-  const nudges = [];
+  var d = today();
+  var streak = S.streak.current;
+  var daysMissed = S.user.daysMissed || 0;
+  var comebackActive = S.user.comebackActive;
+  var lessonDone = isTodayLessonDone();
+  var stars = getTodayStars();
+  var starsEarned = Object.values(stars).filter(Boolean).length;
+  var dueCount = getDueReviewItems().length;
+  var xp = S.stats.xp || 0;
+  var xpLevel = Math.floor(xp / 100) + 1;
+  var totalLessons = Object.keys(S.user.lessonDates || {}).length;
+  var postDay30 = isPostDay30 ? isPostDay30() : totalLessons >= 30;
+  var dow = new Date().getDay();
+  var hour = new Date().getHours();
 
-  if (!stars.speak) nudges.push("Your mouth needs practice too. Say one phrase out loud today.");
-  if (speakReps === 0) nudges.push("Recognition is not fluency. Speaking is the rep that counts.");
-  if (streak === 0) nudges.push("No starting over. Just returning. Today counts.");
-  if (streak >= 3) nudges.push(`${streak} days in a row. You are stacking proof.`);
+  // Comeback state — most urgent
+  if (comebackActive && daysMissed === 1) return "Yesterday slipped. That's fine — one day doesn't erase anything. Today is the one that counts.";
+  if (comebackActive && daysMissed > 1) return "You were away for " + daysMissed + " days. The language waited. Pick up where you left off.";
 
-  const fallback = [
-    "Do not just recognize the phrase. Speak it.",
-    "Small reps build real confidence.",
-    "Say it out loud. That is the whole point.",
-    "A short Spanish day still counts.",
+  // Milestone streaks — fire once, feel earned
+  if (streak === 30) return "30 days in a row. That's not motivation — that's a new identity.";
+  if (streak === 21) return "21 days. You've crossed the threshold where this stops being effort and starts being routine.";
+  if (streak === 14) return "Two weeks without missing a day. You're building the consistency most people only plan to build.";
+  if (streak === 7)  return "One full week in a row. The hardest part of any habit is surviving week one. You're past it.";
+
+  // All 5 stars earned today
+  if (starsEarned === 5) return "All 5 stars today. You pushed through every type of practice. That's a full rep day — rare and real.";
+
+  // All lessons complete
+  if (totalLessons >= LESSONS.length) return "You finished all " + LESSONS.length + " lessons. Most people who start never finish. You did.";
+
+  // Stage 2
+  if (postDay30 && totalLessons < LESSONS.length) return "You're in Stage 2 now. The intermediate zone is where real fluency gets built — not handed out.";
+
+  // Lesson done but no speaking star yet
+  if (lessonDone && !stars.speak) return "Lesson done. Now say something out loud. One phrase — that's where the rep that sticks lives.";
+
+  // High review queue
+  if (dueCount >= 10) return dueCount + " phrases are waiting for review. Reviews are how short-term recognition becomes long-term recall.";
+
+  // No speaking or listening done yet today
+  if (!stars.speak && !stars.listen) return "Recognizing a phrase and producing it are two different skills. Only one of them gets you to fluent.";
+
+  // Solid ongoing streaks
+  if (streak >= 10) return streak + " days straight. You've built something real — don't put it down today.";
+  if (streak >= 5)  return streak + " days in a row. You're past the 'trying to start' phase. You've started.";
+  if (streak >= 3)  return "Day " + streak + " in a row. This is the phase where habits either stick or slip. You're still here.";
+
+  // Day-of-week context
+  if (dow === 0) return "Sunday practice. Most people skip it. You didn't.";
+  if (dow === 1) return "Monday practice sets the tone for the whole week. Good start.";
+  if (dow === 5) return "Friday. You could have skipped it. You didn't.";
+  if (dow === 6) return "Weekend is when streaks survive or break. You showed up.";
+
+  // Time of day
+  if (hour < 8)  return "Early practice compounds. What you learn before 8am tends to stick.";
+  if (hour >= 21) return "Late-night practice still counts. Your brain doesn't check the clock.";
+
+  // XP level acknowledgment
+  if (xpLevel >= 5) return "Level " + xpLevel + " — that's " + xp + " XP of actual speaking reps, not passive listening.";
+
+  // Deterministic fallback pool — doesn't flicker on re-render
+  var fallbacks = [
+    "Don't just recognize the phrase — produce it. That's the whole game.",
     "Awkward is a step. Frozen is the only failure.",
-    "You do not need a perfect day. You need one speaking rep.",
+    "Say it out loud. Even alone. Especially alone.",
+    "You don't need a perfect day. You need one more speaking rep.",
+    "Small consistent reps build something big sporadic sessions can't.",
+    "The phrase you skip is the one that comes up when you need it most.",
+    "Fluency is built in the boring middle, not the exciting beginning.",
+    "Every language learner sounds bad before they sound good. Keep going.",
+    "Real conversation is 10% grammar and 90% courage. Train both.",
   ];
-  return nudges.length > 0 ? nudges[0] : fallback[Math.floor(Math.random() * fallback.length)];
+  var seed = d.split('-').reduce(function(a, p){ return a * 100 + parseInt(p, 10); }, 0);
+  return fallbacks[seed % fallbacks.length];
 }
 
 function getThisSunday() {
