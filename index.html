@@ -899,6 +899,15 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
 .potd-tip { font-size:0.74rem; color:var(--muted); line-height:1.5; padding:8px 10px; background:var(--bg); border-radius:8px; margin-bottom:12px; }
 .potd-practice-btn { background:var(--primary); color:white; border:none; border-radius:20px; padding:8px 18px; font-size:0.8rem; font-weight:700; cursor:pointer; letter-spacing:0.3px; }
 .potd-practice-btn:hover { background:var(--primary-dark); }
+/* ── Activity Calendar ───────────────────────────────── */
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:10px; }
+.cal-sq { aspect-ratio:1/1; border-radius:4px; background:var(--border); min-width:0; }
+.cal-sq.cal-l { background:var(--primary); }
+.cal-sq.cal-p { background:rgba(232,93,4,0.32); }
+.cal-sq.cal-today { outline:2px solid var(--primary); outline-offset:2px; }
+.cal-legend { display:flex; gap:14px; font-size:0.68rem; color:var(--muted); align-items:center; flex-wrap:wrap; }
+.cal-legend-sq { display:inline-block; width:10px; height:10px; border-radius:2px; vertical-align:middle; margin-right:3px; flex-shrink:0; }
+
 /* ── Bookmarks ───────────────────────────────────────── */
 .bm-btn { background:none; border:none; font-size:1.15rem; cursor:pointer; padding:2px 4px; line-height:1; transition:transform 0.12s; flex-shrink:0; }
 .bm-btn:active { transform:scale(1.35); }
@@ -3433,6 +3442,48 @@ function startPOTDPractice() {
   var item = getPhraseOfDay();
   modeState = { mode: 'en-to-es', items: [item], index: 0, results: [], revealed: false, backTab: 'today' };
   renderModeCard();
+}
+
+/* ── Activity Calendar ───────────────────────────────── */
+function renderActivityCalendar() {
+  var lessonSet = {};
+  Object.values(S.user.lessonDates || {}).forEach(function(d) { lessonSet[d] = true; });
+
+  var practiceSet = {};
+  Object.values(S.progress || {}).forEach(function(p) {
+    if (p.lastReviewed) {
+      practiceSet[new Date(p.lastReviewed).toISOString().slice(0, 10)] = true;
+    }
+  });
+  var challengeSet = S.stats.miniChallengeDone || {};
+  var todayStr = today();
+  var streak = S.streak.current || 0;
+
+  var cells = '';
+  for (var i = 69; i >= 0; i--) {
+    var d = new Date(new Date().getTime() - i * 86400000).toISOString().slice(0, 10);
+    var hasLesson = !!lessonSet[d];
+    var hasPractice = !!practiceSet[d] || !!challengeSet[d];
+    var isToday = d === todayStr;
+    var cls = 'cal-sq' +
+      (hasLesson ? ' cal-l' : hasPractice ? ' cal-p' : '') +
+      (isToday ? ' cal-today' : '');
+    cells += '<div class="' + cls + '" title="' + d + '"></div>';
+  }
+
+  return '<div class="section-label">Activity — Last 10 Weeks</div>' +
+    '<div class="card" style="padding:14px;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;">' +
+        '<span style="font-size:0.78rem;color:var(--muted);">Oldest → Today</span>' +
+        '<span style="font-size:0.82rem;font-weight:700;color:var(--primary);">' + streak + ' day streak</span>' +
+      '</div>' +
+      '<div class="cal-grid">' + cells + '</div>' +
+      '<div class="cal-legend">' +
+        '<span><span class="cal-legend-sq" style="background:var(--primary);"></span>Lesson</span>' +
+        '<span><span class="cal-legend-sq" style="background:rgba(232,93,4,0.35);"></span>Practice only</span>' +
+        '<span><span class="cal-legend-sq" style="background:var(--border);"></span>Rest</span>' +
+      '</div>' +
+    '</div>';
 }
 
 /* ── Bookmarks ───────────────────────────────────────── */
@@ -6698,7 +6749,8 @@ function renderProgress() {
       })() +
     '</div>';
 
-  return candoSection + ownershipSummary + heatmapSection + scoreBreakdown + weekTrend + xpCard + badgesHTML + statsGrid + missionsSection + domainMap + starsHistory + teacherBtn;
+  var activityCalendar = renderActivityCalendar();
+  return candoSection + ownershipSummary + heatmapSection + scoreBreakdown + weekTrend + xpCard + activityCalendar + badgesHTML + statsGrid + missionsSection + domainMap + starsHistory + teacherBtn;
 }
 
 function showTeacherView() {
