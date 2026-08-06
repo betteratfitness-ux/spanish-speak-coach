@@ -819,6 +819,16 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
 .ld-english { font-size:0.92rem; color:var(--muted); }
 .ld-pron { font-size:0.78rem; color:var(--primary); font-style:italic; margin-top:6px; }
 .ld-again-btn { background:none; border:1px solid var(--border); border-radius:20px; padding:6px 16px; font-size:0.8rem; color:var(--muted); cursor:pointer; display:inline-flex; align-items:center; gap:6px; margin-bottom:14px; }
+/* Theme Packs */
+.theme-pack-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:4px; }
+.theme-pack-card { background:var(--surface); border:2px solid var(--border); border-radius:var(--radius); padding:14px 12px; cursor:pointer; transition:border-color 0.15s,transform 0.12s; }
+.theme-pack-card:hover { border-color:var(--primary); transform:translateY(-1px); }
+.theme-pack-card:active { transform:scale(0.97); }
+.tp-icon { font-size:1.8rem; margin-bottom:6px; line-height:1; }
+.tp-name { font-size:0.82rem; font-weight:800; color:var(--text); margin-bottom:3px; }
+.tp-desc { font-size:0.68rem; color:var(--muted); line-height:1.4; margin-bottom:8px; }
+.tp-count { font-size:0.65rem; font-weight:700; color:var(--primary); text-transform:uppercase; letter-spacing:0.3px; }
+
 /* Phrase of the Day */
 .potd-card { overflow:hidden; padding:0; }
 .potd-header { background:linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%); padding:10px 14px 8px; display:flex; align-items:center; justify-content:space-between; }
@@ -2984,6 +2994,25 @@ function getNudge() {
     "You do not need a perfect day. You need one speaking rep.",
   ];
   return nudges.length > 0 ? nudges[0] : fallback[Math.floor(Math.random() * fallback.length)];
+}
+
+var THEME_PACKS = [
+  { id:'travel',    icon:'🛫', name:'Travel',           desc:'Airports, hotels, directions, transit',       domains:['D3','D11','D22'] },
+  { id:'food',      icon:'🍽️', name:'Restaurant & Food', desc:'Ordering, dietary needs, paying, compliments', domains:['D2','D3','D23'] },
+  { id:'medical',   icon:'🏥', name:'Medical',           desc:'Doctor visits, pharmacy, symptoms',            domains:['D4','D14','D21'] },
+  { id:'work',      icon:'💼', name:'Work',              desc:'Meetings, emails, scheduling, pro talk',       domains:['D5','D16','D25'] },
+  { id:'social',    icon:'🎉', name:'Social',            desc:'Parties, meeting people, opinions, chat',      domains:['D6','D10','D24'] },
+  { id:'emergency', icon:'🚨', name:'Emergency',         desc:'Urgent phrases — when things go wrong',        domains:['D1','D14'] },
+];
+
+function startThemePack(packId) {
+  var pack = THEME_PACKS.find(function(p){ return p.id === packId; });
+  if (!pack) return;
+  var items = CONTENT.filter(function(c){ return pack.domains.indexOf(c.domain) !== -1; });
+  items = items.slice().sort(function(){ return Math.random() - 0.5; }).slice(0, 15);
+  if (!items.length) return;
+  modeState = { mode: 'speed-round', items: items, index: 0, results: [], revealed: false, backTab: 'practice' };
+  renderModeCard();
 }
 
 var DOMAIN_TIPS = {
@@ -7165,6 +7194,20 @@ function renderPractice() {
     '<div class="practice-hub-option" onclick="startSentenceBuilder(\'practice\')">' +
       '<span class="practice-hub-icon">✍️</span>' +
       '<span class="practice-hub-text"><strong>Sentence Builder</strong><span>Real situation. No word bank. Say a full sentence out loud.</span></span>' +
+    '</div>' +
+
+    '<div class="section-label" style="margin-top:20px;">Vocabulary Theme Packs</div>' +
+    '<div class="nudge-card">Drill by real-world situation — not lesson order. Pick the pack that matches what you need today.</div>' +
+    '<div class="theme-pack-grid">' +
+    THEME_PACKS.map(function(pack) {
+      var count = CONTENT.filter(function(c){ return pack.domains.indexOf(c.domain) !== -1; }).length;
+      return '<div class="theme-pack-card" onclick="startThemePack(\'' + pack.id + '\')">' +
+        '<div class="tp-icon">' + pack.icon + '</div>' +
+        '<div class="tp-name">' + pack.name + '</div>' +
+        '<div class="tp-desc">' + pack.desc + '</div>' +
+        '<div class="tp-count">' + count + ' phrases · Speed Round</div>' +
+      '</div>';
+    }).join('') +
     '</div>' +
 
     '<div class="section-label" style="margin-top:20px;">Reading & Writing</div>' +
