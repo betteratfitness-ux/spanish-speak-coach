@@ -819,6 +819,17 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
 .ld-english { font-size:0.92rem; color:var(--muted); }
 .ld-pron { font-size:0.78rem; color:var(--primary); font-style:italic; margin-top:6px; }
 .ld-again-btn { background:none; border:1px solid var(--border); border-radius:20px; padding:6px 16px; font-size:0.8rem; color:var(--muted); cursor:pointer; display:inline-flex; align-items:center; gap:6px; margin-bottom:14px; }
+/* Confidence Heatmap */
+.heatmap-row { display:flex; align-items:flex-start; gap:8px; margin-bottom:7px; cursor:pointer; }
+.heatmap-row:hover .hm-squares { opacity:0.85; }
+.hm-label { font-size:0.62rem; font-weight:700; color:var(--muted); width:72px; flex-shrink:0; padding-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.hm-squares { display:flex; flex-wrap:wrap; gap:2px; flex:1; }
+.hm-sq { width:13px; height:13px; border-radius:2px; flex-shrink:0; }
+.hm-sq.mastered  { background:#2D9E6B; }
+.hm-sq.reviewing { background:var(--primary); }
+.hm-sq.learning  { background:var(--gold); }
+.hm-sq.unseen    { background:var(--border); }
+
 /* Weekly Recap */
 .weekly-recap { border:2px solid rgba(30,64,175,0.25); border-radius:var(--radius); background:linear-gradient(135deg,rgba(30,64,175,0.07),rgba(30,64,175,0.03)); padding:16px; margin-bottom:14px; }
 .wr-eyebrow { font-size:0.58rem; font-weight:900; text-transform:uppercase; letter-spacing:1px; color:#1E40AF; margin-bottom:4px; }
@@ -3087,6 +3098,14 @@ function getNudge() {
   ];
   var seed = d.split('-').reduce(function(a, p){ return a * 100 + parseInt(p, 10); }, 0);
   return fallbacks[seed % fallbacks.length];
+}
+
+function startDomainDrill(domainKey) {
+  var items = CONTENT.filter(function(c){ return c.domain === domainKey; });
+  if (!items.length) return;
+  items = items.slice().sort(function(){ return Math.random() - 0.5; }).slice(0, 10);
+  modeState = { mode: 'en-to-es', items: items, index: 0, results: [], revealed: false, backTab: 'progress' };
+  renderModeCard();
 }
 
 function getThisSunday() {
@@ -6278,7 +6297,39 @@ function renderProgress() {
       '</div>';
   })();
 
-  return candoSection + ownershipSummary + scoreBreakdown + weekTrend + xpCard + badgesHTML + statsGrid + missionsSection + domainMap + starsHistory + teacherBtn;
+  var totalPhrases = CONTENT.length;
+  var touchedPhrases = CONTENT.filter(function(c){ return S.progress[c.id]; }).length;
+  var heatmapSection =
+    '<div class="section-label">Knowledge Map</div>' +
+    '<div class="card" style="margin-bottom:14px;padding:14px;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
+        '<div style="font-size:0.72rem;color:var(--muted);">Every phrase, colored by confidence. Tap a row to drill.</div>' +
+        '<div style="font-size:0.72rem;font-weight:800;color:var(--primary);">' + touchedPhrases + '/' + totalPhrases + ' touched</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap;">' +
+        '<div style="display:flex;align-items:center;gap:4px;font-size:0.65rem;color:var(--muted);"><div class="hm-sq mastered"></div>Own It</div>' +
+        '<div style="display:flex;align-items:center;gap:4px;font-size:0.65rem;color:var(--muted);"><div class="hm-sq reviewing"></div>Solid</div>' +
+        '<div style="display:flex;align-items:center;gap:4px;font-size:0.65rem;color:var(--muted);"><div class="hm-sq learning"></div>Fuzzy</div>' +
+        '<div style="display:flex;align-items:center;gap:4px;font-size:0.65rem;color:var(--muted);"><div class="hm-sq unseen"></div>New</div>' +
+      '</div>' +
+      (function() {
+        return Object.keys(DOMAINS).map(function(key) {
+          var items = CONTENT.filter(function(c){ return c.domain === key; });
+          if (!items.length) return '';
+          var d = DOMAINS[key];
+          var shortName = (d.icon || '') + ' ' + d.name.split(' ').slice(0, 2).join(' ');
+          var squares = items.map(function(c) {
+            return '<div class="hm-sq ' + getMemoryState(c.id) + '"></div>';
+          }).join('');
+          return '<div class="heatmap-row" onclick="startDomainDrill(\'' + key + '\')">' +
+            '<div class="hm-label">' + shortName + '</div>' +
+            '<div class="hm-squares">' + squares + '</div>' +
+          '</div>';
+        }).join('');
+      })() +
+    '</div>';
+
+  return candoSection + ownershipSummary + heatmapSection + scoreBreakdown + weekTrend + xpCard + badgesHTML + statsGrid + missionsSection + domainMap + starsHistory + teacherBtn;
 }
 
 function showTeacherView() {
