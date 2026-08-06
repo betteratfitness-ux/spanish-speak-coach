@@ -899,6 +899,17 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
 .potd-tip { font-size:0.74rem; color:var(--muted); line-height:1.5; padding:8px 10px; background:var(--bg); border-radius:8px; margin-bottom:12px; }
 .potd-practice-btn { background:var(--primary); color:white; border:none; border-radius:20px; padding:8px 18px; font-size:0.8rem; font-weight:700; cursor:pointer; letter-spacing:0.3px; }
 .potd-practice-btn:hover { background:var(--primary-dark); }
+/* ── Word Tile Challenge ─────────────────────────────── */
+.tile-zone { min-height:58px; display:flex; flex-wrap:wrap; gap:8px; align-items:flex-start; padding:14px; background:rgba(0,0,0,0.04); border-radius:12px; border:2px dashed var(--border); margin-bottom:6px; transition:border-color 0.2s; }
+.tile-zone.has-tiles { border-color:var(--primary); background:rgba(232,93,4,0.04); }
+.tile-zone.wrong { border-color:#E53E3E; background:rgba(229,62,62,0.05); }
+.word-tile { display:inline-flex; align-items:center; padding:9px 16px; border-radius:8px; font-size:0.95rem; font-weight:700; cursor:pointer; user-select:none; transition:transform 0.1s, opacity 0.1s; }
+.word-tile.src { background:var(--card-bg); border:2px solid var(--border); color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,0.08); }
+.word-tile.src:active { transform:scale(0.94); }
+.word-tile.ans { background:var(--primary); color:#fff; border:2px solid transparent; }
+.word-tile.ans:active { opacity:0.75; }
+.tile-source { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:12px 0 16px; }
+.tile-wrong-msg { color:#E53E3E; font-size:0.82rem; text-align:center; margin-bottom:10px; }
 </style>
 </head>
 <body>
@@ -3411,6 +3422,112 @@ function startPOTDPractice() {
   renderModeCard();
 }
 
+/* ── Word Tile Challenge ─────────────────────────────── */
+var tileState = null;
+
+function startTileChallenge() {
+  var reviewing = CONTENT.filter(function(c) { return getMemoryState(c.id) === 'reviewing'; });
+  var learning  = CONTENT.filter(function(c) { return getMemoryState(c.id) === 'learning'; });
+  var pool = reviewing.concat(learning);
+  if (pool.length < 5) {
+    var unseen = CONTENT.filter(function(c) { return getMemoryState(c.id) === 'unseen'; });
+    pool = pool.concat(unseen);
+  }
+  if (pool.length < 3) pool = CONTENT.slice();
+  for (var i = pool.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = pool[i]; pool[i] = pool[j]; pool[j] = t;
+  }
+  pool = pool.slice(0, 10);
+  tileState = null;
+  modeState = { mode: 'tile', items: pool, index: 0, score: 0, results: [], backTab: 'practice' };
+  renderModeCard();
+}
+
+function initTileState(item) {
+  var words = item.spanish.trim().split(/\s+/);
+  var order = words.map(function(_, i) { return i; });
+  for (var i = order.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = order[i]; order[i] = order[j]; order[j] = t;
+  }
+  // Guarantee shuffled ≠ correct on multi-word phrases
+  var inPlace = order.every(function(v, i) { return v === i; });
+  if (inPlace && order.length > 1) { var tmp = order[0]; order[0] = order[1]; order[1] = tmp; }
+  tileState = { itemId: item.id, words: words, order: order, placed: [], wrong: false, tries: 0 };
+}
+
+function renderTileInner() {
+  var ts = tileState;
+  var allPlaced = ts.placed.length === ts.words.length;
+  var zoneClass = 'tile-zone' + (ts.placed.length > 0 ? ' has-tiles' : '') + (ts.wrong ? ' wrong' : '');
+
+  var zoneHtml = '<div class="' + zoneClass + '">';
+  if (ts.placed.length === 0) {
+    zoneHtml += '<span style="color:var(--muted);font-size:0.82rem;margin:auto;">Tap words below to build the sentence</span>';
+  } else {
+    for (var i = 0; i < ts.placed.length; i++) {
+      var pos = ts.placed[i];
+      zoneHtml += '<span class="word-tile ans" onclick="tileToggle(' + pos + ')">' + esc(ts.words[ts.order[pos]]) + '</span>';
+    }
+  }
+  zoneHtml += '</div>';
+
+  var wrongHtml = ts.wrong
+    ? '<div class="tile-wrong-msg">Not quite — tap a placed tile to remove it, then try a different order</div>'
+    : '<div style="height:18px;"></div>';
+
+  var srcHtml = '<div class="tile-source">';
+  for (var i = 0; i < ts.order.length; i++) {
+    if (ts.placed.indexOf(i) === -1) {
+      srcHtml += '<span class="word-tile src" onclick="tileToggle(' + i + ')">' + esc(ts.words[ts.order[i]]) + '</span>';
+    }
+  }
+  srcHtml += '</div>';
+
+  var checkHtml = '<button class="btn btn-primary btn-full" onclick="checkTileAnswer()"' +
+    (allPlaced ? '' : ' disabled style="opacity:0.4;pointer-events:none;"') + '>Check Answer →</button>';
+
+  return zoneHtml + wrongHtml + srcHtml + checkHtml;
+}
+
+function tileToggle(pos) {
+  if (!tileState) return;
+  tileState.wrong = false;
+  var idx = tileState.placed.indexOf(pos);
+  if (idx !== -1) {
+    tileState.placed.splice(idx, 1);
+  } else {
+    tileState.placed.push(pos);
+  }
+  document.getElementById('tile-inner').innerHTML = renderTileInner();
+}
+
+function checkTileAnswer() {
+  if (!tileState) return;
+  var answer = tileState.placed.map(function(pos) { return tileState.words[tileState.order[pos]]; }).join(' ');
+  var correct = tileState.words.join(' ');
+  if (answer === correct) {
+    var firstTry = tileState.tries === 0;
+    var item = modeState.items[modeState.index];
+    var prog = getItemProgress(item.id);
+    prog.lastReviewed = Date.now();
+    prog.nextDue = calcNextDue(firstTry ? 'correct' : 'guessed', firstTry ? 4 : 2);
+    if (firstTry) { prog.correct += 1; modeState.score += 1; }
+    else { prog.guessed += 1; addToReviewDeck(item.id); }
+    modeState.results.push({ id: item.id, result: firstTry ? 'correct' : 'guessed', confidence: firstTry ? 4 : 2 });
+    S.stats.xp = (S.stats.xp || 0) + (firstTry ? 8 : 4);
+    modeState.index += 1;
+    tileState = null;
+    saveState();
+    renderModeCard();
+  } else {
+    tileState.tries += 1;
+    tileState.wrong = true;
+    document.getElementById('tile-inner').innerHTML = renderTileInner();
+  }
+}
+
 function checkStreakFreezeReward() {
   var s = S.streak.current;
   if (s % 7 !== 0 || s === 0) return;
@@ -4502,6 +4619,16 @@ function renderModeCard() {
           <button class="btn" style="flex:1;background:#FED7D7;color:#9B2C2C;" onclick="recordResult('missed',1)">✗ Missed</button>
         </div>
       `}`;
+
+  // ── WORD TILE CHALLENGE ───────────────────────────────
+  } else if (mode === 'tile') {
+    if (!tileState || tileState.itemId !== item.id) initTileState(item);
+    inner = `
+      <div class="card-title">🧩 Word Tile Challenge</div>
+      <span class="domain-tag tag-${item.domain}" style="display:inline-block;margin-bottom:14px;">${domainLabel}</span>
+      <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">Build this sentence in Spanish:</div>
+      <div style="font-size:1.25rem;font-weight:800;color:var(--text);margin-bottom:18px;">${esc(item.english)}</div>
+      <div id="tile-inner">${renderTileInner()}</div>`;
   }
 
   // ── LISTENING CHALLENGE ───────────────────────────────
@@ -4709,7 +4836,7 @@ function renderModeComplete() {
     .filter(Boolean).slice(0, 3);
 
   const emoji = correct === total ? '🌟' : correct > total / 2 ? '✅' : '💪';
-  const modeLabel = { 'listen-repeat':'Listen → Repeat','en-to-es':'English → Spanish','es-to-en':'Spanish → English','speak-memory':'Speak From Memory','speed-round':'Speed Round','build':'Sentence Builder','listen':'Listening Challenge' }[mode] || mode;
+  const modeLabel = { 'listen-repeat':'Listen → Repeat','en-to-es':'English → Spanish','es-to-en':'Spanish → English','speak-memory':'Speak From Memory','speed-round':'Speed Round','build':'Sentence Builder','listen':'Listening Challenge','tile':'Word Tile Challenge' }[mode] || mode;
 
   document.getElementById('main-content').innerHTML = `
     <div class="card" style="text-align:center;">
@@ -7644,6 +7771,11 @@ function renderPractice() {
     '<div class="practice-hub-option" onclick="startSentenceBuilder(\'practice\')">' +
       '<span class="practice-hub-icon">✍️</span>' +
       '<span class="practice-hub-text"><strong>Sentence Builder</strong><span>Real situation. No word bank. Say a full sentence out loud.</span></span>' +
+    '</div>' +
+
+    '<div class="practice-hub-option" onclick="startTileChallenge()">' +
+      '<span class="practice-hub-icon">🧩</span>' +
+      '<span class="practice-hub-text"><strong>Word Tile Challenge</strong><span>Tap shuffled tiles to rebuild the Spanish sentence. Tests your word-order instinct.</span></span>' +
     '</div>' +
 
     '<div class="section-label" style="margin-top:20px;">Vocabulary Theme Packs</div>' +
