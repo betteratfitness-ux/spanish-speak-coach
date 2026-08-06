@@ -899,6 +899,9 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
 .potd-tip { font-size:0.74rem; color:var(--muted); line-height:1.5; padding:8px 10px; background:var(--bg); border-radius:8px; margin-bottom:12px; }
 .potd-practice-btn { background:var(--primary); color:white; border:none; border-radius:20px; padding:8px 18px; font-size:0.8rem; font-weight:700; cursor:pointer; letter-spacing:0.3px; }
 .potd-practice-btn:hover { background:var(--primary-dark); }
+/* ── Bookmarks ───────────────────────────────────────── */
+.bm-btn { background:none; border:none; font-size:1.15rem; cursor:pointer; padding:2px 4px; line-height:1; transition:transform 0.12s; flex-shrink:0; }
+.bm-btn:active { transform:scale(1.35); }
 /* ── Voice Record & Compare ──────────────────────────── */
 .vc-wrap { margin-top:12px; padding:12px 14px; background:rgba(232,93,4,0.05); border-radius:10px; border:1px solid rgba(232,93,4,0.18); }
 .vc-label { font-size:0.68rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:var(--muted); margin-bottom:8px; }
@@ -2834,7 +2837,8 @@ const DEFAULT_STATE = {
     makeItUpStreak: 0, makeItUpExpiry: null,
     miniChallengeDone: {},
     weeklyRecapDismissed: null,
-    freezeTokens: 0, frozenDates: [], earnedFreezeMilestones: [] },
+    freezeTokens: 0, frozenDates: [], earnedFreezeMilestones: [],
+    bookmarks: [] },
   ownership: {},   // { itemId: { worldContext: null, sawOwnCard: false } }
   reviewDeck: [],    // array of item ids
   mastery: {},       // { itemId: { mastered:false, masterDate:null } }
@@ -3428,6 +3432,35 @@ function getPhraseOfDay() {
 function startPOTDPractice() {
   var item = getPhraseOfDay();
   modeState = { mode: 'en-to-es', items: [item], index: 0, results: [], revealed: false, backTab: 'today' };
+  renderModeCard();
+}
+
+/* ── Bookmarks ───────────────────────────────────────── */
+function isBookmarked(id) {
+  return (S.stats.bookmarks || []).indexOf(id) !== -1;
+}
+
+function toggleBookmark(id) {
+  var bm = S.stats.bookmarks || [];
+  if (bm.indexOf(id) !== -1) {
+    S.stats.bookmarks = bm.filter(function(x) { return x !== id; });
+  } else {
+    S.stats.bookmarks = bm.concat([id]);
+  }
+  saveState();
+  var btn = document.getElementById('bm-' + id);
+  if (btn) btn.textContent = isBookmarked(id) ? '⭐' : '☆';
+}
+
+function startMyListSession() {
+  var ids = S.stats.bookmarks || [];
+  if (ids.length === 0) return;
+  var items = CONTENT.filter(function(c) { return ids.indexOf(c.id) !== -1; });
+  for (var i = items.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = items[i]; items[i] = items[j]; items[j] = t;
+  }
+  modeState = { mode: 'en-to-es', items: items, index: 0, results: [], revealed: false, backTab: 'practice' };
   renderModeCard();
 }
 
@@ -4575,6 +4608,7 @@ function answerBox(item, showPron) {
       <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:4px;">
         <div style="font-size:1.6rem;font-weight:800;color:var(--text);">${item.spanish}</div>
         <button class="audio-btn" data-speak="${esc(item.spanish)}" onclick="speakSpanish(this.dataset.speak,this)" title="Hear it">🔊</button>
+        <button id="bm-${item.id}" class="bm-btn" onclick="toggleBookmark('${item.id}')" title="Save to My List">${isBookmarked(item.id) ? '⭐' : '☆'}</button>
       </div>
       ${showPron && item.pron ? `<div style="font-size:0.82rem;color:var(--primary);font-style:italic;margin-bottom:4px;">${item.pron}</div>` : ''}
       <div style="font-size:0.85rem;color:var(--muted);">${item.english}</div>
@@ -7938,6 +7972,16 @@ function renderPractice() {
       '<span class="practice-hub-text"><strong>Review Deck</strong><span>Phrases you missed — brought back at the right time to stick</span></span>' +
       dueBadge +
     '</div>' +
+
+    (function() {
+      var bmCount = (S.stats.bookmarks || []).length;
+      if (bmCount === 0) return '';
+      return '<div class="practice-hub-option" onclick="startMyListSession()">' +
+        '<span class="practice-hub-icon">⭐</span>' +
+        '<span class="practice-hub-text"><strong>My List</strong><span>Phrases you\'ve saved — drill just the ones that matter to you</span></span>' +
+        '<span class="practice-hub-badge" style="background:var(--primary);">' + bmCount + ' saved</span>' +
+      '</div>';
+    })() +
 
     '<div class="section-label" style="margin-top:20px;">Conversations & Real Life</div>' +
 
