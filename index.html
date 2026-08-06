@@ -740,6 +740,32 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
 .sp-opt.sp-selected { border-color: var(--primary); background: rgba(232,93,4,0.08); }
 .sp-time { font-size: 1.2rem; font-weight: 800; color: var(--primary); }
 .sp-label { font-size: 0.68rem; color: var(--muted); margin-top: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+
+/* ── Blind Mission Assessment ─────────────────────────── */
+#mission-overlay { position:fixed; inset:0; background:var(--bg); z-index:1100; overflow-y:auto; padding:24px 16px 40px; display:flex; flex-direction:column; align-items:center; }
+#mission-overlay.hidden { display:none; }
+.mission-wrap { max-width:520px; width:100%; }
+.mission-badge { display:inline-flex; align-items:center; gap:6px; font-size:0.65rem; font-weight:800; text-transform:uppercase; letter-spacing:0.6px; color:var(--primary); margin-bottom:12px; }
+.mission-emoji { font-size:2.4rem; display:block; margin-bottom:8px; }
+.mission-title { font-size:1.4rem; font-weight:900; color:var(--text); line-height:1.2; margin-bottom:6px; }
+.mission-sub { font-size:0.88rem; color:var(--muted); line-height:1.6; margin-bottom:16px; }
+.mission-challenge { background:rgba(232,93,4,0.07); border-left:4px solid var(--primary); border-radius:0 10px 10px 0; padding:14px 16px; margin-bottom:20px; }
+.mission-challenge-label { font-size:0.65rem; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; color:var(--primary); margin-bottom:4px; }
+.mission-challenge-text { font-size:0.95rem; font-weight:700; color:var(--text); line-height:1.5; }
+.mission-phrase-row { display:flex; justify-content:space-between; align-items:baseline; gap:8px; padding:10px 0; border-bottom:1px solid var(--border); }
+.mission-phrase-row:last-child { border-bottom:none; }
+.mission-phrase-es { font-size:0.95rem; font-weight:700; color:var(--text); }
+.mission-phrase-en { font-size:0.78rem; color:var(--muted); flex-shrink:0; }
+.mission-rating-row { display:flex; align-items:center; gap:12px; padding:14px 0; border-bottom:1px solid var(--border); cursor:pointer; }
+.mission-rating-row:last-child { border-bottom:none; }
+.mission-check { width:26px; height:26px; border-radius:50%; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.15s; }
+.mission-check.checked { background:var(--green); border-color:var(--green); }
+.mission-rating-label { font-size:0.9rem; font-weight:600; color:var(--text); line-height:1.4; flex:1; }
+.mission-result-score { font-size:3.5rem; font-weight:900; color:var(--primary); text-align:center; line-height:1; }
+.mission-result-label { font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted); text-align:center; margin-top:4px; margin-bottom:16px; }
+.mission-result-badge { background:var(--green); color:white; border-radius:10px; padding:12px 16px; text-align:center; margin-bottom:16px; font-size:0.88rem; font-weight:700; }
+.mission-result-badge.fail { background:rgba(113,128,150,0.12); color:var(--muted); }
+.cando-demonstrated { font-size:0.68rem; font-weight:800; background:var(--gold); color:#1A202C; border-radius:99px; padding:2px 8px; margin-left:6px; }
 </style>
 </head>
 <body>
@@ -760,6 +786,11 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
     <p>Let's find your starting point — takes 2 minutes.</p>
   </div>
   <div class="diag-body" id="diag-body"></div>
+</div>
+
+<!-- BLIND MISSION ASSESSMENT OVERLAY -->
+<div id="mission-overlay" class="hidden">
+  <div class="mission-wrap" id="mission-body"></div>
 </div>
 
 <!-- PANIC SHEET MODAL -->
@@ -1482,6 +1513,93 @@ var CAN_DO_GOALS = [
 ];
 
 // ===================================================
+// BLIND MISSION ASSESSMENTS — 9 scenarios, one per CDG
+// ===================================================
+var BLIND_MISSIONS = [
+  { id:'BM-01', goalId:'CDG-01', emoji:'👋', title:'The Meet-and-Greet',
+    situation:'You walk into a community Spanish class mixer. You don\'t know anyone. The organizer encourages everyone to introduce themselves.',
+    challenge:'Introduce yourself to at least two people. Ask their names. Greet them politely.',
+    contextPhrases:[
+      {spanish:'¿Cómo te llamas?', english:'What is your name?'},
+      {spanish:'Me llamo...', english:'My name is...'},
+      {spanish:'Mucho gusto.', english:'Nice to meet you.'},
+      {spanish:'¿De dónde eres?', english:'Where are you from?'}
+    ]},
+  { id:'BM-02', goalId:'CDG-02', emoji:'🍽️', title:'No English Menu',
+    situation:'You\'re at a neighborhood Mexican restaurant. The waiter smiles and hands you a Spanish-only menu.',
+    challenge:'Order a complete meal. Ask what they have. Ask for the check when you\'re done.',
+    contextPhrases:[
+      {spanish:'¿Qué tiene de especial?', english:'What is the special?'},
+      {spanish:'Quisiera...', english:'I would like...'},
+      {spanish:'¿Qué recomienda?', english:'What do you recommend?'},
+      {spanish:'La cuenta, por favor.', english:'The check, please.'}
+    ]},
+  { id:'BM-03', goalId:'CDG-03', emoji:'🗺️', title:'Lost in the Neighborhood',
+    situation:'You\'re walking through an unfamiliar area and realize you\'re lost. You need to find a pharmacy.',
+    challenge:'Ask two different people for directions. Confirm what you heard back to them.',
+    contextPhrases:[
+      {spanish:'Disculpe, ¿dónde está la farmacia?', english:'Excuse me, where is the pharmacy?'},
+      {spanish:'Siga recto.', english:'Go straight.'},
+      {spanish:'Doble a la derecha.', english:'Turn right.'},
+      {spanish:'¿Puede repetir, por favor?', english:'Can you repeat, please?'}
+    ]},
+  { id:'BM-04', goalId:'CDG-04', emoji:'📞', title:'The Fast Talker',
+    situation:'You\'re on a phone call with a Spanish speaker who is helpful but talks very quickly.',
+    challenge:'Get through the conversation using only repair phrases. Don\'t pretend to understand when you don\'t.',
+    contextPhrases:[
+      {spanish:'Más despacio, por favor.', english:'Slower, please.'},
+      {spanish:'¿Puede repetir eso?', english:'Can you repeat that?'},
+      {spanish:'No entiendo. ¿Puede explicar?', english:'I don\'t understand. Can you explain?'},
+      {spanish:'Gracias por su paciencia.', english:'Thank you for your patience.'}
+    ]},
+  { id:'BM-05', goalId:'CDG-05', emoji:'🏥', title:'Not Feeling Well',
+    situation:'You\'re traveling and wake up with stomach pain. You need to find a pharmacy and possibly a doctor.',
+    challenge:'Explain what hurts. Ask if you need a doctor. Handle a basic pharmacy conversation.',
+    contextPhrases:[
+      {spanish:'Me duele el estómago.', english:'My stomach hurts.'},
+      {spanish:'Necesito ver a un médico.', english:'I need to see a doctor.'},
+      {spanish:'¿Tiene algo para el dolor?', english:'Do you have something for the pain?'},
+      {spanish:'¿Dónde está la farmacia?', english:'Where is the pharmacy?'}
+    ]},
+  { id:'BM-06', goalId:'CDG-06', emoji:'🏨', title:'The Missing Reservation',
+    situation:'You arrive at a hotel after a long trip. The front desk says they can\'t find your reservation under your name.',
+    challenge:'Confirm your reservation calmly. Ask them to check again. Clarify your room details.',
+    contextPhrases:[
+      {spanish:'Tengo una reservación.', english:'I have a reservation.'},
+      {spanish:'¿Puede verificar, por favor?', english:'Can you check, please?'},
+      {spanish:'Mi apellido es...', english:'My last name is...'},
+      {spanish:'Necesito una habitación.', english:'I need a room.'}
+    ]},
+  { id:'BM-07', goalId:'CDG-07', emoji:'👨‍👩‍👧', title:'Family Dinner',
+    situation:'You\'re invited to a Spanish-speaking family\'s home for dinner. They want to know all about your family.',
+    challenge:'Describe at least 3 family members. Say if you have kids. Ask about their family too.',
+    contextPhrases:[
+      {spanish:'Tengo dos hijos.', english:'I have two children.'},
+      {spanish:'Mi esposa se llama...', english:'My wife\'s name is...'},
+      {spanish:'Mis padres viven en...', english:'My parents live in...'},
+      {spanish:'¿Cuántos hijos tienen?', english:'How many children do you have?'}
+    ]},
+  { id:'BM-08', goalId:'CDG-08', emoji:'💼', title:'Conference Colleague',
+    situation:'You meet a Spanish-speaking colleague at a professional conference. They\'re friendly and curious about your work.',
+    challenge:'Greet them, explain what you do, and discuss a basic task or project.',
+    contextPhrases:[
+      {spanish:'Mucho gusto. Trabajo en...', english:'Nice to meet you. I work in...'},
+      {spanish:'Estamos trabajando en un proyecto.', english:'We are working on a project.'},
+      {spanish:'¿En qué trabaja usted?', english:'What do you do?'},
+      {spanish:'¿Puede ayudarme con esto?', english:'Can you help me with this?'}
+    ]},
+  { id:'BM-09', goalId:'CDG-09', emoji:'💪', title:'The Comeback',
+    situation:'You\'re mid-conversation when you realize you\'ve been using the wrong word for several minutes. The other person looks confused.',
+    challenge:'Acknowledge the mistake with a recovery phrase. Correct yourself. Keep the conversation going.',
+    contextPhrases:[
+      {spanish:'Perdón, quise decir...', english:'Sorry, I meant to say...'},
+      {spanish:'Me equivoqué. Lo que quería decir es...', english:'I made a mistake. What I meant was...'},
+      {spanish:'¿Cómo se dice... en español?', english:'How do you say ... in Spanish?'},
+      {spanish:'Un momento, por favor.', english:'One moment, please.'}
+    ]}
+];
+
+// ===================================================
 // ROLEPLAY SCENARIOS — 6 scripted conversation trees
 // ===================================================
 var ROLEPLAY_SCENARIOS = [
@@ -2015,7 +2133,7 @@ const LESSONS = [
 const LS_KEY = 'ssc_state';
 
 const DEFAULT_STATE = {
-  user: { name: '', level: null, diagnosticDone: false, goalsDone: false, why: '', timePerDay: 10, useCase: '', currentLesson: 1, lessonDates: {}, comebackActive: false, daysMissed: 0 },
+  user: { name: '', level: null, diagnosticDone: false, goalsDone: false, why: '', timePerDay: 10, useCase: '', currentLesson: 1, lessonDates: {}, comebackActive: false, daysMissed: 0, lastMissionDate: null },
   settings: {
     practiceLength: 'standard',
     pronunciationHelper: true,
@@ -2044,6 +2162,8 @@ const DEFAULT_STATE = {
   fmLog: {},          // { 'FM-01': [{ date, attempted, completed, stuck, confidence, notes }] }
   repairStats: { total: 0, dates: {} },
   sessionPref: 'standard', // 'quick'|'standard'|'deep'
+  missionLog: [],       // [{ id, goalId, date, scores:{completed,understood,noHints,recovered}, passed }]
+  demonstrated: {},     // { 'CDG-01': true } — goals confirmed via passed mission
 };
 
 function loadState() {
@@ -2063,6 +2183,8 @@ function loadState() {
     state.fmLog       = Object.assign(structuredClone(DEFAULT_STATE.fmLog),       saved.fmLog       || {});
     state.repairStats = Object.assign(structuredClone(DEFAULT_STATE.repairStats), saved.repairStats || {});
     if (saved.sessionPref) state.sessionPref = saved.sessionPref;
+    if (saved.missionLog) state.missionLog = saved.missionLog;
+    if (saved.demonstrated) state.demonstrated = Object.assign({}, saved.demonstrated);
     return state;
   } catch(e) { return structuredClone(DEFAULT_STATE); }
 }
@@ -2487,6 +2609,7 @@ function renderToday() {
     '</div>';
 
   var canDoCard = renderTodayCanDoCard();
+  var missionCard = renderMissionTodayCard();
 
   var firstName = S.user.name ? S.user.name.trim().split(' ')[0] : '';
   var hour = new Date().getHours();
@@ -2498,6 +2621,7 @@ function renderToday() {
   return greetLine + '<div class="section-label">📅 ' + new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}) + '</div>' +
     comebackCard +
     backupCard +
+    missionCard +
     lessonCard +
     statsRow +
     canDoCard +
@@ -3969,16 +4093,261 @@ function startGoalDrillMode(goalId, which) {
   renderModeCard();
 }
 
+// ===================================================
+// BLIND MISSION ASSESSMENT — logic + rendering
+// ===================================================
+
+function isMissionDue() {
+  var lessonsCompleted = Object.keys(S.user.lessonDates || {}).length;
+  if (lessonsCompleted < 5) return false;
+  var last = S.user.lastMissionDate;
+  if (last === today()) return false;
+  if (!last) return true;
+  var daysSince = Math.round((new Date(today()) - new Date(last)) / 86400000);
+  return daysSince >= 7;
+}
+
+function getNextMission() {
+  // Priority 1: a goal that's phrase-complete but not yet demonstrated
+  var best = null;
+  CAN_DO_GOALS.forEach(function(goal) {
+    if (S.demonstrated[goal.id]) return;
+    if (checkCanDoGoal(goal) === 'done') {
+      if (!best) best = goal;
+    }
+  });
+  // Priority 2: the most progressed partial goal
+  if (!best) {
+    var bestScore = -1;
+    CAN_DO_GOALS.forEach(function(goal) {
+      if (S.demonstrated[goal.id]) return;
+      var needed = goal.requiredPhrases || [];
+      var owned = needed.filter(function(pid) {
+        var p = S.progress[pid]; return p && (p.confidence || 1) >= 3;
+      }).length;
+      if (owned > bestScore) { bestScore = owned; best = goal; }
+    });
+  }
+  if (!best) return null;
+  return BLIND_MISSIONS.find(function(m) { return m.goalId === best.id; }) || BLIND_MISSIONS[0];
+}
+
+function renderMissionTodayCard() {
+  if (!isMissionDue()) return '';
+  var mission = getNextMission();
+  if (!mission) return '';
+  var goal = CAN_DO_GOALS.find(function(g) { return g.id === mission.goalId; });
+  var isReady = goal && checkCanDoGoal(goal) === 'done';
+  var tagText = isReady ? '🎯 MISSION ASSESSMENT DUE' : '🎯 CHALLENGE MISSION DUE';
+  var tagColor = isReady ? 'var(--primary)' : 'var(--gold)';
+  return '<div class="card" style="border-left:4px solid ' + tagColor + ';margin-bottom:14px;">' +
+    '<div style="font-size:0.63rem;font-weight:800;text-transform:uppercase;letter-spacing:0.6px;color:' + tagColor + ';margin-bottom:6px;">' + tagText + '</div>' +
+    '<div style="font-weight:800;font-size:1rem;margin-bottom:4px;">' + mission.emoji + ' ' + esc(mission.title) + '</div>' +
+    '<div style="font-size:0.8rem;color:var(--muted);margin-bottom:12px;line-height:1.5;">' + esc(mission.challenge) + '</div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+      '<button class="btn btn-primary btn-sm" onclick="showBlindMission(\'' + mission.id + '\')">Take the Mission →</button>' +
+      '<button class="btn btn-secondary btn-sm" onclick="dismissMissionToday()">Not today</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function dismissMissionToday() {
+  S.user.lastMissionDate = today();
+  saveState();
+  switchTab('today');
+}
+
+var missionState = { id: null, screen: 'setup', scores: { completed: false, understood: false, noHints: false, recovered: false } };
+
+function showBlindMission(missionId) {
+  var mission = BLIND_MISSIONS.find(function(m) { return m.id === missionId; });
+  if (!mission) return;
+  missionState = { id: missionId, screen: 'setup', scores: { completed: false, understood: false, noHints: false, recovered: false } };
+  document.getElementById('mission-overlay').classList.remove('hidden');
+  renderMissionScreen();
+  window.scrollTo(0, 0);
+}
+
+function closeMissionOverlay() {
+  document.getElementById('mission-overlay').classList.add('hidden');
+}
+
+function renderMissionScreen() {
+  var mission = BLIND_MISSIONS.find(function(m) { return m.id === missionState.id; });
+  if (!mission) return;
+  var html = '';
+  if (missionState.screen === 'setup')  html = renderMissionSetup(mission);
+  if (missionState.screen === 'work')   html = renderMissionWork(mission);
+  if (missionState.screen === 'rating') html = renderMissionRating(mission);
+  if (missionState.screen === 'result') html = renderMissionResult(mission);
+  document.getElementById('mission-body').innerHTML = html;
+  document.getElementById('mission-overlay').scrollTop = 0;
+}
+
+function renderMissionSetup(mission) {
+  var phrasesHTML = mission.contextPhrases.map(function(p) {
+    return '<div class="mission-phrase-row">' +
+      '<span class="mission-phrase-es">' + esc(p.spanish) + '</span>' +
+      '<span class="mission-phrase-en">' + esc(p.english) + '</span>' +
+    '</div>';
+  }).join('');
+
+  return '<div style="margin-bottom:12px;">' +
+    '<button class="btn btn-secondary btn-sm" onclick="closeMissionOverlay()">← Back</button>' +
+  '</div>' +
+  '<div class="mission-badge">🎯 Blind Mission Assessment</div>' +
+  '<span class="mission-emoji">' + mission.emoji + '</span>' +
+  '<div class="mission-title">' + esc(mission.title) + '</div>' +
+  '<div class="mission-sub">' + esc(mission.situation) + '</div>' +
+  '<div class="mission-challenge">' +
+    '<div class="mission-challenge-label">Your mission</div>' +
+    '<div class="mission-challenge-text">' + esc(mission.challenge) + '</div>' +
+  '</div>' +
+  '<div class="card" style="margin-bottom:20px;">' +
+    '<div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:8px;">Context phrases — no hints during the mission</div>' +
+    phrasesHTML +
+  '</div>' +
+  '<div class="card" style="margin-bottom:20px;background:rgba(232,93,4,0.04);border:1.5px solid rgba(232,93,4,0.15);">' +
+    '<div style="font-size:0.82rem;font-weight:700;margin-bottom:4px;">Rules</div>' +
+    '<div style="font-size:0.78rem;color:var(--muted);line-height:1.7;">' +
+      '• No vocabulary preview during the mission<br>' +
+      '• No answer choices — you pick the words<br>' +
+      '• You\'ll self-rate honestly when done<br>' +
+      '• It\'s okay to struggle — that\'s the point' +
+    '</div>' +
+  '</div>' +
+  '<button class="btn btn-primary btn-full" onclick="missionGoToWork()">I\'m Ready — Start the Mission →</button>';
+}
+
+function missionGoToWork() {
+  missionState.screen = 'work';
+  missionState.startTime = Date.now();
+  renderMissionScreen();
+}
+
+function renderMissionWork(mission) {
+  return '<div style="margin-bottom:20px;">' +
+    '<div class="mission-badge">🎯 Mission in Progress</div>' +
+    '<span class="mission-emoji">' + mission.emoji + '</span>' +
+    '<div class="mission-title">' + esc(mission.title) + '</div>' +
+  '</div>' +
+  '<div class="mission-challenge" style="margin-bottom:20px;">' +
+    '<div class="mission-challenge-label">Your mission</div>' +
+    '<div class="mission-challenge-text">' + esc(mission.challenge) + '</div>' +
+  '</div>' +
+  '<div class="card" style="text-align:center;padding:28px 16px;margin-bottom:20px;">' +
+    '<div style="font-size:2.2rem;margin-bottom:10px;">🗣️</div>' +
+    '<div style="font-size:1rem;font-weight:700;margin-bottom:6px;">Do it out loud.</div>' +
+    '<div style="font-size:0.82rem;color:var(--muted);line-height:1.6;">Imagine the real situation. Speak the phrases. Work through it as if it\'s happening right now.</div>' +
+  '</div>' +
+  '<div class="card" style="margin-bottom:20px;">' +
+    '<div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:8px;">Context phrases</div>' +
+    mission.contextPhrases.map(function(p) {
+      return '<div class="mission-phrase-row"><span class="mission-phrase-es">' + esc(p.spanish) + '</span><span class="mission-phrase-en">' + esc(p.english) + '</span></div>';
+    }).join('') +
+  '</div>' +
+  '<button class="btn btn-primary btn-full" onclick="missionGoToRating()">I\'m Done — Rate My Performance →</button>';
+}
+
+function missionGoToRating() {
+  missionState.screen = 'rating';
+  renderMissionScreen();
+}
+
+function toggleMissionScore(key) {
+  missionState.scores[key] = !missionState.scores[key];
+  renderMissionScreen();
+}
+
+function renderMissionRating(mission) {
+  var dims = [
+    { key:'completed',  label:'I completed the mission — I said what needed to be said.' },
+    { key:'understood', label:'I understood the responses (or used repair phrases to get there).' },
+    { key:'noHints',    label:'I spoke without needing to look up hints or vocabulary.' },
+    { key:'recovered',  label:'I recovered after a mistake, or I didn\'t make one.' },
+  ];
+  var rows = dims.map(function(d) {
+    var checked = missionState.scores[d.key];
+    return '<div class="mission-rating-row" onclick="toggleMissionScore(\'' + d.key + '\')">' +
+      '<div class="mission-check' + (checked ? ' checked' : '') + '">' + (checked ? '<span style="color:white;font-size:0.85rem;">✓</span>' : '') + '</div>' +
+      '<div class="mission-rating-label">' + d.label + '</div>' +
+    '</div>';
+  }).join('');
+
+  var totalChecked = Object.values(missionState.scores).filter(Boolean).length;
+
+  return '<div style="margin-bottom:16px;">' +
+    '<div class="mission-badge">🎯 Self-Assessment</div>' +
+    '<div class="mission-title" style="font-size:1.2rem;">How did it go?</div>' +
+    '<div class="mission-sub">Be honest — nobody\'s grading you. This is how you build real skill.</div>' +
+  '</div>' +
+  '<div class="card" style="margin-bottom:20px;">' + rows + '</div>' +
+  '<div style="font-size:0.78rem;color:var(--muted);text-align:center;margin-bottom:16px;">' + totalChecked + ' of 4 checked</div>' +
+  '<button class="btn btn-primary btn-full" onclick="submitMissionRating()">See My Results →</button>';
+}
+
+function submitMissionRating() {
+  var mission = BLIND_MISSIONS.find(function(m) { return m.id === missionState.id; });
+  if (!mission) return;
+  var scores = missionState.scores;
+  var total = Object.values(scores).filter(Boolean).length;
+  var passed = total >= 3;
+  var entry = { id: mission.id, goalId: mission.goalId, date: today(), scores: Object.assign({}, scores), passed: passed };
+  if (!S.missionLog) S.missionLog = [];
+  S.missionLog.push(entry);
+  if (passed) S.demonstrated[mission.goalId] = true;
+  S.user.lastMissionDate = today();
+  if (passed && S.stats) { S.stats.xp = (S.stats.xp || 0) + 30; }
+  saveState();
+  missionState.screen = 'result';
+  renderMissionScreen();
+}
+
+function renderMissionResult(mission) {
+  var lastEntry = (S.missionLog || []).slice().reverse().find(function(e) { return e.id === mission.id; });
+  if (!lastEntry) return '';
+  var total = Object.values(lastEntry.scores).filter(Boolean).length;
+  var passed = lastEntry.passed;
+  var goal = CAN_DO_GOALS.find(function(g) { return g.id === mission.goalId; });
+
+  var dimLabels = { completed: 'Mission completed', understood: 'Understood responses', noHints: 'Spoke without hints', recovered: 'Recovered from mistakes' };
+  var dimRows = Object.entries(lastEntry.scores).map(function(pair) {
+    var key = pair[0], val = pair[1];
+    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">' +
+      '<span style="font-size:1rem;">' + (val ? '✅' : '⬜') + '</span>' +
+      '<span style="font-size:0.85rem;color:' + (val ? 'var(--text)' : 'var(--muted)') + ';">' + dimLabels[key] + '</span>' +
+    '</div>';
+  }).join('');
+
+  var resultCard = passed
+    ? '<div class="mission-result-badge">🏆 Mission Passed' + (goal ? ' — "' + goal.title + '" is now Demonstrated' : '') + '</div>'
+    : '<div class="mission-result-badge fail">Keep practicing — retake this mission after your next 7 lessons.</div>';
+
+  return '<div style="text-align:center;margin-bottom:20px;">' +
+    '<div class="mission-badge" style="justify-content:center;">🎯 Mission Results</div>' +
+    '<div class="mission-result-score">' + total + '/4</div>' +
+    '<div class="mission-result-label">' + (passed ? 'Passed' : 'Not yet') + '</div>' +
+    resultCard +
+  '</div>' +
+  '<div class="card" style="margin-bottom:20px;">' + dimRows + '</div>' +
+  (passed
+    ? '<div style="font-size:0.82rem;color:var(--muted);text-align:center;margin-bottom:20px;line-height:1.6;">+30 XP earned. Check your Can-Do Goals to see your Demonstrated badge.</div>'
+    : '<div style="font-size:0.82rem;color:var(--muted);text-align:center;margin-bottom:20px;line-height:1.6;">3 out of 4 is passing. Keep drilling these phrases and come back for a retry in 7 days.</div>') +
+  '<button class="btn btn-primary btn-full" onclick="closeMissionOverlay();switchTab(\'today\');">Back to Today</button>';
+}
+
 function renderCandoSection() {
-  var doneCt = 0, partialCt = 0, newCt = 0;
+  var doneCt = 0, partialCt = 0, newCt = 0, demoCt = 0;
   var goalCards = CAN_DO_GOALS.map(function(goal) {
     var status = checkCanDoGoal(goal);
-    if (status === 'done') doneCt++;
+    var isDemonstrated = status === 'done' && S.demonstrated && S.demonstrated[goal.id];
+    if (status === 'done') { doneCt++; if (isDemonstrated) demoCt++; }
     else if (status === 'partial') partialCt++;
     else newCt++;
 
-    var statusLabel = status === 'done' ? 'Achieved ✓' : status === 'partial' ? 'In Progress' : 'Not Yet';
-    var statusCls = status === 'done' ? 'done' : status === 'partial' ? 'partial' : 'new';
+    var statusLabel = isDemonstrated ? 'Demonstrated ★' : status === 'done' ? 'Achieved ✓' : status === 'partial' ? 'In Progress' : 'Not Yet';
+    var statusCls = isDemonstrated ? 'done' : status === 'done' ? 'done' : status === 'partial' ? 'partial' : 'new';
+    var statusStyle = isDemonstrated ? 'background:var(--gold);color:#1A202C;' : '';
 
     var phraseProgress = (goal.requiredPhrases || []).map(function(pid) {
       var p = S.progress[pid];
@@ -3993,7 +4362,7 @@ function renderCandoSection() {
           '<div class="cando-title">' + esc(goal.title) + '</div>' +
           '<div class="cando-category">' + esc(goal.category) + '</div>' +
         '</div>' +
-        '<span class="cando-status ' + statusCls + '">' + statusLabel + '</span>' +
+        '<span class="cando-status ' + statusCls + '" style="' + statusStyle + '">' + statusLabel + '</span>' +
       '</div>' +
       '<div style="font-size:0.78rem;color:var(--muted);margin:6px 0;line-height:1.5;">' + esc(goal.desc) + '</div>' +
       '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">' +
@@ -4007,9 +4376,10 @@ function renderCandoSection() {
   }).join('');
 
   return '<div class="section-label">Can-Do Goals — ' + doneCt + '/' + CAN_DO_GOALS.length + ' achieved</div>' +
-    '<div class="card" style="margin-bottom:10px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;padding:12px;">' +
+    '<div class="card" style="margin-bottom:10px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;padding:12px;">' +
+      '<div><div style="font-size:1.3rem;font-weight:800;color:var(--gold);">' + demoCt + '</div><div style="font-size:0.65rem;color:var(--muted);">Demonstrated</div></div>' +
       '<div><div style="font-size:1.3rem;font-weight:800;color:var(--green);">' + doneCt + '</div><div style="font-size:0.65rem;color:var(--muted);">Achieved</div></div>' +
-      '<div><div style="font-size:1.3rem;font-weight:800;color:var(--gold);">' + partialCt + '</div><div style="font-size:0.65rem;color:var(--muted);">In Progress</div></div>' +
+      '<div><div style="font-size:1.3rem;font-weight:800;color:var(--primary);">' + partialCt + '</div><div style="font-size:0.65rem;color:var(--muted);">In Progress</div></div>' +
       '<div><div style="font-size:1.3rem;font-weight:800;color:var(--muted);">' + newCt + '</div><div style="font-size:0.65rem;color:var(--muted);">Not Yet</div></div>' +
     '</div>' +
     goalCards;
