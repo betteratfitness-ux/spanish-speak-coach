@@ -819,6 +819,19 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
 .ld-english { font-size:0.92rem; color:var(--muted); }
 .ld-pron { font-size:0.78rem; color:var(--primary); font-style:italic; margin-top:6px; }
 .ld-again-btn { background:none; border:1px solid var(--border); border-radius:20px; padding:6px 16px; font-size:0.8rem; color:var(--muted); cursor:pointer; display:inline-flex; align-items:center; gap:6px; margin-bottom:14px; }
+/* Weekly Recap */
+.weekly-recap { border:2px solid rgba(30,64,175,0.25); border-radius:var(--radius); background:linear-gradient(135deg,rgba(30,64,175,0.07),rgba(30,64,175,0.03)); padding:16px; margin-bottom:14px; }
+.wr-eyebrow { font-size:0.58rem; font-weight:900; text-transform:uppercase; letter-spacing:1px; color:#1E40AF; margin-bottom:4px; }
+.wr-headline { font-size:1.05rem; font-weight:800; color:var(--text); margin-bottom:12px; line-height:1.35; }
+.wr-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:12px; }
+.wr-stat { background:rgba(30,64,175,0.06); border-radius:10px; padding:10px 6px; text-align:center; }
+.wr-stat-num { font-size:1.3rem; font-weight:900; color:#1E40AF; line-height:1; }
+.wr-stat-label { font-size:0.6rem; font-weight:700; text-transform:uppercase; color:var(--muted); margin-top:3px; letter-spacing:0.3px; }
+.wr-footer { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.wr-tagline { font-size:0.78rem; color:var(--muted); line-height:1.45; flex:1; }
+.wr-dismiss { flex-shrink:0; background:none; border:1px solid rgba(30,64,175,0.3); color:#1E40AF; border-radius:20px; padding:6px 14px; font-size:0.75rem; font-weight:700; cursor:pointer; }
+.wr-dismiss:hover { background:rgba(30,64,175,0.08); }
+
 /* Cultural Notes */
 .cultural-note { background:linear-gradient(135deg,rgba(13,148,136,0.09),rgba(13,148,136,0.04)); border:2px solid rgba(13,148,136,0.28); border-radius:var(--radius); padding:14px; margin-top:12px; }
 .cn-eyebrow { font-size:0.6rem; font-weight:900; text-transform:uppercase; letter-spacing:1px; color:#0D9488; margin-bottom:5px; }
@@ -2776,7 +2789,8 @@ const DEFAULT_STATE = {
     backupReminderDismissed: false, lastBackupPrompt: null, hvpPracticed: 0,
     lastGraceDay: null, graceDayUsedToday: false,
     makeItUpStreak: 0, makeItUpExpiry: null,
-    miniChallengeDone: {} },
+    miniChallengeDone: {},
+    weeklyRecapDismissed: null },
   ownership: {},   // { itemId: { worldContext: null, sawOwnCard: false } }
   reviewDeck: [],    // array of item ids
   mastery: {},       // { itemId: { mastered:false, masterDate:null } }
@@ -3017,6 +3031,71 @@ function getNudge() {
     "You do not need a perfect day. You need one speaking rep.",
   ];
   return nudges.length > 0 ? nudges[0] : fallback[Math.floor(Math.random() * fallback.length)];
+}
+
+function getThisSunday() {
+  var d = new Date();
+  d.setDate(d.getDate() - d.getDay()); // roll back to Sunday
+  return d.toISOString().slice(0, 10);
+}
+
+function getWeeklyStats() {
+  var days = [];
+  for (var i = 6; i >= 0; i--) {
+    var d = new Date();
+    d.setDate(d.getDate() - i);
+    days.push(d.toISOString().slice(0, 10));
+  }
+  var practiced = days.filter(function(d){ return S.dailyStars && S.dailyStars[d]; }).length;
+  var stars = 0;
+  days.forEach(function(d) {
+    var ds = S.dailyStars && S.dailyStars[d];
+    if (ds) stars += Object.values(ds).filter(Boolean).length;
+  });
+  var lessonDates = Object.values(S.user.lessonDates || {});
+  var lessons = days.filter(function(d){ return lessonDates.indexOf(d) !== -1; }).length;
+  var challenges = days.filter(function(d){ return S.stats.miniChallengeDone && S.stats.miniChallengeDone[d]; }).length;
+  return { days: days, practiced: practiced, stars: stars, lessons: lessons, challenges: challenges };
+}
+
+function dismissWeeklyRecap() {
+  S.stats.weeklyRecapDismissed = getThisSunday();
+  saveState();
+  switchTab('today');
+}
+
+function renderWeeklyRecapCard() {
+  var dow = new Date().getDay();
+  if (dow !== 0) return ''; // Sundays only
+  var sunday = getThisSunday();
+  if (S.stats.weeklyRecapDismissed === sunday) return '';
+  var ws = getWeeklyStats();
+  if (ws.practiced < 2) return ''; // not enough data yet
+  var headline;
+  if (ws.practiced === 7) headline = 'You went 7 for 7. A perfect week.';
+  else if (ws.practiced >= 5) headline = 'You practiced ' + ws.practiced + ' of 7 days. That\'s a strong week.';
+  else if (ws.practiced >= 3) headline = 'You got ' + ws.practiced + ' days in. Solid — keep that momentum going.';
+  else headline = ws.practiced + ' day is ' + ws.practiced + ' more than zero. Build on it this week.';
+  var tagline = ws.stars >= 20
+    ? 'Your consistency is compounding. Keep showing up.'
+    : ws.lessons >= 3
+    ? ws.lessons + ' lessons done means ' + ws.lessons + ' days closer to fluency.'
+    : 'Every session counts — even the short ones.';
+  var weekLabel = ws.days[0].slice(5).replace('-', '/') + '–' + ws.days[6].slice(5).replace('-', '/');
+  return '<div class="weekly-recap">' +
+    '<div class="wr-eyebrow">📊 Weekly Recap · ' + weekLabel + '</div>' +
+    '<div class="wr-headline">' + headline + '</div>' +
+    '<div class="wr-stats">' +
+      '<div class="wr-stat"><div class="wr-stat-num">' + ws.practiced + '/7</div><div class="wr-stat-label">Days Active</div></div>' +
+      '<div class="wr-stat"><div class="wr-stat-num">' + ws.stars + '</div><div class="wr-stat-label">Stars Earned</div></div>' +
+      '<div class="wr-stat"><div class="wr-stat-num">' + ws.lessons + '</div><div class="wr-stat-label">Lessons Done</div></div>' +
+      '<div class="wr-stat"><div class="wr-stat-num">' + ws.challenges + '</div><div class="wr-stat-label">Challenges</div></div>' +
+    '</div>' +
+    '<div class="wr-footer">' +
+      '<div class="wr-tagline">' + tagline + '</div>' +
+      '<button class="wr-dismiss" onclick="dismissWeeklyRecap()">Got it</button>' +
+    '</div>' +
+  '</div>';
 }
 
 var CULTURAL_NOTES = {
@@ -3558,6 +3637,9 @@ function renderToday() {
       '</div>' +
     '</div>';
 
+  // Weekly recap (Sundays only, dismissable)
+  var weeklyRecapCard = renderWeeklyRecapCard();
+
   // Mini-challenge card
   var miniChallengeCard = '<div id="mc-card-wrap">' + renderMiniChallengeCard() + '</div>';
 
@@ -3572,6 +3654,7 @@ function renderToday() {
     : '';
 
   return greetLine + '<div class="section-label">📅 ' + new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}) + '</div>' +
+    weeklyRecapCard +
     graceCard +
     makeItUpCard +
     comebackCard +
