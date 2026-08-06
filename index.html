@@ -789,6 +789,24 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
 .rt-write-area { width:100%; box-sizing:border-box; border:2px solid var(--border); border-radius:10px; padding:12px; font-size:0.95rem; color:var(--text); background:var(--bg); min-height:80px; resize:vertical; font-family:inherit; line-height:1.5; }
 .rt-write-area:focus { outline:none; border-color:var(--primary); }
 .rt-sample { background:rgba(45,158,107,0.07); border-left:3px solid var(--green); border-radius:0 8px 8px 0; padding:10px 12px; font-size:0.9rem; color:var(--text); font-style:italic; margin-top:8px; }
+
+/* ── Stage 2 / Graduation ─────────────────────────────── */
+.grad-hero { text-align:center; padding:24px 0 16px; }
+.grad-emoji { font-size:4rem; display:block; margin-bottom:12px; }
+.grad-headline { font-size:2rem; font-weight:900; color:var(--text); line-height:1.2; margin-bottom:6px; }
+.grad-sub { font-size:0.95rem; color:var(--muted); line-height:1.6; margin-bottom:20px; }
+.s2-habit-row { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); }
+.s2-habit-row:last-child { border-bottom:none; }
+.s2-habit-icon { font-size:1.3rem; width:32px; text-align:center; flex-shrink:0; }
+.s2-habit-text { flex:1; }
+.s2-habit-title { font-size:0.9rem; font-weight:700; color:var(--text); }
+.s2-habit-desc { font-size:0.72rem; color:var(--muted); margin-top:1px; }
+.s2-habit-btn { flex-shrink:0; }
+.s2-card { border-left:4px solid var(--primary); margin-bottom:14px; }
+.s2-phase-chip { display:inline-block; font-size:0.62rem; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; border-radius:99px; padding:2px 8px; margin-bottom:4px; }
+.s2-phase-chip.now { background:rgba(45,158,107,0.12); color:var(--green); }
+.s2-phase-chip.soon { background:rgba(232,93,4,0.1); color:var(--primary); }
+.s2-phase-chip.later { background:var(--border); color:var(--muted); }
 </style>
 </head>
 <body>
@@ -2282,7 +2300,7 @@ const LESSONS = [
 const LS_KEY = 'ssc_state';
 
 const DEFAULT_STATE = {
-  user: { name: '', level: null, diagnosticDone: false, goalsDone: false, why: '', timePerDay: 10, useCase: '', currentLesson: 1, lessonDates: {}, comebackActive: false, daysMissed: 0, lastMissionDate: null },
+  user: { name: '', level: null, diagnosticDone: false, goalsDone: false, why: '', timePerDay: 10, useCase: '', currentLesson: 1, lessonDates: {}, comebackActive: false, daysMissed: 0, lastMissionDate: null, graduationShown: false },
   settings: {
     practiceLength: 'standard',
     pronunciationHelper: true,
@@ -2665,7 +2683,9 @@ function renderToday() {
     }
   }
 
-  const lessonCard = lessonDone
+  const lessonCard = isPostDay30()
+    ? renderStage2TodayCard()
+    : lessonDone
     ? '<div class="daily-lesson-card">' +
         '<div class="daily-lesson-day">Day ' + lesson.day + ' — ' + lesson.topic + '</div>' +
         '<div class="daily-lesson-topic">' + lesson.icon + ' Lesson Complete!</div>' +
@@ -4304,6 +4324,181 @@ function startGoalDrillMode(goalId, which) {
   items = items.slice().sort(function(){ return Math.random() - 0.5; });
   modeState = { mode: 'listen-repeat', items: items, index: 0, results: [], revealed: false, showHint: false, backTab: 'mastery' };
   renderModeCard();
+}
+
+// ===================================================
+// STAGE 2 — POST-DAY-30 PATHWAY
+// ===================================================
+
+function isPostDay30() {
+  return Object.keys(S.user.lessonDates || {}).length >= 30;
+}
+
+function renderStage2TodayCard() {
+  var name = S.user.name ? S.user.name.trim().split(' ')[0] : '';
+  var demoCt = CAN_DO_GOALS.filter(function(g){ return S.demonstrated && S.demonstrated[g.id]; }).length;
+  var doneCt = CAN_DO_GOALS.filter(function(g){ return checkCanDoGoal(g) === 'done'; }).length;
+  var allDemonstrated = demoCt >= CAN_DO_GOALS.length;
+
+  var goalLine = allDemonstrated
+    ? '<div style="font-size:0.82rem;color:var(--green);font-weight:700;margin-bottom:10px;">🏆 All 9 Can-Do Goals demonstrated. You\'re Stage 2 complete.</div>'
+    : '<div style="font-size:0.82rem;color:var(--muted);margin-bottom:6px;">Stage 2 goal: demonstrate all 9 Can-Do Skills in real scenarios.</div>' +
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">' +
+        '<div style="flex:1;background:var(--border);border-radius:99px;height:6px;overflow:hidden;">' +
+          '<div style="width:' + Math.round(demoCt/CAN_DO_GOALS.length*100) + '%;height:100%;background:var(--gold);border-radius:99px;"></div>' +
+        '</div>' +
+        '<span style="font-size:0.72rem;color:var(--gold);font-weight:800;">' + demoCt + '/' + CAN_DO_GOALS.length + ' demonstrated</span>' +
+      '</div>';
+
+  var isMissionDueNow = isMissionDue();
+  var missionLine = isMissionDueNow
+    ? '<div style="font-size:0.78rem;color:var(--primary);font-weight:700;margin-bottom:6px;">🎯 Mission Assessment is due today</div>'
+    : '';
+
+  return '<div class="card s2-card" style="margin-bottom:14px;">' +
+    '<div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.6px;color:var(--primary);margin-bottom:6px;">🎓 STAGE 2 — 30-Day Program Complete</div>' +
+    (name ? '<div style="font-weight:800;font-size:1rem;margin-bottom:4px;">Keep going, ' + esc(name) + '.</div>' : '') +
+    goalLine +
+    missionLine +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+      '<button class="btn btn-primary btn-sm" onclick="showStage2Overview()">My Roadmap →</button>' +
+      '<button class="btn btn-secondary btn-sm" onclick="startSentenceBuilder(\'today\')">Sentence Builder</button>' +
+      '<button class="btn btn-secondary btn-sm" onclick="startReadingTasks()">Reading</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function showStage2Overview() {
+  document.getElementById('main-content').innerHTML = renderStage2Overview();
+  window.scrollTo(0,0);
+}
+
+function renderStage2Overview() {
+  var lessonsCompleted = Object.keys(S.user.lessonDates || {}).length;
+  var phrasesAttempted = Object.keys(S.progress || {}).length;
+  var demoCt = CAN_DO_GOALS.filter(function(g){ return S.demonstrated && S.demonstrated[g.id]; }).length;
+  var doneCt = CAN_DO_GOALS.filter(function(g){ return checkCanDoGoal(g) === 'done'; }).length;
+  var xp = S.stats.xp || 0;
+  var name = S.user.name ? S.user.name.trim().split(' ')[0] : '';
+
+  var goalCards = CAN_DO_GOALS.map(function(goal) {
+    var status = checkCanDoGoal(goal);
+    var demo = S.demonstrated && S.demonstrated[goal.id];
+    var icon = demo ? '⭐' : status === 'done' ? '✓' : status === 'partial' ? '○' : '·';
+    var color = demo ? 'var(--gold)' : status === 'done' ? 'var(--green)' : status === 'partial' ? 'var(--primary)' : 'var(--muted)';
+    return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);">' +
+      '<span style="font-size:0.9rem;color:' + color + ';width:18px;text-align:center;flex-shrink:0;">' + icon + '</span>' +
+      '<span style="font-size:0.82rem;color:' + (demo || status !== 'new' ? 'var(--text)' : 'var(--muted)') + ';flex:1;">' + esc(goal.title) + '</span>' +
+      (demo ? '<span style="font-size:0.62rem;font-weight:800;color:var(--gold);">DEMONSTRATED</span>' :
+       status === 'done' ? '<span style="font-size:0.62rem;font-weight:800;color:var(--green);">ACHIEVED</span>' :
+       status === 'partial' ? '<span style="font-size:0.62rem;color:var(--muted);">IN PROGRESS</span>' : '') +
+    '</div>';
+  }).join('');
+
+  var habits = [
+    { icon:'🧠', title:'Review phrases', desc:'5 min · phrases you\'ve missed or haven\'t seen lately', action:'startReviewSession()', label:'Review' },
+    { icon:'✍️', title:'Sentence Builder', desc:'10 prompts · produce full sentences from real situations', action:'startSentenceBuilder(\'today\')', label:'Build' },
+    { icon:'📖', title:'Reading Task', desc:'One real text · WhatsApp, menus, signs, emails', action:'startReadingTasks()', label:'Read' },
+    { icon:'🎭', title:'Roleplay Scenario', desc:'A scripted conversation · say the right thing at the right time', action:'switchTab(\'roleplay\')', label:'Practice' },
+    { icon:'🎯', title:'Mission Assessment', desc:'Every 7 days · prove a skill without hints', action:'switchTab(\'today\')', label:'Check Today' },
+  ];
+  var habitsHTML = habits.map(function(h) {
+    return '<div class="s2-habit-row">' +
+      '<div class="s2-habit-icon">' + h.icon + '</div>' +
+      '<div class="s2-habit-text">' +
+        '<div class="s2-habit-title">' + h.title + '</div>' +
+        '<div class="s2-habit-desc">' + h.desc + '</div>' +
+      '</div>' +
+      '<button class="btn btn-secondary btn-sm s2-habit-btn" onclick="' + h.action + '">' + h.label + '</button>' +
+    '</div>';
+  }).join('');
+
+  var phases = [
+    { chip:'now', label:'Stage 2 — Now', items:['Demonstrate all 9 Can-Do Skills in mission assessments','Sentence Builder — produce without hints','Reading Tasks — understand real Spanish text','Roleplay + Field Missions for conversational reps'] },
+    { chip:'soon', label:'Phase 2 — Coming Next', items:['AI conversation partner — open-ended practice','Objective assessment — your speaking rated by AI','Listening progression — native speed audio','Live Mission Mode — AI plays the other person'] },
+    { chip:'later', label:'Phase 3 — Later', items:['Language partner matching','Community challenges and accountability','Progress sharing and coaching reports'] },
+  ];
+  var phasesHTML = phases.map(function(ph) {
+    return '<div style="margin-bottom:14px;">' +
+      '<span class="s2-phase-chip ' + ph.chip + '">' + ph.label + '</span>' +
+      '<ul style="margin:6px 0 0 16px;padding:0;">' +
+        ph.items.map(function(item){ return '<li style="font-size:0.8rem;color:var(--muted);line-height:1.6;margin-bottom:2px;">' + item + '</li>'; }).join('') +
+      '</ul>' +
+    '</div>';
+  }).join('');
+
+  return '<button class="btn btn-secondary btn-sm" onclick="switchTab(\'today\')" style="margin-bottom:16px;">← Today</button>' +
+
+    '<div class="grad-hero">' +
+      '<span class="grad-emoji">🎓</span>' +
+      '<div class="grad-headline">30 Days Done.</div>' +
+      '<div class="grad-sub">You built a Spanish habit. That\'s harder than it sounds.<br>Stage 2 is where it turns into real-world skill.</div>' +
+    '</div>' +
+
+    '<div class="card" style="margin-bottom:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;padding:14px;">' +
+      '<div><div style="font-size:1.4rem;font-weight:800;color:var(--green);">' + lessonsCompleted + '</div><div style="font-size:0.65rem;color:var(--muted);">Lessons Done</div></div>' +
+      '<div><div style="font-size:1.4rem;font-weight:800;color:var(--primary);">' + phrasesAttempted + '</div><div style="font-size:0.65rem;color:var(--muted);">Phrases Touched</div></div>' +
+      '<div><div style="font-size:1.4rem;font-weight:800;color:var(--gold);">' + xp + '</div><div style="font-size:0.65rem;color:var(--muted);">XP Earned</div></div>' +
+    '</div>' +
+
+    '<div class="section-label">Stage 2 Goal: Demonstrate All 9 Can-Do Skills</div>' +
+    '<div class="card" style="margin-bottom:14px;padding:14px;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
+        '<span style="font-size:0.78rem;color:var(--muted);">' + demoCt + ' of 9 demonstrated</span>' +
+        '<span style="font-size:0.72rem;font-weight:800;color:var(--gold);">' + Math.round(demoCt/CAN_DO_GOALS.length*100) + '% complete</span>' +
+      '</div>' +
+      '<div style="background:var(--border);border-radius:99px;height:8px;overflow:hidden;margin-bottom:14px;">' +
+        '<div style="width:' + Math.round(demoCt/CAN_DO_GOALS.length*100) + '%;height:100%;background:var(--gold);border-radius:99px;transition:width 0.4s;"></div>' +
+      '</div>' +
+      goalCards +
+    '</div>' +
+
+    '<div class="section-label">Your Daily Stage 2 Routine</div>' +
+    '<div class="card" style="margin-bottom:14px;">' + habitsHTML + '</div>' +
+
+    '<div class="section-label">The Full Roadmap</div>' +
+    '<div class="card" style="margin-bottom:14px;">' + phasesHTML + '</div>' +
+
+    '<button class="btn btn-primary btn-full" onclick="switchTab(\'today\')">Back to Today</button>';
+}
+
+function showGraduation() {
+  var name = S.user.name ? S.user.name.trim().split(' ')[0] : '';
+  var lessonsCompleted = Object.keys(S.user.lessonDates || {}).length;
+  var phrasesAttempted = Object.keys(S.progress || {}).length;
+  var xp = S.stats.xp || 0;
+  S.user.graduationShown = true;
+  saveState();
+
+  document.getElementById('main-content').innerHTML =
+    '<div class="card grad-hero">' +
+      '<span class="grad-emoji">🎓</span>' +
+      '<div class="grad-headline">You did it' + (name ? ', ' + esc(name) : '') + '.</div>' +
+      '<div style="font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:8px;">30 days of Spanish. Done.</div>' +
+      '<div class="grad-sub">You showed up every day and built a real habit. That\'s not nothing — most people never get here.</div>' +
+    '</div>' +
+
+    '<div class="card" style="margin-bottom:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;padding:14px;">' +
+      '<div><div style="font-size:1.6rem;font-weight:900;color:var(--green);">' + lessonsCompleted + '</div><div style="font-size:0.65rem;color:var(--muted);">Lessons</div></div>' +
+      '<div><div style="font-size:1.6rem;font-weight:900;color:var(--primary);">' + phrasesAttempted + '</div><div style="font-size:0.65rem;color:var(--muted);">Phrases</div></div>' +
+      '<div><div style="font-size:1.6rem;font-weight:900;color:var(--gold);">' + xp + '</div><div style="font-size:0.65rem;color:var(--muted);">XP</div></div>' +
+    '</div>' +
+
+    '<div class="card" style="margin-bottom:14px;border-left:4px solid var(--primary);padding:16px;">' +
+      '<div style="font-weight:800;font-size:1rem;margin-bottom:6px;">You\'re not a beginner anymore.</div>' +
+      '<div style="font-size:0.85rem;color:var(--muted);line-height:1.7;">' +
+        'You can introduce yourself. Order food. Ask for help. Handle a complication. Recover when something goes wrong.<br><br>' +
+        'Stage 2 is where those skills stop being phrases and start being instincts. ' +
+        'Demonstrate each Can-Do Goal in a real mission — without hints.' +
+      '</div>' +
+    '</div>' +
+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+      '<button class="btn btn-primary" style="flex:1;" onclick="showStage2Overview()">See Stage 2 Roadmap →</button>' +
+      '<button class="btn btn-secondary" onclick="switchTab(\'today\')">Back to Today</button>' +
+    '</div>';
+
+  window.scrollTo(0,0);
 }
 
 // ===================================================
@@ -7058,7 +7253,12 @@ function renderLessonComplete(ls) {
         '<div><div style="font-weight:700;font-size:0.88rem;">Up Next: Day ' + nextLesson.day + ' — ' + nextLesson.topic + '</div>' +
         '<div style="font-size:0.75rem;color:var(--muted);">Come back tomorrow to continue</div></div>' +
       '</div>'
-    : '<div style="font-size:0.85rem;color:var(--muted);margin-top:10px;text-align:center;">You\'ve completed all 10 lessons. More coming soon!</div>';
+    : '<div style="text-align:center;margin-top:16px;">' +
+        '<div style="font-size:2rem;margin-bottom:6px;">🎓</div>' +
+        '<div style="font-weight:800;font-size:1.1rem;color:var(--primary);margin-bottom:4px;">You finished all 30 days.</div>' +
+        '<div style="font-size:0.82rem;color:var(--muted);margin-bottom:12px;">Stage 2 unlocked — it\'s time to demonstrate what you\'ve built.</div>' +
+        '<button class="btn btn-primary" onclick="showGraduation()">See Your Next Chapter →</button>' +
+      '</div>';
 
   // Build debrief: find a phrase the user struggled with and a natural upgrade
   var debriefHtml = '';
