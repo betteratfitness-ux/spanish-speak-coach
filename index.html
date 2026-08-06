@@ -766,6 +766,15 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
 .mission-result-badge { background:var(--green); color:white; border-radius:10px; padding:12px 16px; text-align:center; margin-bottom:16px; font-size:0.88rem; font-weight:700; }
 .mission-result-badge.fail { background:rgba(113,128,150,0.12); color:var(--muted); }
 .cando-demonstrated { font-size:0.68rem; font-weight:800; background:var(--gold); color:#1A202C; border-radius:99px; padding:2px 8px; margin-left:6px; }
+
+/* ── Sentence Builder ─────────────────────────────────── */
+.sb-situation { font-size:0.78rem; color:var(--muted); line-height:1.6; margin-bottom:8px; }
+.sb-goal { font-size:1.05rem; font-weight:800; color:var(--text); line-height:1.4; margin-bottom:16px; }
+.sb-model { background:rgba(45,158,107,0.08); border-left:4px solid var(--green); border-radius:0 10px 10px 0; padding:12px 14px; margin-bottom:10px; }
+.sb-model-label { font-size:0.62rem; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; color:var(--green); margin-bottom:4px; }
+.sb-model-text { font-size:1.05rem; font-weight:700; color:var(--text); }
+.sb-also { font-size:0.78rem; color:var(--muted); margin-bottom:6px; }
+.sb-tip { font-size:0.78rem; color:var(--primary); background:rgba(232,93,4,0.07); border-radius:8px; padding:8px 10px; line-height:1.5; }
 </style>
 </head>
 <body>
@@ -1597,6 +1606,32 @@ var BLIND_MISSIONS = [
       {spanish:'¿Cómo se dice... en español?', english:'How do you say ... in Spanish?'},
       {spanish:'Un momento, por favor.', english:'One moment, please.'}
     ]}
+];
+
+// ===================================================
+// SENTENCE-BUILDING PROMPTS — 20 production drills
+// ===================================================
+var SENTENCE_PROMPTS = [
+  { id:'SB-01', category:'Introductions', situation:'You meet someone at a community mixer.', goal:'Introduce yourself and ask their name.', model:'Me llamo [tu nombre]. ¿Cómo te llamas?', also:'"Hola, soy [nombre]. ¿Y tú?"', tip:'Use "Me llamo" (formal) or "Soy" (casual) — both are correct.' },
+  { id:'SB-02', category:'Introductions', situation:'Someone asks where you\'re from.', goal:'Answer and ask them the same question.', model:'Soy de [ciudad]. ¿Y usted, de dónde es?', also:'"Soy americano/a. ¿De dónde eres tú?"', tip:'Mirroring the question back is natural and keeps the conversation going.' },
+  { id:'SB-03', category:'Introductions', situation:'A conversation is wrapping up.', goal:'Say goodbye politely and wish them well.', model:'Mucho gusto. ¡Hasta luego!', also:'"Fue un placer conocerle. Cuídese."', tip:'"Mucho gusto" works both at hello AND goodbye after meeting someone.' },
+  { id:'SB-04', category:'Food', situation:'You\'re at a restaurant. The waiter asks what you want.', goal:'Order a specific dish politely.', model:'Quisiera el pollo con arroz, por favor.', also:'"Me gustaría el número dos, por favor."', tip:'"Quisiera" (I would like) is more polite than "Quiero" (I want).' },
+  { id:'SB-05', category:'Food', situation:'You don\'t understand the menu and need help.', goal:'Ask the waiter what they recommend.', model:'¿Qué recomienda usted?', also:'"¿Qué tiene de especial hoy?"', tip:'Asking for a recommendation is a great workaround when you don\'t recognize items.' },
+  { id:'SB-06', category:'Food', situation:'You finished eating and want to leave.', goal:'Ask for the check.', model:'La cuenta, por favor.', also:'"¿Me puede traer la cuenta?"', tip:'Short and direct is fine. Waiters know exactly what "la cuenta" means.' },
+  { id:'SB-07', category:'Navigation', situation:'You\'re lost and need to find the hotel.', goal:'Stop a stranger and ask for directions.', model:'Disculpe, ¿sabe dónde está el hotel [nombre]?', also:'"Perdone, ¿cómo llego al hotel?"', tip:'"Disculpe" or "Perdone" gets attention politely before your question.' },
+  { id:'SB-08', category:'Navigation', situation:'Someone gave you fast directions you didn\'t catch.', goal:'Ask them to repeat more slowly.', model:'¿Puede repetir más despacio, por favor?', also:'"Lo siento, no entendí bien. ¿Puede decirlo más despacio?"', tip:'This phrase alone will rescue more conversations than any vocabulary list.' },
+  { id:'SB-09', category:'Navigation', situation:'Someone helped you find your destination.', goal:'Thank them warmly before parting.', model:'Muchas gracias por su ayuda. ¡Que tenga buen día!', also:'"Le agradezco mucho. ¡Hasta luego!"', tip:'Adding "¡Que tenga buen día!" (Have a good day!) leaves a great impression.' },
+  { id:'SB-10', category:'Repair', situation:'A native speaker is talking too fast for you to follow.', goal:'Politely ask them to slow down.', model:'Más despacio, por favor. Estoy aprendiendo español.', also:'"Habla un poco rápido para mí. ¿Puede ir más despacio?"', tip:'Mentioning you\'re learning removes any awkwardness — they\'ll respect it.' },
+  { id:'SB-11', category:'Repair', situation:'You heard a word you didn\'t understand.', goal:'Ask what it means.', model:'¿Qué significa esa palabra?', also:'"No entendí esa parte. ¿Qué quiere decir?"', tip:'Asking about specific words shows you\'re engaged, not lost.' },
+  { id:'SB-12', category:'Repair', situation:'You just realized you said the wrong thing.', goal:'Acknowledge the mistake and correct yourself.', model:'Perdón, me equivoqué. Lo que quería decir es...', also:'"Disculpe, quise decir [la frase correcta]."', tip:'Native speakers make mistakes too. A quick correction and continue is all you need.' },
+  { id:'SB-13', category:'Health', situation:'You have a bad headache and need help.', goal:'Explain your symptom to a pharmacist.', model:'Me duele la cabeza. ¿Tiene algo para el dolor?', also:'"Tengo mucho dolor de cabeza. ¿Qué me recomienda?"', tip:'"Me duele [body part]" = My [body part] hurts. Essential health phrase.' },
+  { id:'SB-14', category:'Health', situation:'You need to find a pharmacy urgently.', goal:'Ask someone where the nearest pharmacy is.', model:'¿Dónde está la farmacia más cercana?', also:'"¿Hay una farmacia cerca de aquí?"', tip:'"Más cercana" means nearest. Useful in any urgent situation.' },
+  { id:'SB-15', category:'Health', situation:'A pharmacist asks how they can help you.', goal:'Explain you need something for a stomach ache.', model:'Me duele el estómago. Necesito algo para el dolor.', also:'"Tengo malestar estomacal. ¿Tiene algún remedio?"', tip:'Keep it simple — state the symptom and say you need something for it.' },
+  { id:'SB-16', category:'Travel', situation:'You arrive at the hotel front desk.', goal:'Tell them you have a reservation.', model:'Buenas tardes. Tengo una reservación a nombre de [apellido].', also:'"Hola, hice una reservación en línea. Mi apellido es..."', tip:'Lead with your last name (apellido) — hotels always search by last name.' },
+  { id:'SB-17', category:'Travel', situation:'The front desk can\'t find your booking.', goal:'Stay calm and ask them to look again.', model:'¿Puede verificar otra vez? Hice la reservación hace dos semanas.', also:'"Estoy seguro/a que está a mi nombre. ¿Puede revisar de nuevo?"', tip:'Staying calm and specific ("two weeks ago") helps them search more effectively.' },
+  { id:'SB-18', category:'Family', situation:'Someone at a dinner party asks if you have children.', goal:'Answer and ask about their family.', model:'Sí, tengo dos hijos. ¿Y ustedes, tienen hijos?', also:'"No tengo hijos, pero tengo dos sobrinos. ¿Y su familia?"', tip:'Turning the question around shows genuine interest and keeps conversation flowing.' },
+  { id:'SB-19', category:'Work', situation:'A new colleague asks what you do for work.', goal:'Explain your job and what you work on.', model:'Trabajo en [industria]. Me dedico a [función].', also:'"Soy [profesión]. Trabajo para una empresa de [tipo]."', tip:'"Me dedico a..." (I dedicate myself to...) sounds natural and professional.' },
+  { id:'SB-20', category:'Work', situation:'You need a colleague\'s help with something.', goal:'Ask them politely if they can help you.', model:'Disculpe, ¿puede ayudarme con esto un momento?', also:'"¿Tendría un minuto para ayudarme con algo?"', tip:'"¿Tendría un minuto?" (Would you have a minute?) is very polite and appreciated.' },
 ];
 
 // ===================================================
@@ -2916,6 +2951,13 @@ function renderSpeak() {
           <span>10 prompts fast. Go. Build response instincts.</span>
         </div>
       </div>
+      <div class="practice-option" onclick="startSentenceBuilder('speak')">
+        <div class="practice-option-icon">✍️</div>
+        <div class="practice-option-text">
+          <strong>Sentence Builder</strong>
+          <span>Real situation. No word bank. Say a full sentence out loud.</span>
+        </div>
+      </div>
     </div>`;
 }
 
@@ -3157,9 +3199,10 @@ function renderModeCard() {
   const showPron = S.settings.pronunciationHelper;
   const { mode, index, items, revealed } = modeState;
   const total = items.length;
-  const prog = getItemProgress(item.id);
+  const isSentenceMode = mode === 'build';
+  const prog = isSentenceMode ? { missed: 0 } : getItemProgress(item.id);
   const missCount = prog.missed || 0;
-  const domainLabel = DOMAINS[item.domain]?.name || item.domain;
+  const domainLabel = isSentenceMode ? (item.category || '') : (DOMAINS[item.domain]?.name || item.domain);
 
   // Weak-item badge
   const weakBadge = missCount >= 2
@@ -3300,6 +3343,42 @@ function renderModeCard() {
       `}`;
   }
 
+  // ── SENTENCE BUILDER ──────────────────────────────────
+  if (mode === 'build') {
+    var sp = item; // item is a SENTENCE_PROMPT object
+    inner = revealed ? `
+      <div class="card-title">✍️ Sentence Builder</div>
+      <div style="margin-bottom:12px;">
+        <div class="sb-situation">${esc(sp.situation)}</div>
+        <div class="sb-goal">${esc(sp.goal)}</div>
+      </div>
+      <div class="sb-model">
+        <div class="sb-model-label">Model answer</div>
+        <div class="sb-model-text">${esc(sp.model)}</div>
+      </div>
+      ${sp.also ? '<div class="sb-also">Also works: ' + esc(sp.also) + '</div>' : ''}
+      ${sp.tip ? '<div class="sb-tip">💡 ' + esc(sp.tip) + '</div>' : ''}
+      <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px;">
+        <button class="btn btn-green" onclick="recordSentenceResult('correct')">✓ Nailed It — I said something close</button>
+        <button class="btn" style="background:#FEEBC8;color:#7B341E;" onclick="recordSentenceResult('guessed')">~ Got the Idea — missed some words</button>
+        <button class="btn" style="background:#FED7D7;color:#9B2C2C;" onclick="recordSentenceResult('missed')">✗ Missed It — I didn't know what to say</button>
+      </div>
+    ` : `
+      <div class="card-title">✍️ Sentence Builder</div>
+      <div style="margin-bottom:14px;">
+        <span class="domain-tag tag-D1" style="background:rgba(232,93,4,0.1);color:var(--primary);border:none;">${esc(sp.category)}</span>
+      </div>
+      <div class="sb-situation">${esc(sp.situation)}</div>
+      <div class="sb-goal">${esc(sp.goal)}</div>
+      <div style="background:rgba(45,158,107,0.06);border-radius:10px;padding:14px 12px;text-align:center;margin-bottom:14px;">
+        <div style="font-size:1.5rem;margin-bottom:6px;">🗣️</div>
+        <div style="font-size:0.85rem;font-weight:700;color:var(--text);">Say it out loud in Spanish.</div>
+        <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">No word bank. No choices. Just you.</div>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="revealAnswer()">I Said It → See Model Answer</button>
+    `;
+  }
+
   document.getElementById('main-content').innerHTML = modeShell(index, total, inner);
 
   // Auto-play the Spanish phrase when card loads in listen-repeat mode
@@ -3352,6 +3431,26 @@ function recordResult(result, confidence) {
   renderModeCard();
 }
 
+function recordSentenceResult(result) {
+  if (!modeState) return;
+  var xpMap = { correct: 12, guessed: 7, missed: 3 };
+  S.stats.xp = (S.stats.xp || 0) + xpMap[result];
+  S.stats.sentenceBuildReps = (S.stats.sentenceBuildReps || 0) + 1;
+  if (result === 'correct') awardStar('speak');
+  modeState.results.push({ id: modeState.items[modeState.index].id, result, confidence: result === 'correct' ? 4 : result === 'guessed' ? 2 : 1 });
+  modeState.index += 1;
+  modeState.revealed = false;
+  saveState();
+  renderModeCard();
+}
+
+function startSentenceBuilder(backTab) {
+  backTab = backTab || 'speak';
+  var items = SENTENCE_PROMPTS.slice().sort(function(){ return Math.random() - 0.5; }).slice(0, 10);
+  modeState = { mode: 'build', items: items, index: 0, results: [], revealed: false, showHint: false, backTab: backTab };
+  renderModeCard();
+}
+
 function renderModeComplete() {
   const { results, mode } = modeState;
   const correct  = results.filter(r => r.result === 'correct').length;
@@ -3368,7 +3467,7 @@ function renderModeComplete() {
     .filter(Boolean).slice(0, 3);
 
   const emoji = correct === total ? '🌟' : correct > total / 2 ? '✅' : '💪';
-  const modeLabel = { 'listen-repeat':'Listen → Repeat','en-to-es':'English → Spanish','es-to-en':'Spanish → English','speak-memory':'Speak From Memory','speed-round':'Speed Round' }[mode] || mode;
+  const modeLabel = { 'listen-repeat':'Listen → Repeat','en-to-es':'English → Spanish','es-to-en':'Spanish → English','speak-memory':'Speak From Memory','speed-round':'Speed Round','build':'Sentence Builder' }[mode] || mode;
 
   document.getElementById('main-content').innerHTML = `
     <div class="card" style="text-align:center;">
