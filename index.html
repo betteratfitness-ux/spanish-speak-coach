@@ -775,6 +775,20 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
 .sb-model-text { font-size:1.05rem; font-weight:700; color:var(--text); }
 .sb-also { font-size:0.78rem; color:var(--muted); margin-bottom:6px; }
 .sb-tip { font-size:0.78rem; color:var(--primary); background:rgba(232,93,4,0.07); border-radius:8px; padding:8px 10px; line-height:1.5; }
+
+/* ── Reading Tasks ────────────────────────────────────── */
+.rt-badge { font-size:0.62rem; font-weight:800; text-transform:uppercase; letter-spacing:0.6px; color:var(--muted); margin-bottom:8px; }
+.rt-passage { font-size:1rem; line-height:1.75; color:var(--text); background:var(--bg); border-radius:10px; padding:16px 14px; margin-bottom:14px; white-space:pre-line; border:1.5px solid var(--border); }
+.rt-hint-row { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
+.rt-hint-chip { font-size:0.72rem; background:rgba(232,93,4,0.08); border-radius:6px; padding:3px 8px; color:var(--text); }
+.rt-hint-chip strong { color:var(--primary); }
+.rt-opt { border:2px solid var(--border); border-radius:10px; padding:12px 14px; margin-bottom:8px; cursor:pointer; font-size:0.9rem; font-weight:600; color:var(--text); transition:border-color 0.15s,background 0.15s; }
+.rt-opt:hover { border-color:var(--primary); }
+.rt-opt.rt-correct { border-color:var(--green); background:rgba(45,158,107,0.08); color:var(--green); }
+.rt-opt.rt-wrong { border-color:#E53E3E; background:rgba(229,62,62,0.06); color:#9B2C2C; }
+.rt-write-area { width:100%; box-sizing:border-box; border:2px solid var(--border); border-radius:10px; padding:12px; font-size:0.95rem; color:var(--text); background:var(--bg); min-height:80px; resize:vertical; font-family:inherit; line-height:1.5; }
+.rt-write-area:focus { outline:none; border-color:var(--primary); }
+.rt-sample { background:rgba(45,158,107,0.07); border-left:3px solid var(--green); border-radius:0 8px 8px 0; padding:10px 12px; font-size:0.9rem; color:var(--text); font-style:italic; margin-top:8px; }
 </style>
 </head>
 <body>
@@ -1632,6 +1646,106 @@ var SENTENCE_PROMPTS = [
   { id:'SB-18', category:'Family', situation:'Someone at a dinner party asks if you have children.', goal:'Answer and ask about their family.', model:'Sí, tengo dos hijos. ¿Y ustedes, tienen hijos?', also:'"No tengo hijos, pero tengo dos sobrinos. ¿Y su familia?"', tip:'Turning the question around shows genuine interest and keeps conversation flowing.' },
   { id:'SB-19', category:'Work', situation:'A new colleague asks what you do for work.', goal:'Explain your job and what you work on.', model:'Trabajo en [industria]. Me dedico a [función].', also:'"Soy [profesión]. Trabajo para una empresa de [tipo]."', tip:'"Me dedico a..." (I dedicate myself to...) sounds natural and professional.' },
   { id:'SB-20', category:'Work', situation:'You need a colleague\'s help with something.', goal:'Ask them politely if they can help you.', model:'Disculpe, ¿puede ayudarme con esto un momento?', also:'"¿Tendría un minuto para ayudarme con algo?"', tip:'"¿Tendría un minuto?" (Would you have a minute?) is very polite and appreciated.' },
+];
+
+// ===================================================
+// READING PASSAGES — 8 real-world texts with comprehension
+// ===================================================
+var READING_PASSAGES = [
+  { id:'RT-01', icon:'💬', type:'Message', title:'WhatsApp from a friend',
+    context:'Your Spanish-speaking friend just sent you this message.',
+    passage:'¡Hola! Nos vemos mañana a las 7 en el restaurante de la esquina. ¿Puedes llevar algo de beber, por favor? 🙏',
+    translation:'Hi! We\'re meeting tomorrow at 7 at the corner restaurant. Can you bring something to drink, please?',
+    vocabHints:[{w:'mañana',m:'tomorrow'},{w:'a las 7',m:'at 7 o\'clock'},{w:'llevar',m:'to bring'}],
+    questions:[
+      {q:'When are they meeting?', opts:['Tonight','Tomorrow','This weekend','Next week'], correct:1},
+      {q:'What does your friend ask you to bring?', opts:['Food','Drinks','Dessert','Nothing'], correct:1}
+    ],
+    writePrompt:'Write a reply confirming you\'ll come and will bring drinks.',
+    writeSample:'¡Claro que sí! Nos vemos mañana. Llevo las bebidas. 😊'
+  },
+  { id:'RT-02', icon:'🍽️', type:'Menu', title:'Restaurant daily menu',
+    context:'You see this posted on the wall at a local restaurant.',
+    passage:'MENÚ DEL DÍA\n\nSopa de tomate o ensalada verde\nPollo asado con arroz o pasta\nFlan de vainilla\n\nIncluye bebida y pan — $12.50',
+    translation:'DAILY MENU — Tomato soup or green salad / Roasted chicken with rice or pasta / Vanilla flan — Includes drink and bread',
+    vocabHints:[{w:'menú del día',m:'daily set menu'},{w:'incluye',m:'includes'},{w:'flan',m:'custard dessert'}],
+    questions:[
+      {q:'What are the two starter choices?', opts:['Soup or pasta','Soup or salad','Salad or chicken','Soup or flan'], correct:1},
+      {q:'What is included in the price?', opts:['Only a drink','Drink and bread','Bread and dessert','Everything'], correct:1}
+    ],
+    writePrompt:'Order the full menu — tell the waiter your choices for each course.',
+    writeSample:'Quisiera la sopa de tomate, el pollo con arroz y el flan, por favor.'
+  },
+  { id:'RT-03', icon:'🏨', type:'Sign', title:'Hotel room checkout notice',
+    context:'You see this sign on the back of your hotel room door.',
+    passage:'AVISO IMPORTANTE\n\nHorario de salida: 12:00 del mediodía.\n\nSi necesita salir más tarde, hable con la recepción antes de las 10:00 a.m. Se cobrará una tarifa adicional.',
+    translation:'IMPORTANT NOTICE — Checkout time: 12:00 noon. If you need to leave later, speak to reception before 10:00 a.m. An additional fee will be charged.',
+    vocabHints:[{w:'horario de salida',m:'checkout time'},{w:'recepción',m:'front desk'},{w:'tarifa adicional',m:'additional fee'}],
+    questions:[
+      {q:'What is the standard checkout time?', opts:['10:00 AM','11:00 AM','12:00 PM','2:00 PM'], correct:2},
+      {q:'What happens if you leave late without asking?', opts:['Nothing','Free upgrade','Extra charge','You must leave immediately'], correct:2}
+    ],
+    writePrompt:'Ask the front desk if you can check out at 2 PM.',
+    writeSample:'Buenos días. ¿Es posible hacer el check-out a las 2 de la tarde?'
+  },
+  { id:'RT-04', icon:'📅', type:'Text message', title:'Doctor\'s appointment reminder',
+    context:'You receive this text from a medical clinic.',
+    passage:'RECORDATORIO: Tiene una cita con el Dr. Ramírez el martes, 15 de agosto a las 3:30 p.m. Por favor llegue 10 minutos antes. Para cancelar, llame al 555-8900.',
+    translation:'REMINDER: You have an appointment with Dr. Ramírez on Tuesday, August 15 at 3:30 PM. Please arrive 10 minutes early. To cancel, call 555-8900.',
+    vocabHints:[{w:'cita',m:'appointment'},{w:'llegue',m:'arrive'},{w:'cancelar',m:'to cancel'}],
+    questions:[
+      {q:'What day is the appointment?', opts:['Monday','Tuesday','Wednesday','Thursday'], correct:1},
+      {q:'How early should you arrive?', opts:['5 minutes','10 minutes','15 minutes','30 minutes'], correct:1}
+    ],
+    writePrompt:'Send a message to confirm you\'ll be there.',
+    writeSample:'Confirmo mi cita para el martes a las 3:30 p.m. Gracias.'
+  },
+  { id:'RT-05', icon:'💊', type:'Label', title:'Medicine bottle label',
+    context:'This is the label on a bottle from a Mexican pharmacy.',
+    passage:'IBUPROFENO 400mg\n\nTomar 1 tableta cada 8 horas con comida.\nNo exceder 3 tabletas en 24 horas.\nConservar en lugar fresco y seco.\nMantener fuera del alcance de los niños.',
+    translation:'IBUPROFEN 400mg — Take 1 tablet every 8 hours with food. Do not exceed 3 tablets in 24 hours. Keep in a cool, dry place. Keep out of reach of children.',
+    vocabHints:[{w:'tableta',m:'tablet'},{w:'cada',m:'every'},{w:'fuera del alcance',m:'out of reach'}],
+    questions:[
+      {q:'How often should you take this medicine?', opts:['Every 4 hours','Every 6 hours','Every 8 hours','Every 12 hours'], correct:2},
+      {q:'What is the maximum number of tablets per day?', opts:['1','2','3','4'], correct:2}
+    ]
+  },
+  { id:'RT-06', icon:'🛒', type:'Market sign', title:'Street market price board',
+    context:'You see this handwritten sign at a street market stall.',
+    passage:'¡OFERTA DE HOY! 🥑\n\nAguacates — 3 x $1.00\nTomates — 2 kilos x $2.50\nElotes — 6 x $2.00\n\n¡Todo fresco del campo!',
+    translation:'TODAY\'S SPECIAL! Avocados — 3 for $1.00 / Tomatoes — 2 kilos for $2.50 / Corn — 6 for $2.00 — All fresh from the farm!',
+    vocabHints:[{w:'oferta',m:'special/sale'},{w:'elotes',m:'corn on the cob'},{w:'fresco del campo',m:'fresh from the farm'}],
+    questions:[
+      {q:'How many avocados can you get for $1.00?', opts:['1','2','3','4'], correct:2},
+      {q:'How much for 2 kilos of tomatoes?', opts:['$1.00','$1.50','$2.00','$2.50'], correct:3}
+    ],
+    writePrompt:'Ask the vendor for 6 avocados and 2 kilos of tomatoes.',
+    writeSample:'Quiero seis aguacates y dos kilos de tomates, por favor. ¿Cuánto es?'
+  },
+  { id:'RT-07', icon:'📧', type:'Email', title:'Email from a colleague',
+    context:'You receive this email at work from a Spanish-speaking colleague.',
+    passage:'Hola,\n\n¿Tienes un momento hoy? Necesito revisar contigo el informe de ventas del mes. Puede ser por videollamada si prefieres.\n\nAvísame cuando estés disponible.\n\nGracias,\nCarlos',
+    translation:'Hi, Do you have a moment today? I need to review the monthly sales report with you. We can do a video call if you prefer. Let me know when you\'re available. Thanks, Carlos',
+    vocabHints:[{w:'revisar',m:'to review'},{w:'informe de ventas',m:'sales report'},{w:'disponible',m:'available'}],
+    questions:[
+      {q:'What does Carlos want to review?', opts:['A project proposal','The sales report','A budget plan','His schedule'], correct:1},
+      {q:'What option does he offer for the meeting?', opts:['In person','Phone call','Video call','Email only'], correct:2}
+    ],
+    writePrompt:'Reply to Carlos — say you\'re available this afternoon at 3 PM.',
+    writeSample:'Hola Carlos, sí puedo. Estoy disponible esta tarde a las 3. ¿Te parece bien una videollamada?'
+  },
+  { id:'RT-08', icon:'🏠', type:'Rental ad', title:'Apartment rental listing',
+    context:'You\'re looking at apartment listings in a local Spanish newspaper.',
+    passage:'SE RENTA\n\nApartamento: 2 recámaras, 1 baño\nCocina equipada · Aire acondicionado\nEstacionamiento incluido · Cerca del metro\n\n$1,200/mes + servicios\nLlamar: 555-2341',
+    translation:'FOR RENT — Apartment: 2 bedrooms, 1 bathroom. Equipped kitchen, air conditioning, parking included, near the metro. $1,200/month + utilities. Call: 555-2341',
+    vocabHints:[{w:'recámaras',m:'bedrooms'},{w:'estacionamiento',m:'parking'},{w:'servicios',m:'utilities'}],
+    questions:[
+      {q:'How many bedrooms does the apartment have?', opts:['1','2','3','Studio'], correct:1},
+      {q:'What is NOT included in the rent?', opts:['Parking','Air conditioning','Utilities','Kitchen appliances'], correct:2}
+    ],
+    writePrompt:'Call about the apartment — ask if pets are allowed.',
+    writeSample:'Buenas tardes. Vi su anuncio del apartamento. ¿Me puede decir si se permiten mascotas?'
+  }
 ];
 
 // ===================================================
@@ -4193,6 +4307,181 @@ function startGoalDrillMode(goalId, which) {
 }
 
 // ===================================================
+// READING TASKS — state + rendering
+// ===================================================
+
+var readState = null;
+// { passages:[], index:0, screen:'passage'|'questions'|'write'|'result', qIndex:0, correct:0, showHints:false, showTranslation:false, showWriteSample:false, answered:null }
+
+function startReadingTasks() {
+  var passages = READING_PASSAGES.slice().sort(function(){ return Math.random()-0.5; });
+  readState = { passages:passages, index:0, screen:'passage', qIndex:0, correct:0, total:0, showHints:false, showTranslation:false, showWriteSample:false, answered:null };
+  renderReadingCard();
+}
+
+function renderReadingCard() {
+  if (!readState || readState.index >= readState.passages.length) {
+    renderReadingComplete(); return;
+  }
+  var p = readState.passages[readState.index];
+  var backBtn = '<button class="btn btn-secondary btn-sm" onclick="switchTab(\'practice\')" style="margin-bottom:12px;">← Practice</button>';
+  var total = readState.passages.length;
+  var pct = Math.round(readState.index / total * 100);
+  var progressBar = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">' +
+    backBtn +
+    '<div style="flex:1;background:var(--border);border-radius:99px;height:6px;overflow:hidden;">' +
+      '<div style="width:' + pct + '%;height:100%;background:var(--primary);border-radius:99px;transition:width 0.3s;"></div>' +
+    '</div>' +
+    '<span style="font-size:0.72rem;color:var(--muted);font-weight:700;white-space:nowrap;">' + (readState.index+1) + '/' + total + '</span>' +
+  '</div>';
+
+  var html = '';
+  if (readState.screen === 'passage') html = renderReadPassage(p, progressBar);
+  if (readState.screen === 'questions') html = renderReadQuestion(p, progressBar);
+  if (readState.screen === 'write') html = renderReadWrite(p, progressBar);
+
+  document.getElementById('main-content').innerHTML = html;
+}
+
+function renderReadPassage(p, progressBar) {
+  var hintsHTML = '';
+  if (readState.showHints && p.vocabHints) {
+    hintsHTML = '<div class="rt-hint-row">' + p.vocabHints.map(function(h){
+      return '<span class="rt-hint-chip"><strong>' + esc(h.w) + '</strong> = ' + esc(h.m) + '</span>';
+    }).join('') + '</div>';
+  }
+  var translationHTML = readState.showTranslation
+    ? '<div style="font-size:0.8rem;color:var(--muted);margin-bottom:12px;line-height:1.6;font-style:italic;">' + esc(p.translation) + '</div>'
+    : '';
+  return '<div class="card">' +
+    progressBar +
+    '<div class="rt-badge">' + p.icon + ' ' + esc(p.type) + '</div>' +
+    '<div style="font-weight:800;font-size:1rem;margin-bottom:4px;">' + esc(p.title) + '</div>' +
+    '<div style="font-size:0.78rem;color:var(--muted);margin-bottom:10px;">' + esc(p.context) + '</div>' +
+    '<div class="rt-passage">' + esc(p.passage) + '</div>' +
+    translationHTML +
+    hintsHTML +
+    '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">' +
+      (p.vocabHints ? '<button class="btn btn-secondary btn-sm" onclick="readToggleHints()">' + (readState.showHints ? 'Hide vocab hints' : '💡 Show vocab hints') + '</button>' : '') +
+      '<button class="btn btn-secondary btn-sm" onclick="readToggleTranslation()">' + (readState.showTranslation ? 'Hide translation' : '🌐 Show translation') + '</button>' +
+    '</div>' +
+    '<button class="btn btn-primary btn-full" onclick="readGoToQuestions()">I Read It → Answer Questions</button>' +
+  '</div>';
+}
+
+function readToggleHints() { readState.showHints = !readState.showHints; renderReadingCard(); }
+function readToggleTranslation() { readState.showTranslation = !readState.showTranslation; renderReadingCard(); }
+function readGoToQuestions() { readState.screen = 'questions'; readState.qIndex = 0; readState.answered = null; renderReadingCard(); }
+
+function renderReadQuestion(p, progressBar) {
+  var q = p.questions[readState.qIndex];
+  var isAnswered = readState.answered !== null;
+  var optsHTML = q.opts.map(function(opt, i) {
+    var cls = 'rt-opt';
+    var extra = '';
+    if (isAnswered) {
+      if (i === q.correct) { cls += ' rt-correct'; extra = ' ✓'; }
+      else if (i === readState.answered && i !== q.correct) { cls += ' rt-wrong'; extra = ' ✗'; }
+    }
+    var clickHandler = isAnswered ? '' : 'onclick="readAnswerQuestion(' + i + ')"';
+    return '<div class="' + cls + '" ' + clickHandler + '>' + esc(opt) + extra + '</div>';
+  }).join('');
+
+  var feedback = '';
+  if (isAnswered) {
+    var correct = readState.answered === q.correct;
+    feedback = '<div style="font-size:0.82rem;font-weight:700;color:' + (correct ? 'var(--green)' : 'var(--primary)') + ';margin-bottom:12px;">' +
+      (correct ? '✓ Correct!' : '✗ The answer is: ' + esc(q.opts[q.correct])) + '</div>';
+  }
+  var nextBtn = isAnswered ? '<button class="btn btn-primary btn-full" onclick="readNextQuestion()">Next →</button>' : '';
+
+  return '<div class="card">' +
+    progressBar +
+    '<div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:8px;">Question ' + (readState.qIndex+1) + ' of ' + p.questions.length + '</div>' +
+    '<div style="font-weight:800;font-size:0.95rem;margin-bottom:14px;">' + esc(q.q) + '</div>' +
+    optsHTML +
+    feedback +
+    nextBtn +
+  '</div>';
+}
+
+function readAnswerQuestion(i) {
+  var p = readState.passages[readState.index];
+  var q = p.questions[readState.qIndex];
+  readState.answered = i;
+  readState.total++;
+  if (i === q.correct) readState.correct++;
+  renderReadingCard();
+}
+
+function readNextQuestion() {
+  var p = readState.passages[readState.index];
+  readState.qIndex++;
+  readState.answered = null;
+  if (readState.qIndex >= p.questions.length) {
+    if (p.writePrompt) { readState.screen = 'write'; readState.showWriteSample = false; }
+    else { readAdvancePassage(); return; }
+  }
+  renderReadingCard();
+}
+
+function renderReadWrite(p, progressBar) {
+  var sampleHTML = readState.showWriteSample
+    ? '<div class="rt-sample">Sample: ' + esc(p.writeSample) + '</div>'
+    : '';
+  return '<div class="card">' +
+    progressBar +
+    '<div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:8px;">✍️ Write in Spanish</div>' +
+    '<div style="font-weight:700;font-size:0.95rem;margin-bottom:12px;">' + esc(p.writePrompt) + '</div>' +
+    '<textarea class="rt-write-area" id="rt-write-input" placeholder="Type your Spanish here..." autocomplete="off" autocorrect="off" spellcheck="false"></textarea>' +
+    sampleHTML +
+    '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">' +
+      '<button class="btn btn-secondary btn-sm" onclick="readShowWriteSample()">See sample reply</button>' +
+      '<button class="btn btn-primary" style="flex:1;" onclick="readAdvancePassage()">Next passage →</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function readShowWriteSample() { readState.showWriteSample = true; renderReadingCard(); }
+
+function readAdvancePassage() {
+  awardStar('recall');
+  S.stats.xp = (S.stats.xp||0) + 15;
+  S.stats.readingTasksDone = (S.stats.readingTasksDone||0) + 1;
+  saveState();
+  readState.index++;
+  readState.screen = 'passage';
+  readState.qIndex = 0;
+  readState.answered = null;
+  readState.showHints = false;
+  readState.showTranslation = false;
+  readState.showWriteSample = false;
+  renderReadingCard();
+}
+
+function renderReadingComplete() {
+  var pct = readState.total > 0 ? Math.round(readState.correct / readState.total * 100) : 0;
+  var emoji = pct >= 80 ? '🌟' : pct >= 50 ? '✅' : '💪';
+  document.getElementById('main-content').innerHTML =
+    '<div class="card" style="text-align:center;">' +
+      '<div style="font-size:2.5rem;margin-bottom:6px;">' + emoji + '</div>' +
+      '<div class="card-heading">Reading Session Complete</div>' +
+      '<div style="font-size:0.78rem;color:var(--muted);margin-bottom:14px;">You read ' + readState.passages.length + ' real-world texts</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">' +
+        '<div style="background:var(--bg);border-radius:8px;padding:10px;">' +
+          '<div style="font-size:1.3rem;font-weight:800;color:var(--green);">' + readState.correct + '/' + readState.total + '</div>' +
+          '<div style="font-size:0.65rem;color:var(--muted);">Correct</div>' +
+        '</div>' +
+        '<div style="background:var(--bg);border-radius:8px;padding:10px;">' +
+          '<div style="font-size:1.3rem;font-weight:800;color:var(--primary);">' + pct + '%</div>' +
+          '<div style="font-size:0.65rem;color:var(--muted);">Comprehension</div>' +
+        '</div>' +
+      '</div>' +
+      '<button class="btn btn-primary btn-full" onclick="switchTab(\'practice\')">Back to Practice</button>' +
+    '</div>';
+}
+
+// ===================================================
 // BLIND MISSION ASSESSMENT — logic + rendering
 // ===================================================
 
@@ -5979,6 +6268,23 @@ function renderPractice() {
       '<span class="practice-hub-icon">⚡</span>' +
       '<span class="practice-hub-text"><strong>Speed Round</strong><span>Fast prompts. Build instinct-level response speed.</span></span>' +
     '</div>' +
+
+    '<div class="practice-hub-option" onclick="startSentenceBuilder(\'practice\')">' +
+      '<span class="practice-hub-icon">✍️</span>' +
+      '<span class="practice-hub-text"><strong>Sentence Builder</strong><span>Real situation. No word bank. Say a full sentence out loud.</span></span>' +
+    '</div>' +
+
+    '<div class="section-label" style="margin-top:20px;">Reading & Writing</div>' +
+    '<div class="nudge-card">Read real Spanish — menus, signs, messages. Then answer comprehension questions and try a written reply.</div>' +
+    (function() {
+      var done = S.stats.readingTasksDone || 0;
+      var badge = done > 0 ? '<span class="practice-hub-badge" style="background:var(--primary);">' + done + ' completed</span>' : '';
+      return '<div class="practice-hub-option" onclick="startReadingTasks()">' +
+        '<span class="practice-hub-icon">📖</span>' +
+        '<span class="practice-hub-text"><strong>Reading Tasks</strong><span>Real texts: menus, signs, messages, emails — read and understand</span></span>' +
+        badge +
+      '</div>';
+    })() +
 
     '<div class="section-label" style="margin-top:20px;">Review & Spaced Repetition</div>' +
 
