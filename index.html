@@ -819,6 +819,18 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
 .ld-english { font-size:0.92rem; color:var(--muted); }
 .ld-pron { font-size:0.78rem; color:var(--primary); font-style:italic; margin-top:6px; }
 .ld-again-btn { background:none; border:1px solid var(--border); border-radius:20px; padding:6px 16px; font-size:0.8rem; color:var(--muted); cursor:pointer; display:inline-flex; align-items:center; gap:6px; margin-bottom:14px; }
+/* Phrase of the Day */
+.potd-card { overflow:hidden; padding:0; }
+.potd-header { background:linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%); padding:10px 14px 8px; display:flex; align-items:center; justify-content:space-between; }
+.potd-label { font-size:0.58rem; font-weight:900; text-transform:uppercase; letter-spacing:1px; color:rgba(255,255,255,0.75); }
+.potd-flag { font-size:1.1rem; }
+.potd-body { padding:14px 14px 12px; }
+.potd-spanish { font-size:1.55rem; font-weight:900; color:var(--text); line-height:1.25; margin-bottom:4px; }
+.potd-pron { font-size:0.75rem; color:var(--primary); font-style:italic; margin-bottom:8px; }
+.potd-english { font-size:0.88rem; color:var(--text); font-weight:600; margin-bottom:8px; }
+.potd-tip { font-size:0.74rem; color:var(--muted); line-height:1.5; padding:8px 10px; background:var(--bg); border-radius:8px; margin-bottom:12px; }
+.potd-practice-btn { background:var(--primary); color:white; border:none; border-radius:20px; padding:8px 18px; font-size:0.8rem; font-weight:700; cursor:pointer; letter-spacing:0.3px; }
+.potd-practice-btn:hover { background:var(--primary-dark); }
 </style>
 </head>
 <body>
@@ -2974,6 +2986,48 @@ function getNudge() {
   return nudges.length > 0 ? nudges[0] : fallback[Math.floor(Math.random() * fallback.length)];
 }
 
+var DOMAIN_TIPS = {
+  D1:'Use when you meet someone new or need a quick, polite opener.',
+  D2:'Great for everyday talk — food, family, what time it is.',
+  D3:'Pull this out at a restaurant, store, or when you need directions.',
+  D4:'Useful when talking about your body, pain, or a health visit.',
+  D5:'Helpful in professional settings — scheduling, appointments, services.',
+  D6:'Use this to keep a real conversation going and share your opinion.',
+  D7:'A core verb pattern — master this and dozens of sentences open up.',
+  D8:'Use when describing things around you — color, size, quantity.',
+  D9:'Shopping, prices, paying — use this when money comes up.',
+  D10:'When you want to connect emotionally or make social plans.',
+  D11:'On the bus, in a taxi, asking how to get somewhere.',
+  D12:'Talking about your home, your routine, your daily life.',
+  D13:'When sharing what happened or what you\'re looking forward to.',
+  D14:'For urgent moments — this one could matter when it counts.',
+  D15:'Sharing what you love, what you do for fun, what you\'re into.',
+  D16:'Talking about work, your job, your professional life.',
+  CHUNK:'A native-speaker filler or connector — sprinkle into any conversation.',
+  D17:'Telling a story about the past — what you did, what happened.',
+  D18:'Suggesting plans, setting a time, handling schedule changes.',
+  D19:'Shopping in a market or store — finding fit, negotiating, returning.',
+  D20:'Describing people\'s looks or what a place is like.',
+  D21:'Doctor visits, pharmacy runs, explaining how you feel.',
+  D22:'Navigating transit, catching the right bus, recovering from wrong turns.',
+  D23:'Ordering for your diet, asking what\'s in a dish, giving compliments.',
+  D24:'At a party or event — meeting people, toasting, small talk.',
+  D25:'Professional settings — meetings, emails, working remotely.',
+  D26:'Nuanced conversation — hedging, clarifying, advanced opinions.',
+};
+
+function getPhraseOfDay() {
+  var d = today();
+  var seed = d.split('-').reduce(function(a, p) { return a * 100 + parseInt(p, 10); }, 0);
+  return CONTENT[seed % CONTENT.length];
+}
+
+function startPOTDPractice() {
+  var item = getPhraseOfDay();
+  modeState = { mode: 'en-to-es', items: [item], index: 0, results: [], revealed: false, backTab: 'today' };
+  renderModeCard();
+}
+
 function dismissGraceNotification() {
   S.stats.graceDayUsedToday = false;
   saveState();
@@ -3276,6 +3330,30 @@ function renderToday() {
       '</div>' +
     '</div>';
 
+  // Phrase of the Day card
+  var potdItem = getPhraseOfDay();
+  var potdDom = DOMAINS[potdItem.domain] || {};
+  var potdTip = DOMAIN_TIPS[potdItem.domain] || ('A useful phrase from ' + (potdDom.name || 'your lessons') + '.');
+  var potdCard =
+    '<div class="card potd-card" style="margin-bottom:14px;">' +
+      '<div class="potd-header">' +
+        '<div>' +
+          '<div class="potd-label">Phrase of the Day</div>' +
+        '</div>' +
+        '<div class="potd-flag">🇪🇸</div>' +
+      '</div>' +
+      '<div class="potd-body">' +
+        '<div class="potd-spanish">' + esc(potdItem.spanish) + '</div>' +
+        (potdItem.pron ? '<div class="potd-pron">' + esc(potdItem.pron) + '</div>' : '') +
+        '<div class="potd-english">' + esc(potdItem.english) + '</div>' +
+        '<div class="potd-tip">' +
+          (potdDom.icon ? potdDom.icon + ' ' : '') +
+          '<strong>' + esc(potdDom.name || '') + '</strong> — ' + potdTip +
+        '</div>' +
+        '<button class="potd-practice-btn" onclick="startPOTDPractice()">▶ Practice this phrase</button>' +
+      '</div>' +
+    '</div>';
+
   var canDoCard = renderTodayCanDoCard();
   var missionCard = renderMissionTodayCard();
 
@@ -3291,6 +3369,7 @@ function renderToday() {
     makeItUpCard +
     comebackCard +
     backupCard +
+    potdCard +
     missionCard +
     lessonCard +
     statsRow +
