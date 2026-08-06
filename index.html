@@ -819,6 +819,18 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
 .ld-english { font-size:0.92rem; color:var(--muted); }
 .ld-pron { font-size:0.78rem; color:var(--primary); font-style:italic; margin-top:6px; }
 .ld-again-btn { background:none; border:1px solid var(--border); border-radius:20px; padding:6px 16px; font-size:0.8rem; color:var(--muted); cursor:pointer; display:inline-flex; align-items:center; gap:6px; margin-bottom:14px; }
+/* Streak Freeze */
+.freeze-card { border:2px solid rgba(14,165,233,0.3); border-radius:var(--radius); background:linear-gradient(135deg,rgba(14,165,233,0.07),rgba(14,165,233,0.03)); padding:12px 14px; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.freeze-tokens { display:flex; align-items:center; gap:6px; }
+.freeze-token { font-size:1.1rem; }
+.freeze-token.empty { opacity:0.2; filter:grayscale(1); }
+.freeze-info { flex:1; }
+.freeze-title { font-size:0.78rem; font-weight:800; color:#0EA5E9; margin-bottom:1px; }
+.freeze-sub { font-size:0.7rem; color:var(--muted); line-height:1.4; }
+.freeze-btn { flex-shrink:0; background:#0EA5E9; color:white; border:none; border-radius:20px; padding:8px 14px; font-size:0.75rem; font-weight:700; cursor:pointer; white-space:nowrap; }
+.freeze-btn:hover { background:#0284C7; }
+.freeze-btn.protected { background:rgba(14,165,233,0.12); color:#0EA5E9; border:1.5px solid rgba(14,165,233,0.35); cursor:default; }
+
 /* Confidence Heatmap */
 .heatmap-row { display:flex; align-items:flex-start; gap:8px; margin-bottom:7px; cursor:pointer; }
 .heatmap-row:hover .hm-squares { opacity:0.85; }
@@ -2801,7 +2813,8 @@ const DEFAULT_STATE = {
     lastGraceDay: null, graceDayUsedToday: false,
     makeItUpStreak: 0, makeItUpExpiry: null,
     miniChallengeDone: {},
-    weeklyRecapDismissed: null },
+    weeklyRecapDismissed: null,
+    freezeTokens: 0, frozenDates: [], earnedFreezeMilestones: [] },
   ownership: {},   // { itemId: { worldContext: null, sawOwnCard: false } }
   reviewDeck: [],    // array of item ids
   mastery: {},       // { itemId: { mastered:false, masterDate:null } }
@@ -2868,28 +2881,40 @@ function updateStreak() {
     var diff = Math.round((new Date(d) - new Date(prev)) / 86400000);
     if (diff === 1) {
       S.streak.current += 1;
+      checkStreakFreezeReward();
     } else {
       var prevStreak = S.streak.current;
-      // Grace day: missed exactly 1 day, available once per 30 days, streak ≥ 2
-      var lastGrace = S.stats.lastGraceDay;
-      var daysSinceGrace = lastGrace ? Math.round((new Date(d) - new Date(lastGrace)) / 86400000) : 999;
-      var graceAvailable = diff === 2 && daysSinceGrace >= 30 && prevStreak >= 2;
+      // Freeze check: missed exactly 1 day and that day was frozen
+      var missedDay = new Date(new Date(prev).getTime() + 86400000).toISOString().slice(0, 10);
+      var frozenList = S.stats.frozenDates || [];
+      var freezeProtects = diff === 2 && frozenList.indexOf(missedDay) !== -1;
 
-      if (graceAvailable) {
+      if (freezeProtects) {
+        S.stats.frozenDates = frozenList.filter(function(fd) { return fd !== missedDay; });
         S.streak.current += 1;
-        S.stats.lastGraceDay = d;
-        S.stats.graceDayUsedToday = true;
+        checkStreakFreezeReward();
       } else {
-        // Streak breaks — bank the old streak for make-it-up (if ≥ 3 and not already pending)
-        if (prevStreak >= 3 && !S.stats.makeItUpStreak) {
-          var tomorrow = new Date(new Date(d).getTime() + 86400000).toISOString().slice(0, 10);
-          S.stats.makeItUpStreak = prevStreak;
-          S.stats.makeItUpExpiry = tomorrow;
+        // Grace day: missed exactly 1 day, available once per 30 days, streak ≥ 2
+        var lastGrace = S.stats.lastGraceDay;
+        var daysSinceGrace = lastGrace ? Math.round((new Date(d) - new Date(lastGrace)) / 86400000) : 999;
+        var graceAvailable = diff === 2 && daysSinceGrace >= 30 && prevStreak >= 2;
+
+        if (graceAvailable) {
+          S.streak.current += 1;
+          S.stats.lastGraceDay = d;
+          S.stats.graceDayUsedToday = true;
+        } else {
+          // Streak breaks — bank the old streak for make-it-up (if ≥ 3 and not already pending)
+          if (prevStreak >= 3 && !S.stats.makeItUpStreak) {
+            var makeTomorrow = new Date(new Date(d).getTime() + 86400000).toISOString().slice(0, 10);
+            S.stats.makeItUpStreak = prevStreak;
+            S.stats.makeItUpExpiry = makeTomorrow;
+          }
+          S.stats.comebacks = (S.stats.comebacks || 0) + 1;
+          S.user.comebackActive = true;
+          S.user.daysMissed = diff - 1;
+          S.streak.current = 1;
         }
-        S.stats.comebacks = (S.stats.comebacks || 0) + 1;
-        S.user.comebackActive = true;
-        S.user.daysMissed = diff - 1;
-        S.streak.current = 1;
       }
     }
   } else {
@@ -3386,6 +3411,61 @@ function startPOTDPractice() {
   renderModeCard();
 }
 
+function checkStreakFreezeReward() {
+  var s = S.streak.current;
+  if (s % 7 !== 0 || s === 0) return;
+  var key = 'streak' + s;
+  var earned = S.stats.earnedFreezeMilestones || [];
+  if (earned.indexOf(key) === -1 && (S.stats.freezeTokens || 0) < 3) {
+    S.stats.freezeTokens = (S.stats.freezeTokens || 0) + 1;
+    S.stats.earnedFreezeMilestones = earned.concat([key]);
+  }
+}
+
+function checkLessonFreezeReward() {
+  var lessons = Object.keys(S.user.lessonDates || {}).length;
+  if (lessons === 0 || lessons % 10 !== 0) return;
+  var key = 'lessons' + lessons;
+  var earned = S.stats.earnedFreezeMilestones || [];
+  if (earned.indexOf(key) === -1 && (S.stats.freezeTokens || 0) < 3) {
+    S.stats.freezeTokens = (S.stats.freezeTokens || 0) + 1;
+    S.stats.earnedFreezeMilestones = earned.concat([key]);
+  }
+}
+
+function freezeNextDay() {
+  if ((S.stats.freezeTokens || 0) < 1) return;
+  var tomorrow = new Date(new Date().getTime() + 86400000).toISOString().slice(0, 10);
+  var frozen = S.stats.frozenDates || [];
+  if (frozen.indexOf(tomorrow) !== -1) return;
+  S.stats.frozenDates = frozen.concat([tomorrow]);
+  S.stats.freezeTokens -= 1;
+  saveState();
+  switchTab('today');
+}
+
+function renderFreezeCard() {
+  var tokens = S.stats.freezeTokens || 0;
+  if (tokens === 0) return '';
+  var tomorrow = new Date(new Date().getTime() + 86400000).toISOString().slice(0, 10);
+  var frozen = S.stats.frozenDates || [];
+  var alreadyFrozen = frozen.indexOf(tomorrow) !== -1;
+  var tokenIcons = '';
+  for (var i = 0; i < 3; i++) {
+    tokenIcons += '<span class="freeze-token' + (i >= tokens ? ' empty' : '') + '">🧊</span>';
+  }
+  return '<div class="freeze-card">' +
+    '<div class="freeze-tokens">' + tokenIcons + '</div>' +
+    '<div class="freeze-info">' +
+      '<div class="freeze-title">Streak Freeze</div>' +
+      '<div class="freeze-sub">' + tokens + ' token' + (tokens !== 1 ? 's' : '') + ' — earned by hitting 7-day milestones</div>' +
+    '</div>' +
+    (alreadyFrozen
+      ? '<button class="freeze-btn protected">✓ Tomorrow protected</button>'
+      : '<button class="freeze-btn" onclick="freezeNextDay()">Protect Tomorrow</button>') +
+  '</div>';
+}
+
 function dismissGraceNotification() {
   S.stats.graceDayUsedToday = false;
   saveState();
@@ -3739,6 +3819,7 @@ function renderToday() {
     missionCard +
     lessonCard +
     statsRow +
+    renderFreezeCard() +
     canDoCard +
     reviewCard +
     starsCard +
@@ -8357,6 +8438,7 @@ function renderLessonComplete(ls) {
   }
   awardStar('recall');
   checkBadges();
+  checkLessonFreezeReward();
   saveState();
 
   var nextLesson = LESSONS.find(function(l) { return l.day === lesson.day + 1; });
