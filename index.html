@@ -3082,6 +3082,8 @@ const DEFAULT_STATE = {
     voiceLog: {},
     grammarQuizDone: {},
     irlLog: {},
+    dailyXPGoal: 30,
+    dailyXPGoalCelebrated: null,
     bookmarks: [] },
   ownership: {},   // { itemId: { worldContext: null, sawOwnCard: false } }
   reviewDeck: [],    // array of item ids
@@ -3135,6 +3137,11 @@ function saveState() {
       if (!S.stats.xpLog) S.stats.xpLog = {};
       var _d = today();
       S.stats.xpLog[_d] = (S.stats.xpLog[_d] || 0) + delta;
+      var goal = S.stats.dailyXPGoal || 30;
+      if (S.stats.xpLog[_d] >= goal && S.stats.dailyXPGoalCelebrated !== _d) {
+        S.stats.dailyXPGoalCelebrated = _d;
+        setTimeout(function() { showCelebration('🎯', 'Daily Goal Hit!', 'You earned ' + goal + ' XP today. Streak stays alive.'); }, 400);
+      }
     }
   }
   _xpLastSaved = cur;
@@ -4796,6 +4803,26 @@ function renderToday() {
   var canDoCard = renderTodayCanDoCard();
   var missionCard = renderMissionTodayCard();
 
+  var todayXP = (S.stats.xpLog && S.stats.xpLog[today()]) || 0;
+  var xpGoal = S.stats.dailyXPGoal || 30;
+  var xpGoalPct = Math.min(Math.round(todayXP / xpGoal * 100), 100);
+  var xpGoalDone = todayXP >= xpGoal;
+  var xpGoalCard =
+    '<div class="card" style="margin-bottom:14px;padding:12px 14px;">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;">' +
+        '<div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);">🎯 Daily XP Goal</div>' +
+        '<div style="font-size:0.78rem;font-weight:800;color:' + (xpGoalDone ? 'var(--gold)' : 'var(--text)') + ';">' +
+          (xpGoalDone ? '✓ ' : '') + todayXP + ' / ' + xpGoal + ' XP' +
+        '</div>' +
+      '</div>' +
+      '<div style="height:7px;border-radius:99px;background:var(--border);overflow:hidden;">' +
+        '<div style="height:100%;width:' + xpGoalPct + '%;border-radius:99px;background:' + (xpGoalDone ? 'var(--gold)' : 'var(--primary)') + ';transition:width 0.4s ease;"></div>' +
+      '</div>' +
+      (xpGoalDone
+        ? '<div style="font-size:0.7rem;color:var(--gold);font-weight:700;margin-top:5px;">Goal complete! Extra XP still counts. 🔥</div>'
+        : '<div style="font-size:0.7rem;color:var(--muted);margin-top:5px;">' + (xpGoal - todayXP) + ' XP to go — any practice counts.</div>') +
+    '</div>';
+
   var firstName = S.user.name ? S.user.name.trim().split(' ')[0] : '';
   var hour = new Date().getHours();
   var greetWord = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
@@ -4814,6 +4841,7 @@ function renderToday() {
     missionCard +
     lessonCard +
     statsRow +
+    xpGoalCard +
     renderNemesisCard() +
     renderFreezeCard() +
     canDoCard +
