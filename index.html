@@ -1866,7 +1866,12 @@ const GRAMMAR = [
       {sp:'Ella es doctora.',en:'She is a doctor. (profession)'},
       {sp:'Ella está en casa.',en:'She is at home. (location/state)'},
     ],
-    tip:'Memory trick: <em>SER</em> = Stable, Enduring, Real. <em>ESTAR</em> = Emotions, Temporary, Accidental, Results.'
+    tip:'Memory trick: <em>SER</em> = Stable, Enduring, Real. <em>ESTAR</em> = Emotions, Temporary, Accidental, Results.',
+    quiz:[
+      {q:'"I am a doctor." Which is correct?', opts:['Soy médico.','Estoy médico.','Es médico.'], correct:0},
+      {q:'"She is tired." Which is correct?', opts:['Ella es cansada.','Ella está cansada.','Ella estoy cansada.'], correct:1},
+      {q:'"We are at home." Which is correct?', opts:['Somos en casa.','Estamos en casa.','Somos casa.'], correct:1},
+    ]
   },
   {
     id:'G2', title:'Por vs. Para', subtitle:'Two ways to say "for"',
@@ -1877,7 +1882,12 @@ const GRAMMAR = [
       {sp:'Estudio para aprender.',en:"I study to learn. (purpose → para)"},
       {sp:'Caminé por una hora.',en:'I walked for an hour. (duration → por)'},
     ],
-    tip:'Quick test: if you can replace "for" with "in order to" → use <em>para</em>. If it\'s about exchange or time passing → use <em>por</em>.'
+    tip:'Quick test: if you can replace "for" with "in order to" → use <em>para</em>. If it\'s about exchange or time passing → use <em>por</em>.',
+    quiz:[
+      {q:'"This coffee is for you." (recipient)', opts:['Este café es por ti.','Este café es para ti.','Este café está para ti.'], correct:1},
+      {q:'"I walked for two hours." (duration)', opts:['Caminé para dos horas.','Caminé dos horas por.','Caminé por dos horas.'], correct:2},
+      {q:'"I study in order to learn." (purpose)', opts:['Estudio para aprender.','Estudio por aprender.','Estudio de aprender.'], correct:0},
+    ]
   },
   {
     id:'G3', title:'Reflexive Verbs', subtitle:'When you do something to yourself',
@@ -1888,7 +1898,12 @@ const GRAMMAR = [
       {sp:'¿Cómo te sientes?',en:'How do you feel?'},
       {sp:'Se durmió en el sofá.',en:'He fell asleep on the sofa.'},
     ],
-    tip:'Watch for these common reflexive verbs: llamarse, levantarse, sentirse, dormirse, ponerse, quedarse.'
+    tip:'Watch for these common reflexive verbs: llamarse, levantarse, sentirse, dormirse, ponerse, quedarse.',
+    quiz:[
+      {q:'"My name is Carlos." (I call myself)', opts:['Llamo Carlos.','Me llamo Carlos.','Lo llamo Carlos.'], correct:1},
+      {q:'"How do you feel?" (reflexive)', opts:['¿Cómo sientes?','¿Cómo se sientes?','¿Cómo te sientes?'], correct:2},
+      {q:'"He fell asleep on the sofa."', opts:['Él durmió en el sofá.','Él se durmió en el sofá.','Él me durmió en el sofá.'], correct:1},
+    ]
   },
   {
     id:'G4', title:'Preterite (Simple Past)', subtitle:'Completed actions in the past',
@@ -1899,7 +1914,12 @@ const GRAMMAR = [
       {sp:'Fuimos al mercado.',en:'We went to the market.'},
       {sp:'¿Qué hiciste ayer?',en:'What did you do yesterday?'},
     ],
-    tip:'Key time words that signal preterite: <em>ayer, anoche, la semana pasada, una vez, de repente.</em>'
+    tip:'Key time words that signal preterite: <em>ayer, anoche, la semana pasada, una vez, de repente.</em>',
+    quiz:[
+      {q:'"I ate pizza last night." (preterite)', opts:['Como pizza anoche.','Comía pizza anoche.','Comí pizza anoche.'], correct:2},
+      {q:'Which time word signals the preterite?', opts:['siempre (always)','a veces (sometimes)','anoche (last night)'], correct:2},
+      {q:'"What did you do yesterday?"', opts:['¿Qué haces ayer?','¿Qué hiciste ayer?','¿Qué hacías ayer?'], correct:1},
+    ]
   },
   {
     id:'G5', title:'Gustar (and verbs like it)', subtitle:'"I like" works backwards in Spanish',
@@ -1910,7 +1930,12 @@ const GRAMMAR = [
       {sp:'Le gusta bailar.',en:'He/she likes to dance.'},
       {sp:'¿Te gusta vivir aquí?',en:'Do you like living here?'},
     ],
-    tip:'Rule: one thing → <em>gusta</em>. More than one thing → <em>gustan</em>. Same pattern for: encantar, molestar, importar, doler.'
+    tip:'Rule: one thing → <em>gusta</em>. More than one thing → <em>gustan</em>. Same pattern for: encantar, molestar, importar, doler.',
+    quiz:[
+      {q:'"I like coffee." (one thing)', opts:['Me gusto el café.','Me gustan el café.','Me gusta el café.'], correct:2},
+      {q:'"I like tacos." (plural — tacos please me)', opts:['Me gusta los tacos.','Me gustan los tacos.','Te gustan los tacos.'], correct:1},
+      {q:'"She likes to dance."', opts:['Le gustan bailar.','Se gusta bailar.','Le gusta bailar.'], correct:2},
+    ]
   },
   {
     id:'G6', title:'Ir a + Infinitive', subtitle:'The easiest way to talk about the future',
@@ -1921,7 +1946,12 @@ const GRAMMAR = [
       {sp:'¿Qué vas a hacer?',en:'What are you going to do?'},
       {sp:'Ella va a llegar tarde.',en:"She's going to arrive late."},
     ],
-    tip:'Master the forms: voy / vas / va / vamos / van. Add any infinitive after and you can talk about almost any future plan.'
+    tip:'Master the forms: voy / vas / va / vamos / van. Add any infinitive after and you can talk about almost any future plan.',
+    quiz:[
+      {q:'"I\'m going to study tomorrow."', opts:['Va a estudiar mañana.','Voy a estudiar mañana.','Vamos a estudiar mañana.'], correct:1},
+      {q:'"What are you going to do?" (tú)', opts:['¿Qué va a hacer?','¿Qué voy a hacer?','¿Qué vas a hacer?'], correct:2},
+      {q:'"We\'re going to eat together."', opts:['Van a comer juntos.','Vamos a comer juntos.','Vas a comer juntos.'], correct:1},
+    ]
   },
   {
     id:'G7', title:'Direct Object Pronouns', subtitle:'Replace the thing you\'re talking about',
@@ -1932,7 +1962,12 @@ const GRAMMAR = [
       {sp:'¿Compras los boletos? Sí, los compro.',en:'Are you buying the tickets? Yes, I\'m buying them.'},
       {sp:'No lo sé.',en:"I don't know it / I don't know."},
     ],
-    tip:'Placement: before conjugated verb (<em>lo veo</em>) OR attached to infinitive (<em>verlo</em>). Both are correct.'
+    tip:'Placement: before conjugated verb (<em>lo veo</em>) OR attached to infinitive (<em>verlo</em>). Both are correct.',
+    quiz:[
+      {q:'"Do you have the book? Yes, I have it." (el libro = masculine)', opts:['Sí, la tengo.','Sí, lo tengo.','Sí, los tengo.'], correct:1},
+      {q:'"I don\'t know it / I don\'t know."', opts:['No la sé.','No los sé.','No lo sé.'], correct:2},
+      {q:'"I saw María. I saw her yesterday." (María = feminine)', opts:['La vi ayer.','Lo vi ayer.','Le vi ayer.'], correct:0},
+    ]
   },
   {
     id:'G8', title:'Tú Commands', subtitle:'Telling someone (informal) what to do',
@@ -1943,7 +1978,12 @@ const GRAMMAR = [
       {sp:'Escucha esto.',en:'Listen to this.'},
       {sp:'No hables tan rápido.',en:"Don't speak so fast. (negative → use subjunctive)"},
     ],
-    tip:'Irregular positive commands to memorize: <em>ven</em> (come), <em>di</em> (say), <em>haz</em> (do), <em>ve</em> (go), <em>pon</em> (put), <em>ten</em> (have), <em>sal</em> (leave).'
+    tip:'Irregular positive commands to memorize: <em>ven</em> (come), <em>di</em> (say), <em>haz</em> (do), <em>ve</em> (go), <em>pon</em> (put), <em>ten</em> (have), <em>sal</em> (leave).',
+    quiz:[
+      {q:'"Speak more slowly!" (hablar, tú command)', opts:['¡Hablas más despacio!','¡Habla más despacio!','¡Hablen más despacio!'], correct:1},
+      {q:'Which is the correct irregular tú command for "come here"?', opts:['¡Vienes!','¡Venir!','¡Ven!'], correct:2},
+      {q:'"Listen to this." (escuchar, tú command)', opts:['¡Escuchas esto!','¡Escuchen esto!','Escucha esto.'], correct:2},
+    ]
   },
 ];
 
@@ -3039,6 +3079,7 @@ const DEFAULT_STATE = {
     reminderFiredDate: null,
     xpLog: {},
     voiceLog: {},
+    grammarQuizDone: {},
     bookmarks: [] },
   ownership: {},   // { itemId: { worldContext: null, sawOwnCard: false } }
   reviewDeck: [],    // array of item ids
@@ -4890,7 +4931,112 @@ function openGrammarLesson(id) {
       <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#B7791F;letter-spacing:0.5px;margin-bottom:6px;">💡 Memory Tip</div>
       <div style="font-size:0.88rem;line-height:1.6;">${g.tip}</div>
     </div>
+
+    ${g.quiz ? `<button class="btn btn-primary btn-full" onclick="startGrammarQuiz('${g.id}')" style="margin-top:4px;">
+      ${(S.stats.grammarQuizDone||{})[g.id] ? '🔄 Retake Quiz' : '📝 Test Yourself →'}
+    </button>` : ''}
   `;
+}
+
+var _gqState = null;
+
+function startGrammarQuiz(gId) {
+  _gqState = { gId: gId, qIdx: 0, score: 0, tried: [] };
+  renderGrammarQuiz();
+}
+
+function renderGrammarQuiz() {
+  if (!_gqState) return;
+  var g = GRAMMAR.find(function(x) { return x.id === _gqState.gId; });
+  if (!g || !g.quiz) return;
+  var q = g.quiz[_gqState.qIdx];
+  if (!q) { finishGrammarQuiz(); return; }
+
+  var tried = _gqState.tried;
+  var opts = q.opts.map(function(opt, i) {
+    var isTried = tried.indexOf(i) !== -1;
+    var isCorrect = i === q.correct;
+    var bg = isTried ? (isCorrect ? '#C6F6D5' : 'var(--border)') : 'var(--surface)';
+    var clr = isTried && isCorrect ? '#22543D' : 'var(--text)';
+    var op = isTried && !isCorrect ? '0.45' : '1';
+    return '<button onclick="' + (isTried ? '' : 'answerGrammarQuiz(' + i + ')') + '" ' +
+      (isTried ? 'disabled ' : '') +
+      'style="width:100%;text-align:left;padding:13px 14px;margin-bottom:8px;font-size:0.9rem;font-weight:600;' +
+      'background:' + bg + ';color:' + clr + ';opacity:' + op + ';border:2px solid var(--border);' +
+      'border-radius:10px;cursor:' + (isTried ? 'default' : 'pointer') + ';">' +
+      esc(opt) + (isTried && isCorrect ? ' ✓' : isTried ? ' ✗' : '') +
+    '</button>';
+  }).join('');
+
+  var progress = '';
+  for (var i = 0; i < g.quiz.length; i++) {
+    progress += '<div style="flex:1;height:4px;border-radius:2px;background:' + (i < _gqState.qIdx ? 'var(--primary)' : i === _gqState.qIdx ? 'var(--gold)' : 'var(--border)') + ';"></div>';
+  }
+
+  document.getElementById('main-content').innerHTML =
+    '<div style="margin-bottom:12px;">' +
+      '<button class="btn btn-secondary btn-sm" onclick="openGrammarLesson(\'' + _gqState.gId + '\')">← Lesson</button>' +
+    '</div>' +
+    '<div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;color:var(--primary);letter-spacing:0.5px;margin-bottom:2px;">' + esc(g.title) + ' — Quiz</div>' +
+    '<div style="font-size:0.75rem;color:var(--muted);margin-bottom:10px;">Question ' + (_gqState.qIdx + 1) + ' of ' + g.quiz.length + '</div>' +
+    '<div style="display:flex;gap:4px;margin-bottom:16px;">' + progress + '</div>' +
+    '<div class="card">' +
+      '<div style="font-size:1rem;font-weight:700;margin-bottom:14px;line-height:1.5;">' + esc(q.q) + '</div>' +
+      opts +
+    '</div>';
+}
+
+function answerGrammarQuiz(optIdx) {
+  if (!_gqState) return;
+  var g = GRAMMAR.find(function(x) { return x.id === _gqState.gId; });
+  var q = g.quiz[_gqState.qIdx];
+  if (optIdx === q.correct) {
+    _gqState.score += 1;
+    _gqState.tried = [];
+    _gqState.qIdx += 1;
+    if (_gqState.qIdx >= g.quiz.length) {
+      finishGrammarQuiz();
+    } else {
+      renderGrammarQuiz();
+    }
+  } else {
+    if (_gqState.tried.indexOf(optIdx) === -1) _gqState.tried.push(optIdx);
+    renderGrammarQuiz();
+  }
+}
+
+function finishGrammarQuiz() {
+  var gId = _gqState.gId;
+  var score = _gqState.score;
+  var g = GRAMMAR.find(function(x) { return x.id === gId; });
+  _gqState = null;
+
+  var alreadyDone = (S.stats.grammarQuizDone || {})[gId];
+  if (!alreadyDone) {
+    if (!S.stats.grammarQuizDone) S.stats.grammarQuizDone = {};
+    S.stats.grammarQuizDone[gId] = true;
+    S.stats.xp = (S.stats.xp || 0) + 10;
+    saveState();
+    checkBadges();
+  }
+
+  var perfect = score === g.quiz.length;
+  document.getElementById('main-content').innerHTML =
+    '<div style="margin-bottom:12px;">' +
+      '<button class="btn btn-secondary btn-sm" onclick="switchTab(\'learn\')">← Learn</button>' +
+    '</div>' +
+    '<div class="card" style="text-align:center;padding:28px 16px;">' +
+      '<div style="font-size:2.2rem;margin-bottom:10px;">' + (perfect ? '🎉' : '💪') + '</div>' +
+      '<div style="font-size:1.3rem;font-weight:800;margin-bottom:6px;">' + score + '/' + g.quiz.length + ' correct</div>' +
+      '<div style="font-size:0.88rem;color:var(--muted);line-height:1.6;margin-bottom:14px;">' +
+        (perfect ? 'Perfect! You\'ve got this rule locked in.' : 'Nice try — re-read the lesson and come back.') +
+      '</div>' +
+      (!alreadyDone ? '<div style="color:var(--green);font-weight:700;font-size:0.9rem;margin-bottom:14px;">+10 XP earned</div>' : '') +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">' +
+        '<button class="btn btn-primary" onclick="openGrammarLesson(\'' + gId + '\')">' + (perfect ? 'Back to Lesson' : 'Review Lesson') + '</button>' +
+        '<button class="btn btn-secondary" onclick="startGrammarQuiz(\'' + gId + '\')">Try Again</button>' +
+      '</div>' +
+    '</div>';
 }
 
 function openDomain(key) {
@@ -8093,6 +8239,7 @@ const BADGES = [
   { id:'B16', icon:'🎯', name:'Sharp Shooter',   desc:'Practice score hit 40 — you\'re past the beginner plateau',              check:()=> calcPracticeScore() >= 40 },
   { id:'B17', icon:'🌟', name:'High Achiever',   desc:'Practice score hit 75 — your Spanish is actually working in real life',  check:()=> calcPracticeScore() >= 75 },
   { id:'B18', icon:'🧠', name:'Deep Learner',    desc:'Explored 5 different areas of Spanish — food, travel, health, and more', check:()=> new Set(Object.keys(S.progress).map(id=>{const c=CONTENT.find(x=>x.id===id);return c?.domain;}).filter(Boolean)).size >= 5 },
+  { id:'B19', icon:'🎓', name:'Grammar Ace',     desc:'Passed every grammar mini-quiz. You understand the why, not just the what.', check:()=> GRAMMAR.every(g => (S.stats.grammarQuizDone||{})[g.id]) },
 ];
 
 function awardXP(amount) {
