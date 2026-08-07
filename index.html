@@ -3022,6 +3022,8 @@ const DEFAULT_STATE = {
     autoPlayAudio: false,
     audioSpeed: 0.9,
     theme: 'auto',
+    reminderEnabled: false,
+    reminderTime: '08:00',
   },
   dailyStars: {},    // { 'YYYY-MM-DD': { speak:bool, listen:bool, recall:bool, conversation:bool, comeback:bool } }
   streak: { current: 0, best: 0, lastDate: null },
@@ -3034,6 +3036,7 @@ const DEFAULT_STATE = {
     miniChallengeDone: {},
     weeklyRecapDismissed: null,
     freezeTokens: 0, frozenDates: [], earnedFreezeMilestones: [],
+    reminderFiredDate: null,
     bookmarks: [] },
   ownership: {},   // { itemId: { worldContext: null, sawOwnCard: false } }
   reviewDeck: [],    // array of item ids
@@ -7657,6 +7660,112 @@ function showTeacherView() {
     '</div>';
 }
 
+// ===================================================
+// DAILY REMINDER NOTIFICATIONS
+// ===================================================
+var _reminderTimer = null;
+
+function reminderMsToday(timeStr) {
+  var parts = (timeStr || '08:00').split(':');
+  var d = new Date();
+  d.setHours(+parts[0], +parts[1], 0, 0);
+  return d.getTime();
+}
+
+function hasPracticedToday() {
+  var stars = S.dailyStars[today()] || {};
+  return Object.values(stars).some(Boolean);
+}
+
+function fireReminder() {
+  S.stats.reminderFiredDate = today();
+  saveState();
+  var streak = S.streak.current || 0;
+  var body = streak >= 3
+    ? streak + '-day streak — 5 minutes keeps it alive. 🔥'
+    : 'Your Spanish lesson is ready. 5 minutes is all it takes. 🇪🇸';
+  var opts = { body: body, icon: 'icon.svg', badge: 'icon.svg', tag: 'ssc-daily', renotify: false };
+  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.ready.then(function(reg) {
+      reg.showNotification('Time for your Spanish!', opts);
+    }).catch(function() {
+      new Notification('Time for your Spanish!', opts);
+    });
+  } else if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification('Time for your Spanish!', opts);
+  }
+}
+
+function checkAndFireReminder() {
+  if (_reminderTimer) { clearTimeout(_reminderTimer); _reminderTimer = null; }
+  if (!S.settings.reminderEnabled) return;
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  if (hasPracticedToday()) return;
+  if (S.stats.reminderFiredDate === today()) return;
+  var now = Date.now();
+  var target = reminderMsToday(S.settings.reminderTime);
+  if (now >= target) {
+    fireReminder();
+  } else {
+    _reminderTimer = setTimeout(function() {
+      if (!hasPracticedToday()) fireReminder();
+    }, target - now);
+  }
+}
+
+function enableReminder() {
+  if (!('Notification' in window)) return;
+  Notification.requestPermission().then(function(perm) {
+    S.settings.reminderEnabled = perm === 'granted';
+    saveState();
+    var settingsEl = document.getElementById('settings-reminder-section');
+    if (settingsEl) settingsEl.outerHTML = reminderSettingsHtml();
+    if (perm === 'granted') checkAndFireReminder();
+  });
+}
+
+function disableReminder() {
+  S.settings.reminderEnabled = false;
+  saveState();
+  if (_reminderTimer) { clearTimeout(_reminderTimer); _reminderTimer = null; }
+  var settingsEl = document.getElementById('settings-reminder-section');
+  if (settingsEl) settingsEl.outerHTML = reminderSettingsHtml();
+}
+
+function updateReminderTime(val) {
+  S.settings.reminderTime = val;
+  saveState();
+  checkAndFireReminder();
+}
+
+function reminderSettingsHtml() {
+  var cfg = S.settings;
+  var supported = 'Notification' in window;
+  var perm = supported ? Notification.permission : 'unsupported';
+  var inner = '';
+  if (!supported) {
+    inner = '<div style="font-size:0.82rem;color:var(--muted);">Notifications not supported in this browser.</div>';
+  } else if (perm === 'denied') {
+    inner = '<div style="font-size:0.82rem;color:var(--red);">Notifications are blocked. Allow them in browser/OS settings, then reload.</div>';
+  } else {
+    var togHtml = '<div class="setting-row">' +
+      '<div class="setting-label"><strong>Daily Practice Reminder</strong><span>Get a nudge at your chosen time</span></div>' +
+      (cfg.reminderEnabled
+        ? '<button class="toggle on" onclick="disableReminder()"></button>'
+        : '<button class="toggle" onclick="enableReminder()"></button>') +
+      '</div>';
+    var timeHtml = cfg.reminderEnabled
+      ? '<div class="setting-row">' +
+          '<div class="setting-label"><strong>Remind me at</strong><span>Daily local time</span></div>' +
+          '<input type="time" value="' + (cfg.reminderTime || '08:00') + '" onchange="updateReminderTime(this.value)" style="width:110px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:0.9rem;">' +
+        '</div>' +
+        '<div style="font-size:0.75rem;color:var(--green);padding:2px 0 4px;">✓ Reminder active at ' + (cfg.reminderTime || '08:00') + ' — fires if you haven\'t practiced yet that day.</div>'
+      : '';
+    inner = togHtml + timeHtml;
+  }
+  return '<div id="settings-reminder-section" class="card">' + inner + '</div>';
+}
+
 function renderSettings() {
   const u = S.user;
   const cfg = S.settings;
@@ -7688,6 +7797,9 @@ function renderSettings() {
         </div>
       </div>
     </div>
+
+    <div class="section-label">Daily Reminder</div>
+    ${reminderSettingsHtml()}
 
     <div class="section-label">Practice Settings</div>
     <div class="card">
@@ -10353,6 +10465,7 @@ function skipDiagnostic() {
 // ===================================================
 updateStreak();
 initTTS();
+checkAndFireReminder();
 if (!S.user.goalsDone) {
   showGoals();
 } else if (!S.user.diagnosticDone) {
