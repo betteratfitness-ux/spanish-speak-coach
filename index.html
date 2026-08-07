@@ -27,6 +27,43 @@
   --shadow: 0 2px 12px rgba(0,0,0,0.08);
 }
 
+/* ── Dark Mode Tokens ── */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111827;
+    --surface: #1C2333;
+    --text: #E8EDF5;
+    --muted: #8892A4;
+    --border: #2D3748;
+    --shadow: 0 2px 16px rgba(0,0,0,0.45);
+    --green: #34A87A;
+    --gold: #F6AD55;
+    --red: #FC6B6B;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111827;
+  --surface: #1C2333;
+  --text: #E8EDF5;
+  --muted: #8892A4;
+  --border: #2D3748;
+  --shadow: 0 2px 16px rgba(0,0,0,0.45);
+  --green: #34A87A;
+  --gold: #F6AD55;
+  --red: #FC6B6B;
+}
+:root[data-theme="light"] {
+  --bg: #F0F4F8;
+  --surface: #FFFFFF;
+  --text: #1A202C;
+  --muted: #718096;
+  --border: #E2E8F0;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  --green: #2D9E6B;
+  --gold: #FFB703;
+  --red: #D62828;
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -99,6 +136,8 @@ body {
   background: rgba(255,255,255,0.92); color: var(--text);
   outline: none;
 }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #srch-input { background: var(--surface); color: var(--text); } }
+:root[data-theme="dark"] #srch-input { background: var(--surface); color: var(--text); }
 #srch-input::placeholder { color: var(--muted); }
 #srch-close { background: none; border: none; color: white; font-size: 1.4rem; cursor: pointer; padding: 4px; line-height: 1; }
 #srch-results { flex: 1; overflow-y: auto; padding: 10px 14px 32px; max-width: 680px; width: 100%; margin: 0 auto; }
@@ -798,6 +837,8 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
 .sp-opt { background: var(--bg); border: 2px solid var(--border); border-radius: 10px; padding: 12px 8px; text-align: center; cursor: pointer; transition: all 0.15s; }
 .sp-opt:hover { border-color: var(--primary); background: #FFF5EE; }
 .sp-opt.sp-selected { border-color: var(--primary); background: rgba(232,93,4,0.08); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .sp-opt:hover { background: rgba(232,93,4,0.18); } }
+:root[data-theme="dark"] .sp-opt:hover { background: rgba(232,93,4,0.18); }
 .sp-time { font-size: 1.2rem; font-weight: 800; color: var(--primary); }
 .sp-label { font-size: 0.68rem; color: var(--muted); margin-top: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
 
@@ -1049,6 +1090,12 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
 .cpi-saved-en { color:var(--muted); flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .cpi-saved-es { font-weight:700; flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .cpi-del-btn { background:none; border:none; color:var(--red); font-size:1rem; cursor:pointer; padding:2px 4px; flex-shrink:0; }
+
+/* Theme Picker */
+.theme-picker { display:flex; gap:6px; }
+.theme-picker button { flex:1; padding:8px 4px; border:2px solid var(--border); border-radius:10px; background:var(--bg); color:var(--muted); font-size:0.8rem; font-weight:600; cursor:pointer; transition:all 0.15s; }
+.theme-picker button.active { border-color:var(--primary); background:rgba(232,93,4,0.08); color:var(--primary); }
+.theme-picker button:hover:not(.active) { border-color:var(--muted); color:var(--text); }
 </style>
 </head>
 <body>
@@ -2974,6 +3021,7 @@ const DEFAULT_STATE = {
     audioEnabled: true,
     autoPlayAudio: false,
     audioSpeed: 0.9,
+    theme: 'auto',
   },
   dailyStars: {},    // { 'YYYY-MM-DD': { speak:bool, listen:bool, recall:bool, conversation:bool, comeback:bool } }
   streak: { current: 0, best: 0, lastDate: null },
@@ -3037,6 +3085,21 @@ let S = loadState();
 function getAllContent() {
   return CONTENT.concat(S.customPhrases || []);
 }
+
+function applyTheme(t) {
+  t = t || S.settings.theme || 'auto';
+  S.settings.theme = t;
+  var root = document.documentElement;
+  if (t === 'dark')  { root.dataset.theme = 'dark'; }
+  else if (t === 'light') { root.dataset.theme = 'light'; }
+  else { delete root.dataset.theme; }
+  saveState();
+  ['auto','light','dark'].forEach(function(opt) {
+    var btn = document.getElementById('theme-' + opt);
+    if (btn) btn.classList.toggle('active', opt === t);
+  });
+}
+applyTheme();
 
 // ===================================================
 // UTILITIES
@@ -7460,6 +7523,18 @@ function renderSettings() {
           <option value="12" ${cfg.dailyGoal===12?'selected':''}>12 min</option>
           <option value="24" ${cfg.dailyGoal===24?'selected':''}>24 min</option>
         </select>
+      </div>
+    </div>
+
+    <div class="section-label">Display</div>
+    <div class="card">
+      <div class="setting-row" style="align-items:flex-start;flex-direction:column;gap:10px;">
+        <div class="setting-label"><strong>Theme</strong><span>How the app looks</span></div>
+        <div class="theme-picker">
+          <button id="theme-light" class="${(cfg.theme||'auto')==='light'?'active':''}" onclick="applyTheme('light')">☀️ Light</button>
+          <button id="theme-auto"  class="${(cfg.theme||'auto')==='auto' ?'active':''}" onclick="applyTheme('auto')">🔆 Auto</button>
+          <button id="theme-dark"  class="${(cfg.theme||'auto')==='dark' ?'active':''}" onclick="applyTheme('dark')">🌙 Dark</button>
+        </div>
       </div>
     </div>
 
