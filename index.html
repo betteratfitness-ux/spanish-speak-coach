@@ -5512,6 +5512,11 @@ function renderModeCard() {
     `;
   }
 
+  // Capture XP at session start for end-of-session summary
+  if (modeState.sessionStartXp === undefined && index === 0) {
+    modeState.sessionStartXp = S.stats.xp || 0;
+  }
+
   document.getElementById('main-content').innerHTML = modeShell(index, total, inner);
 
   // Auto-start speech recognition in voice auto-mode
@@ -5657,69 +5662,134 @@ function renderModeComplete() {
     return;
   }
 
-  const { results, mode } = modeState;
-  const correct  = results.filter(r => r.result === 'correct').length;
-  const missed   = results.filter(r => r.result === 'missed').length;
-  const guessed  = results.filter(r => r.result === 'guessed').length;
-  const total    = results.length;
-  const avgConf  = total > 0 ? (results.reduce((a,r) => a + r.confidence, 0) / total).toFixed(1) : 0;
-  const addedToReview = results.filter(r => r.result !== 'correct' || r.confidence <= 2).length;
+  var results = modeState.results;
+  var mode    = modeState.mode;
+  var correct = results.filter(function(r) { return r.result === 'correct'; }).length;
+  var missed  = results.filter(function(r) { return r.result === 'missed'; }).length;
+  var guessed = results.filter(function(r) { return r.result === 'guessed'; }).length;
+  var total   = results.length;
+  var pct     = total > 0 ? Math.round((correct / total) * 100) : 0;
+  var xpGained = Math.max(0, (S.stats.xp || 0) - (modeState.sessionStartXp || 0));
+  var curXP   = S.stats.xp || 0;
+  var curLevel = Math.floor(curXP / 100) + 1;
+  var xpIntoLevel = curXP % 100;
+  var allContent = getAllContent();
 
-  // Weak items for follow-up display
-  const weakItems = results
-    .filter(r => r.result === 'missed' || r.confidence <= 2)
-    .map(r => CONTENT.find(c => c.id === r.id))
-    .filter(Boolean).slice(0, 3);
+  // Weak items — missed or low confidence, linked to real content
+  var weakResults = results.filter(function(r) { return r.result === 'missed' || (r.confidence || 0) <= 2; });
+  var weakItems = weakResults.map(function(r) {
+    return allContent.find(function(c) { return c.id === r.id; });
+  }).filter(Boolean).slice(0, 4);
 
-  const emoji = correct === total ? '🌟' : correct > total / 2 ? '✅' : '💪';
-  const modeLabel = (modeState && modeState.weakSpot ? 'Weak Spot Drill' : { 'listen-repeat':'Listen → Repeat','en-to-es':'English → Spanish','es-to-en':'Spanish → English','speak-memory':'Speak From Memory','speed-round':'Speed Round','build':'Sentence Builder','listen':'Listening Challenge','tile':'Word Tile Challenge','dictation':'Dictation' }[mode]) || mode;
+  // Best phrase — highest confidence this session
+  var bestResult = results.slice().sort(function(a,b) { return (b.confidence||0)-(a.confidence||0); })[0];
+  var bestItem   = bestResult && allContent.find(function(c) { return c.id === bestResult.id; });
+  var showBest   = bestItem && (bestResult.confidence || 0) >= 4 && missed < total;
 
-  document.getElementById('main-content').innerHTML = `
-    <div class="card" style="text-align:center;">
-      <div style="font-size:2.5rem;margin-bottom:6px;">${emoji}</div>
-      <div class="card-heading">Session Complete</div>
-      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:14px;">${modeLabel} · ${total} item${total !== 1 ? 's' : ''}</div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;">
-        <div style="background:var(--bg);border-radius:8px;padding:8px;">
-          <div style="font-size:1.2rem;font-weight:800;color:var(--green);">${correct}</div>
-          <div style="font-size:0.65rem;color:var(--muted);">Got It</div>
-        </div>
-        <div style="background:var(--bg);border-radius:8px;padding:8px;">
-          <div style="font-size:1.2rem;font-weight:800;color:#D69E2E;">${guessed}</div>
-          <div style="font-size:0.65rem;color:var(--muted);">Guessed</div>
-        </div>
-        <div style="background:var(--bg);border-radius:8px;padding:8px;">
-          <div style="font-size:1.2rem;font-weight:800;color:var(--red);">${missed}</div>
-          <div style="font-size:0.65rem;color:var(--muted);">Missed</div>
-        </div>
-        <div style="background:var(--bg);border-radius:8px;padding:8px;">
-          <div style="font-size:1.2rem;font-weight:800;color:var(--primary);">${avgConf}</div>
-          <div style="font-size:0.65rem;color:var(--muted);">Avg Conf</div>
-        </div>
-      </div>
-      ${addedToReview > 0 ? `<div style="background:#FFF5EE;border-radius:8px;padding:8px 12px;font-size:0.8rem;color:var(--primary);margin-bottom:10px;">📚 ${addedToReview} item${addedToReview !== 1?'s':''} added to your Review Deck for spaced repetition.</div>` : `<div style="background:#F0FFF4;border-radius:8px;padding:8px 12px;font-size:0.8rem;color:var(--green);margin-bottom:10px;">✓ All items answered confidently.</div>`}
-    </div>
+  var modeLabel = (modeState.weakSpot ? 'Weak Spot Drill' : {
+    'listen-repeat':'Listen → Repeat','en-to-es':'English → Spanish',
+    'es-to-en':'Spanish → English','speak-memory':'Speak From Memory',
+    'speed-round':'Speed Round','build':'Sentence Builder',
+    'listen':'Listening Challenge','tile':'Word Tile Challenge','dictation':'Dictation'
+  }[mode]) || mode;
 
-    ${weakItems.length > 0 ? `
-    <div class="card">
-      <div class="card-title">Items to Watch</div>
-      ${weakItems.map(item => `
-        <div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
-          <div>
-            <div style="font-weight:700;font-size:0.9rem;">${item.spanish}</div>
-            <div style="font-size:0.75rem;color:var(--muted);">${item.english}</div>
-          </div>
-          <span class="domain-tag tag-${item.domain}">${item.domain}</span>
-        </div>`).join('')}
-      <div style="font-size:0.75rem;color:var(--muted);margin-top:8px;">These are queued for review. The app will bring them back.</div>
-    </div>` : ''}
+  var headline, sub, heroEmoji;
+  if (total === 0) {
+    headline = 'Nothing to grade'; sub = ''; heroEmoji = '🤷';
+  } else if (pct === 100) {
+    headline = 'Flawless!'; sub = 'Every phrase nailed — you\'re building real fluency.'; heroEmoji = '🌟';
+  } else if (pct >= 80) {
+    headline = 'Strong session'; sub = 'Most phrases landed. A few to revisit.'; heroEmoji = '✅';
+  } else if (pct >= 60) {
+    headline = 'Good effort'; sub = 'Solid reps. The tricky ones will click with repetition.'; heroEmoji = '💪';
+  } else {
+    headline = 'Keep going'; sub = 'Tough session — that\'s where the real growth is.'; heroEmoji = '🔄';
+  }
 
-    <div class="btn-row">
-      <button class="btn btn-primary" onclick="startMode('${mode}')">Go Again</button>
-      <button class="btn btn-secondary" onclick="switchTab('speak')">Speak Hub</button>
-      <button class="btn btn-secondary" onclick="switchTab('review')">Review Deck</button>
-    </div>
-  `;
+  // Smart primary CTA
+  var primaryBtn, secondaryBtn;
+  if (missed > 0) {
+    primaryBtn = '<button class="btn btn-primary btn-full" onclick="startWeakSpotDrill()">🎯 Drill My Weak Spots</button>';
+  } else if (pct === 100 && mode === 'listen-repeat') {
+    primaryBtn = '<button class="btn btn-primary btn-full" onclick="startMode(\'en-to-es\',null,\'' + (modeState.backTab||'practice') + '\')">Level Up → English → Spanish</button>';
+  } else {
+    primaryBtn = '<button class="btn btn-primary btn-full" onclick="startMode(\'' + mode + '\')">Go Again</button>';
+  }
+  secondaryBtn = '<button class="btn btn-secondary btn-full" onclick="switchTab(\'' + (modeState.backTab || 'today') + '\')">← Back</button>';
+
+  // XP progress bar
+  var xpBarHtml = xpGained > 0
+    ? '<div style="background:var(--bg);border-radius:10px;padding:12px 14px;margin-bottom:12px;">' +
+        '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">' +
+          '<span style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);">XP earned</span>' +
+          '<span style="font-size:1.1rem;font-weight:800;color:var(--gold);">+' + xpGained + ' XP</span>' +
+        '</div>' +
+        '<div style="height:6px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:4px;">' +
+          '<div style="height:100%;width:' + xpIntoLevel + '%;background:var(--gold);border-radius:99px;transition:width 0.6s;"></div>' +
+        '</div>' +
+        '<div style="font-size:0.68rem;color:var(--muted);text-align:right;">Level ' + curLevel + ' · ' + xpIntoLevel + '/100 XP</div>' +
+      '</div>'
+    : '';
+
+  // Weak phrases section
+  var weakHtml = weakItems.length > 0
+    ? '<div class="card" style="margin-bottom:10px;">' +
+        '<div style="font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:var(--red);margin-bottom:10px;">Needs Work · ' + weakItems.length + '</div>' +
+        weakItems.map(function(item) {
+          return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">' +
+            '<div style="min-width:0;">' +
+              '<div style="font-weight:700;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(item.spanish) + '</div>' +
+              '<div style="font-size:0.74rem;color:var(--muted);">' + esc(item.english) + '</div>' +
+            '</div>' +
+            '<button class="sv-retry-btn" style="margin-left:8px;flex-shrink:0;" data-speak="' + esc(item.spanish) + '" onclick="speakSpanish(this.dataset.speak,this)">🔊</button>' +
+          '</div>';
+        }).join('') +
+        '<div style="font-size:0.7rem;color:var(--muted);margin-top:8px;">SRS will surface these again — or drill them now.</div>' +
+      '</div>'
+    : '';
+
+  // Best phrase section
+  var bestHtml = showBest
+    ? '<div style="background:rgba(45,158,107,0.07);border:1px solid rgba(45,158,107,0.25);border-radius:10px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;">' +
+        '<span style="font-size:1.3rem;">⭐</span>' +
+        '<div>' +
+          '<div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:var(--green);margin-bottom:2px;">Best phrase this session</div>' +
+          '<div style="font-weight:700;font-size:0.9rem;">' + esc(bestItem.spanish) + '</div>' +
+          '<div style="font-size:0.75rem;color:var(--muted);">' + esc(bestItem.english) + '</div>' +
+        '</div>' +
+      '</div>'
+    : '';
+
+  document.getElementById('main-content').innerHTML =
+    '<div class="card" style="margin-bottom:10px;">' +
+      '<div style="text-align:center;padding:8px 0 14px;">' +
+        '<div style="font-size:2.4rem;margin-bottom:6px;">' + heroEmoji + '</div>' +
+        '<div style="font-size:1.25rem;font-weight:900;color:var(--text);margin-bottom:4px;">' + headline + '</div>' +
+        '<div style="font-size:0.82rem;color:var(--muted);margin-bottom:14px;">' + sub + '</div>' +
+        '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">' +
+          '<div style="background:var(--bg);border-radius:8px;padding:10px 6px;">' +
+            '<div style="font-size:1.4rem;font-weight:800;color:var(--green);">' + correct + '</div>' +
+            '<div style="font-size:0.62rem;color:var(--muted);text-transform:uppercase;font-weight:700;">Got It</div>' +
+          '</div>' +
+          '<div style="background:var(--bg);border-radius:8px;padding:10px 6px;">' +
+            '<div style="font-size:1.4rem;font-weight:800;color:var(--red);">' + missed + '</div>' +
+            '<div style="font-size:0.62rem;color:var(--muted);text-transform:uppercase;font-weight:700;">Missed</div>' +
+          '</div>' +
+          '<div style="background:var(--bg);border-radius:8px;padding:10px 6px;">' +
+            '<div style="font-size:1.4rem;font-weight:800;color:var(--primary);">' + pct + '%</div>' +
+            '<div style="font-size:0.62rem;color:var(--muted);text-transform:uppercase;font-weight:700;">Accuracy</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="font-size:0.72rem;color:var(--muted);">' + modeLabel + ' · ' + total + ' phrase' + (total !== 1 ? 's' : '') + '</div>' +
+      '</div>' +
+      xpBarHtml +
+      bestHtml +
+    '</div>' +
+    weakHtml +
+    '<div style="display:flex;flex-direction:column;gap:8px;">' +
+      primaryBtn +
+      secondaryBtn +
+    '</div>';
 }
 
 // ===================================================
