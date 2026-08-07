@@ -3038,6 +3038,7 @@ const DEFAULT_STATE = {
     freezeTokens: 0, frozenDates: [], earnedFreezeMilestones: [],
     reminderFiredDate: null,
     xpLog: {},
+    voiceLog: {},
     bookmarks: [] },
   ownership: {},   // { itemId: { worldContext: null, sawOwnCard: false } }
   reviewDeck: [],    // array of item ids
@@ -3080,11 +3081,26 @@ function loadState() {
   } catch(e) { return structuredClone(DEFAULT_STATE); }
 }
 
+var _xpTracked = false;
+var _xpLastSaved = 0;
+
 function saveState() {
+  var cur = S.stats.xp || 0;
+  if (_xpTracked) {
+    var delta = cur - _xpLastSaved;
+    if (delta > 0) {
+      if (!S.stats.xpLog) S.stats.xpLog = {};
+      var _d = today();
+      S.stats.xpLog[_d] = (S.stats.xpLog[_d] || 0) + delta;
+    }
+  }
+  _xpLastSaved = cur;
   localStorage.setItem(LS_KEY, JSON.stringify(S));
 }
 
 let S = loadState();
+_xpLastSaved = S.stats.xp || 0;
+_xpTracked = true;
 
 function getAllContent() {
   return CONTENT.concat(S.customPhrases || []);
@@ -3923,6 +3939,7 @@ function startDictation() {
 var _svTarget = '';
 var _svRecognition = null;
 var _svAutoTimer = null;
+var _svLastPct = 0;
 
 function startSpeechVerify(targetText, isAuto) {
   _svTarget = targetText;
@@ -3960,10 +3977,12 @@ function startSpeechVerify(targetText, isAuto) {
 }
 
 function svShowResult(panel, transcript, targetText, isAuto) {
+  _svLastPct = 0;
   if (_svAutoTimer) { clearInterval(_svAutoTimer); _svAutoTimer = null; }
   var normT = normalizeStr(transcript);
   var normC = normalizeStr(targetText);
   var pct = Math.min(100, Math.round(wordOverlap(normT, normC) * 100));
+  _svLastPct = pct;
   var color    = pct >= 85 ? 'var(--green)' : pct >= 55 ? '#D69E2E' : 'var(--red)';
   var verdict  = pct >= 85 ? 'Great match!' : pct >= 55 ? 'Close — a few words off' : 'Keep practicing';
   var autoRes  = pct >= 85 ? 'correct' : pct >= 55 ? 'guessed' : 'missed';
@@ -3981,7 +4000,7 @@ function svShowResult(panel, transcript, targetText, isAuto) {
     '</div>' +
     '<div class="dict-comparison" style="margin-bottom:8px;">' + dictWordDiff(transcript, targetText) + '</div>' +
     '<div style="display:flex;gap:6px;">' +
-      '<button id="sv-accept-btn" class="btn" style="flex:2;background:' + autoBg + ';color:' + autoClr + ';font-size:0.8rem;font-weight:700;padding:8px 10px;" onclick="svAccept(\'' + autoRes + '\',' + autoConf + ')">' + autoLbl + (isAuto ? ' <span id="sv-cd">· 2s</span>' : '') + '</button>' +
+      '<button id="sv-accept-btn" class="btn" style="flex:2;background:' + autoBg + ';color:' + autoClr + ';font-size:0.8rem;font-weight:700;padding:8px 10px;" onclick="svAccept(\'' + autoRes + '\',' + autoConf + ',' + pct + ')">' + autoLbl + (isAuto ? ' <span id="sv-cd">· 2s</span>' : '') + '</button>' +
       '<button class="sv-retry-btn" style="flex:1;" onclick="startSpeechVerify(_svTarget)">🎙️ Retry</button>' +
     '</div>' +
   '</div>';
@@ -3999,8 +4018,16 @@ function svShowResult(panel, transcript, targetText, isAuto) {
   }
 }
 
-function svAccept(result, conf) {
+function svAccept(result, conf, pct) {
   if (_svAutoTimer) { clearInterval(_svAutoTimer); _svAutoTimer = null; }
+  var p = (pct !== undefined) ? pct : _svLastPct;
+  if (p > 0) {
+    if (!S.stats.voiceLog) S.stats.voiceLog = {};
+    var vd = today();
+    if (!S.stats.voiceLog[vd]) S.stats.voiceLog[vd] = { sum: 0, count: 0 };
+    S.stats.voiceLog[vd].sum += p;
+    S.stats.voiceLog[vd].count += 1;
+  }
   recordResult(result, conf);
 }
 
@@ -7618,7 +7645,8 @@ function renderProgress() {
 
   var activityCalendar = renderActivityCalendar();
   var xpSparkline = renderXPSparkline();
-  return candoSection + ownershipSummary + heatmapSection + scoreBreakdown + weekTrend + xpSparkline + xpCard + activityCalendar + badgesHTML + statsGrid + missionsSection + domainMap + starsHistory + teacherBtn;
+  var voiceSparkline = renderVoiceSparkline();
+  return candoSection + ownershipSummary + heatmapSection + scoreBreakdown + weekTrend + xpSparkline + voiceSparkline + xpCard + activityCalendar + badgesHTML + statsGrid + missionsSection + domainMap + starsHistory + teacherBtn;
 }
 
 function showTeacherView() {
@@ -8069,9 +8097,6 @@ const BADGES = [
 
 function awardXP(amount) {
   S.stats.xp = (S.stats.xp || 0) + amount;
-  if (!S.stats.xpLog) S.stats.xpLog = {};
-  var d = today();
-  S.stats.xpLog[d] = (S.stats.xpLog[d] || 0) + amount;
   checkBadges();
   saveState();
 }
@@ -8119,6 +8144,70 @@ function renderXPSparkline() {
       '<div style="font-size:0.72rem;color:var(--muted);">' + totalThisWeek + ' XP this week' + trendArrow + '</div>' +
     '</div>' +
     '<div style="display:flex;gap:2px;align-items:flex-end;">' + bars + '</div>' +
+  '</div>';
+}
+
+function renderVoiceSparkline() {
+  var log = S.stats.voiceLog || {};
+  var days = [];
+  var now = new Date();
+  for (var i = 13; i >= 0; i--) {
+    var d = new Date(now);
+    d.setDate(d.getDate() - i);
+    days.push(d.toISOString().slice(0, 10));
+  }
+  var hasAny = days.some(function(d) { return log[d] && log[d].count > 0; });
+  if (!hasAny) return '';
+
+  var todayStr = today();
+  var avgs = days.map(function(d) {
+    var e = log[d];
+    return (e && e.count > 0) ? Math.round(e.sum / e.count) : 0;
+  });
+  var maxVal = Math.max.apply(null, avgs) || 1;
+
+  var thisWeekAvg = (function() {
+    var s = 0, c = 0;
+    days.slice(7).forEach(function(d) { var e = log[d]; if (e && e.count) { s += e.sum; c += e.count; } });
+    return c > 0 ? Math.round(s / c) : 0;
+  })();
+  var lastWeekAvg = (function() {
+    var s = 0, c = 0;
+    days.slice(0, 7).forEach(function(d) { var e = log[d]; if (e && e.count) { s += e.sum; c += e.count; } });
+    return c > 0 ? Math.round(s / c) : 0;
+  })();
+  var trendArrow = thisWeekAvg > lastWeekAvg
+    ? '<span style="color:var(--green);font-size:0.72rem;font-weight:700;margin-left:6px;">↑ ' + (thisWeekAvg - lastWeekAvg) + '% vs last week</span>'
+    : thisWeekAvg < lastWeekAvg && lastWeekAvg > 0
+    ? '<span style="color:var(--primary);font-size:0.72rem;font-weight:700;margin-left:6px;">↓ ' + (lastWeekAvg - thisWeekAvg) + '% vs last week</span>'
+    : '';
+
+  var bars = days.map(function(d, i) {
+    var v = avgs[i];
+    var pct = Math.round((v / maxVal) * 100);
+    var isToday = d === todayStr;
+    var dow = ['S','M','T','W','T','F','S'][new Date(d + 'T12:00:00').getDay()];
+    var barColor = isToday ? 'var(--primary)' : v >= 85 ? 'var(--green)' : v >= 55 ? 'var(--gold)' : v > 0 ? 'var(--red)' : 'var(--border)';
+    return '<div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;">' +
+      '<div style="font-size:0.58rem;color:' + (v > 0 ? 'var(--text)' : 'var(--muted)') + ';font-weight:' + (v > 0 ? '700' : '400') + ';line-height:1;">' + (v > 0 ? v + '%' : '') + '</div>' +
+      '<div style="width:100%;height:48px;display:flex;align-items:flex-end;">' +
+        '<div style="width:100%;height:' + Math.max(4, pct) + '%;background:' + barColor + ';border-radius:3px 3px 0 0;transition:height 0.3s ease;"></div>' +
+      '</div>' +
+      '<div style="font-size:0.6rem;color:' + (isToday ? 'var(--primary)' : 'var(--muted)') + ';font-weight:' + (isToday ? '800' : '400') + ';">' + dow + '</div>' +
+    '</div>';
+  }).join('');
+
+  return '<div class="card" style="margin-bottom:14px;">' +
+    '<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;">' +
+      '<div style="font-weight:800;font-size:0.95rem;">🎙️ Voice Match — 14 Days</div>' +
+      '<div style="font-size:0.72rem;color:var(--muted);">' + (thisWeekAvg > 0 ? 'avg ' + thisWeekAvg + '% this week' : 'use Voice Auto to track') + trendArrow + '</div>' +
+    '</div>' +
+    '<div style="display:flex;gap:2px;align-items:flex-end;">' + bars + '</div>' +
+    '<div style="display:flex;gap:12px;margin-top:8px;font-size:0.62rem;color:var(--muted);">' +
+      '<span style="display:flex;align-items:center;gap:3px;"><span style="width:8px;height:8px;border-radius:2px;background:var(--green);display:inline-block;"></span>≥85% great</span>' +
+      '<span style="display:flex;align-items:center;gap:3px;"><span style="width:8px;height:8px;border-radius:2px;background:var(--gold);display:inline-block;"></span>55–84% close</span>' +
+      '<span style="display:flex;align-items:center;gap:3px;"><span style="width:8px;height:8px;border-radius:2px;background:var(--red);display:inline-block;"></span>&lt;55% keep going</span>' +
+    '</div>' +
   '</div>';
 }
 
