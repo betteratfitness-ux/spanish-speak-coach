@@ -3037,6 +3037,7 @@ const DEFAULT_STATE = {
     weeklyRecapDismissed: null,
     freezeTokens: 0, frozenDates: [], earnedFreezeMilestones: [],
     reminderFiredDate: null,
+    xpLog: {},
     bookmarks: [] },
   ownership: {},   // { itemId: { worldContext: null, sawOwnCard: false } }
   reviewDeck: [],    // array of item ids
@@ -7616,7 +7617,8 @@ function renderProgress() {
     '</div>';
 
   var activityCalendar = renderActivityCalendar();
-  return candoSection + ownershipSummary + heatmapSection + scoreBreakdown + weekTrend + xpCard + activityCalendar + badgesHTML + statsGrid + missionsSection + domainMap + starsHistory + teacherBtn;
+  var xpSparkline = renderXPSparkline();
+  return candoSection + ownershipSummary + heatmapSection + scoreBreakdown + weekTrend + xpSparkline + xpCard + activityCalendar + badgesHTML + statsGrid + missionsSection + domainMap + starsHistory + teacherBtn;
 }
 
 function showTeacherView() {
@@ -8067,8 +8069,57 @@ const BADGES = [
 
 function awardXP(amount) {
   S.stats.xp = (S.stats.xp || 0) + amount;
+  if (!S.stats.xpLog) S.stats.xpLog = {};
+  var d = today();
+  S.stats.xpLog[d] = (S.stats.xpLog[d] || 0) + amount;
   checkBadges();
   saveState();
+}
+
+function renderXPSparkline() {
+  var log = S.stats.xpLog || {};
+  var days = [];
+  var now = new Date();
+  for (var i = 13; i >= 0; i--) {
+    var d = new Date(now);
+    d.setDate(d.getDate() - i);
+    days.push(d.toISOString().slice(0, 10));
+  }
+  var vals = days.map(function(d) { return log[d] || 0; });
+  var maxVal = Math.max.apply(null, vals) || 1;
+  var todayStr = today();
+  var totalThisWeek = 0;
+  days.slice(7).forEach(function(d) { totalThisWeek += log[d] || 0; });
+  var totalLastWeek = 0;
+  days.slice(0, 7).forEach(function(d) { totalLastWeek += log[d] || 0; });
+  var trendArrow = totalThisWeek > totalLastWeek
+    ? '<span style="color:var(--green);font-size:0.72rem;font-weight:700;margin-left:6px;">↑ ' + (totalThisWeek - totalLastWeek) + ' vs last week</span>'
+    : totalThisWeek < totalLastWeek
+    ? '<span style="color:var(--primary);font-size:0.72rem;font-weight:700;margin-left:6px;">↓ ' + (totalLastWeek - totalThisWeek) + ' vs last week</span>'
+    : '';
+
+  var bars = days.map(function(d, i) {
+    var v = vals[i];
+    var pct = Math.round((v / maxVal) * 100);
+    var isToday = d === todayStr;
+    var dow = ['S','M','T','W','T','F','S'][new Date(d + 'T12:00:00').getDay()];
+    var barColor = isToday ? 'var(--primary)' : v > 0 ? 'var(--gold)' : 'var(--border)';
+    return '<div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;">' +
+      '<div style="font-size:0.58rem;color:' + (v > 0 ? 'var(--text)' : 'var(--muted)') + ';font-weight:' + (v > 0 ? '700' : '400') + ';line-height:1;">' + (v > 0 ? v : '') + '</div>' +
+      '<div style="width:100%;height:48px;display:flex;align-items:flex-end;">' +
+        '<div style="width:100%;height:' + Math.max(4, pct) + '%;background:' + barColor + ';border-radius:3px 3px 0 0;transition:height 0.3s ease;"></div>' +
+      '</div>' +
+      '<div style="font-size:0.6rem;color:' + (isToday ? 'var(--primary)' : 'var(--muted)') + ';font-weight:' + (isToday ? '800' : '400') + ';">' + dow + '</div>' +
+    '</div>';
+  }).join('');
+
+  return '<div class="card" style="margin-bottom:14px;">' +
+    '<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;">' +
+      '<div style="font-weight:800;font-size:0.95rem;">⚡ Daily XP — 14 Days</div>' +
+      '<div style="font-size:0.72rem;color:var(--muted);">' + totalThisWeek + ' XP this week' + trendArrow + '</div>' +
+    '</div>' +
+    '<div style="display:flex;gap:2px;align-items:flex-end;">' + bars + '</div>' +
+  '</div>';
 }
 
 function checkBadges() {
