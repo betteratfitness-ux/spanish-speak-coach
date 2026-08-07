@@ -4970,7 +4970,30 @@ function renderToday() {
     ? '<div style="font-size:1.15rem;font-weight:800;color:var(--text);margin-bottom:2px;">' + greetWord + ', ' + esc(firstName) + '. 👋</div>'
     : '';
 
+  // Streak-at-risk banner: after 7pm, streak exists, no practice yet today
+  var streakRiskCard = '';
+  if (hour >= 19 && S.streak.current > 0 && earnedCount === 0 && !S.user.comebackActive) {
+    var _now = new Date();
+    var _midnight = new Date(_now); _midnight.setHours(24, 0, 0, 0);
+    var _msLeft = _midnight - _now;
+    var _hLeft = Math.floor(_msLeft / 3600000);
+    var _mLeft = Math.floor((_msLeft % 3600000) / 60000);
+    var _timeStr = _hLeft > 0 ? _hLeft + 'h ' + _mLeft + 'm left' : _mLeft + ' min left';
+    streakRiskCard =
+      '<div class="card" style="border:2px solid var(--primary);margin-bottom:14px;background:rgba(232,93,4,0.06);">' +
+        '<div style="display:flex;align-items:center;gap:10px;">' +
+          '<div style="font-size:2rem;line-height:1;flex-shrink:0;">🔥</div>' +
+          '<div style="flex:1;">' +
+            '<div style="font-weight:900;font-size:1rem;color:var(--primary);margin-bottom:2px;">Your ' + S.streak.current + '-day streak ends tonight</div>' +
+            '<div style="font-size:0.78rem;color:var(--muted);margin-bottom:10px;">' + _timeStr + ' · 5 phrases is all it takes.</div>' +
+            '<button class="btn btn-primary btn-sm" onclick="startEmergencyDay()" style="width:100%;">⚡ Save My Streak — 5 Quick Phrases</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+  }
+
   return greetLine + '<div class="section-label">📅 ' + new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}) + '</div>' +
+    streakRiskCard +
     weeklyRecapCard +
     graceCard +
     makeItUpCard +
