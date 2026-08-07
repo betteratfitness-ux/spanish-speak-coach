@@ -3161,6 +3161,8 @@ function updateStreak() {
         S.stats.frozenDates = frozenList.filter(function(fd) { return fd !== missedDay; });
         S.streak.current += 1;
         checkStreakFreezeReward();
+        var savedStreak = S.streak.current;
+        setTimeout(function() { showCelebration('🛡️', 'Streak Saved!', 'Your freeze token stepped in for yesterday. ' + savedStreak + '-day streak intact.'); }, 500);
       } else {
         // Grace day: missed exactly 1 day, available once per 30 days, streak ≥ 2
         var lastGrace = S.stats.lastGraceDay;
@@ -4194,6 +4196,10 @@ function checkStreakFreezeReward() {
   if (earned.indexOf(key) === -1 && (S.stats.freezeTokens || 0) < 3) {
     S.stats.freezeTokens = (S.stats.freezeTokens || 0) + 1;
     S.stats.earnedFreezeMilestones = earned.concat([key]);
+    var newCount = S.stats.freezeTokens;
+    setTimeout(function() {
+      showCelebration('🧊', 'Streak Freeze Earned!', 'One missed day won\'t break your streak. You now have ' + newCount + ' freeze token' + (newCount === 1 ? '' : 's') + ' — use it when life gets in the way.');
+    }, 1200);
   }
 }
 
@@ -4205,6 +4211,10 @@ function checkLessonFreezeReward() {
   if (earned.indexOf(key) === -1 && (S.stats.freezeTokens || 0) < 3) {
     S.stats.freezeTokens = (S.stats.freezeTokens || 0) + 1;
     S.stats.earnedFreezeMilestones = earned.concat([key]);
+    var nc = S.stats.freezeTokens;
+    setTimeout(function() {
+      showCelebration('🧊', 'Streak Freeze Earned!', '10 lessons completed — you\'ve earned a freeze token. That\'s ' + nc + ' total. Miss a day, your streak survives.');
+    }, 1200);
   }
 }
 
@@ -4221,7 +4231,7 @@ function freezeNextDay() {
 
 function renderFreezeCard() {
   var tokens = S.stats.freezeTokens || 0;
-  if (tokens === 0) return '';
+  var streak = S.streak.current || 0;
   var tomorrow = new Date(new Date().getTime() + 86400000).toISOString().slice(0, 10);
   var frozen = S.stats.frozenDates || [];
   var alreadyFrozen = frozen.indexOf(tomorrow) !== -1;
@@ -4229,14 +4239,32 @@ function renderFreezeCard() {
   for (var i = 0; i < 3; i++) {
     tokenIcons += '<span class="freeze-token' + (i >= tokens ? ' empty' : '') + '">🧊</span>';
   }
+
+  if (tokens === 0) {
+    // Teaser: only show if they have an active streak worth protecting
+    if (streak < 2) return '';
+    var daysToFirst = 7 - (streak % 7);
+    var progressPct = Math.round((streak % 7) / 7 * 100);
+    return '<div class="freeze-card">' +
+      '<div class="freeze-tokens">' + tokenIcons + '</div>' +
+      '<div class="freeze-info">' +
+        '<div class="freeze-title">Streak Freeze</div>' +
+        '<div class="freeze-sub">Earn your first token in ' + daysToFirst + ' more day' + (daysToFirst === 1 ? '' : 's') + ' — protects against missing a day</div>' +
+        '<div style="margin-top:5px;height:3px;background:var(--border);border-radius:99px;overflow:hidden;">' +
+          '<div style="height:100%;width:' + progressPct + '%;background:#0EA5E9;border-radius:99px;transition:width 0.4s;"></div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
   return '<div class="freeze-card">' +
     '<div class="freeze-tokens">' + tokenIcons + '</div>' +
     '<div class="freeze-info">' +
-      '<div class="freeze-title">Streak Freeze</div>' +
-      '<div class="freeze-sub">' + tokens + ' token' + (tokens !== 1 ? 's' : '') + ' — earned by hitting 7-day milestones</div>' +
+      '<div class="freeze-title">Streak Freeze · ' + tokens + ' token' + (tokens !== 1 ? 's' : '') + '</div>' +
+      '<div class="freeze-sub">' + (alreadyFrozen ? 'Tomorrow is protected — your streak is safe even if you skip.' : 'Use a token to protect tomorrow if you might miss a day.') + '</div>' +
     '</div>' +
     (alreadyFrozen
-      ? '<button class="freeze-btn protected">✓ Tomorrow protected</button>'
+      ? '<button class="freeze-btn protected">✓ Protected</button>'
       : '<button class="freeze-btn" onclick="freezeNextDay()">Protect Tomorrow</button>') +
   '</div>';
 }
@@ -4472,6 +4500,7 @@ function renderToday() {
       '<div class="card" style="text-align:center;padding:12px;margin-bottom:0;">' +
         '<div style="font-size:1.4rem;font-weight:800;color:var(--primary);">' + S.streak.current + '</div>' +
         '<div style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;font-weight:700;">Day Streak</div>' +
+        ((S.stats.freezeTokens || 0) > 0 ? '<div style="font-size:0.65rem;color:#0EA5E9;margin-top:3px;font-weight:600;">🧊 ×' + S.stats.freezeTokens + '</div>' : '') +
       '</div>' +
       '<div class="card" style="text-align:center;padding:12px;margin-bottom:0;">' +
         '<div style="font-size:1.4rem;font-weight:800;color:var(--gold);">Lv ' + xpLevel + '</div>' +
