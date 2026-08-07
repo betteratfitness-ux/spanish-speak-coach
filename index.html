@@ -1043,6 +1043,7 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
 @keyframes celeb-fade { from{opacity:0} to{opacity:1} }
 @keyframes celeb-bounce { from{transform:scale(0.4) translateY(30px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
 @keyframes celeb-pop { 0%{transform:scale(0) rotate(-15deg)} 70%{transform:scale(1.2) rotate(4deg)} 100%{transform:scale(1) rotate(0)} }
+@keyframes pulseBadge { 0%,100%{opacity:1} 50%{opacity:0.55} }
 /* Dictation Mode */
 .dict-input { width:100%; box-sizing:border-box; padding:14px 16px; font-size:1.05rem; border:2px solid var(--border); border-radius:12px; background:var(--card-bg); color:var(--text); font-family:inherit; outline:none; text-align:center; transition:border-color 0.2s; }
 .dict-input:focus { border-color:var(--primary); }
@@ -3080,6 +3081,7 @@ const DEFAULT_STATE = {
     xpLog: {},
     voiceLog: {},
     grammarQuizDone: {},
+    irlLog: {},
     bookmarks: [] },
   ownership: {},   // { itemId: { worldContext: null, sawOwnCard: false } }
   reviewDeck: [],    // array of item ids
@@ -4454,6 +4456,41 @@ function dismissBackupReminder() {
 // ===================================================
 // RENDERING — TODAY TAB
 // ===================================================
+function renderNemesisCard() {
+  var best = null, bestRate = 0;
+  Object.keys(S.progress).forEach(function(id) {
+    var p = S.progress[id];
+    var total = (p.correct || 0) + (p.missed || 0) + (p.guessed || 0);
+    if (total < 3) return;
+    var rate = (p.missed || 0) / total;
+    if (rate > bestRate) { bestRate = rate; best = id; }
+  });
+  if (!best || bestRate < 0.25) return '';
+  var item = CONTENT.find(function(c) { return c.id === best; });
+  if (!item) return '';
+  var p = S.progress[best];
+  var total = (p.correct || 0) + (p.missed || 0) + (p.guessed || 0);
+  var missCount = p.missed || 0;
+  return '<div class="card" style="border-left:4px solid var(--red);margin-bottom:14px;background:rgba(239,68,68,0.04);">' +
+    '<div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.6px;color:var(--red);margin-bottom:6px;">😤 Today\'s Nemesis</div>' +
+    '<div style="display:flex;align-items:center;gap:10px;">' +
+      '<div style="flex:1;">' +
+        '<div style="font-size:1.05rem;font-weight:800;color:var(--text);">' + esc(item.spanish) + '</div>' +
+        '<div style="font-size:0.78rem;color:var(--muted);margin-top:2px;">' + esc(item.english) + '</div>' +
+        '<div style="font-size:0.68rem;color:var(--red);margin-top:4px;font-weight:700;">' + missCount + ' miss' + (missCount !== 1 ? 'es' : '') + ' out of ' + total + ' attempts</div>' +
+      '</div>' +
+      '<button class="btn btn-sm" style="background:var(--red);color:white;font-weight:700;white-space:nowrap;flex-shrink:0;" onclick="startNemesisDrill(\'' + esc(best) + '\')">Drill it →</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function startNemesisDrill(itemId) {
+  var item = CONTENT.find(function(c) { return c.id === itemId; });
+  if (!item) return;
+  modeState = { mode: 'speak', items: [item, item, item], index: 0, results: [], consec: 0, nemesis: true };
+  showCard();
+}
+
 function renderToday() {
   updateStreak();
   const stars = getTodayStars();
@@ -4607,12 +4644,22 @@ function renderToday() {
       '</div>';
 
   // Quick stats row — renamed "Fluency" → "Score"
+  var bestStreak = S.streak.best || 0;
+  var curStreak = S.streak.current || 0;
+  var isNewBest = curStreak > 0 && curStreak >= bestStreak;
+  var streakSubLine = '';
+  if (isNewBest && curStreak > 1) {
+    streakSubLine = '<div style="font-size:0.63rem;color:var(--gold);margin-top:3px;font-weight:700;animation:pulseBadge 1s ease infinite;">🏆 Personal best!</div>';
+  } else if (bestStreak > 1 && curStreak < bestStreak) {
+    streakSubLine = '<div style="font-size:0.63rem;color:var(--muted);margin-top:3px;font-weight:600;">Best: ' + bestStreak + 'd 🏆</div>';
+  }
   const statsRow =
     '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">' +
       '<div class="card" style="text-align:center;padding:12px;margin-bottom:0;">' +
-        '<div style="font-size:1.4rem;font-weight:800;color:var(--primary);">' + S.streak.current + '</div>' +
+        '<div style="font-size:1.4rem;font-weight:800;color:var(--primary);">' + curStreak + '</div>' +
         '<div style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;font-weight:700;">Day Streak</div>' +
         ((S.stats.freezeTokens || 0) > 0 ? '<div style="font-size:0.65rem;color:#0EA5E9;margin-top:3px;font-weight:600;">🧊 ×' + S.stats.freezeTokens + '</div>' : '') +
+        streakSubLine +
       '</div>' +
       '<div class="card" style="text-align:center;padding:12px;margin-bottom:0;">' +
         '<div style="font-size:1.4rem;font-weight:800;color:var(--gold);">Lv ' + xpLevel + '</div>' +
@@ -4767,6 +4814,7 @@ function renderToday() {
     missionCard +
     lessonCard +
     statsRow +
+    renderNemesisCard() +
     renderFreezeCard() +
     canDoCard +
     reviewCard +
@@ -5509,8 +5557,23 @@ function wordBreakdownHtml(spanish) {
   '</div>';
 }
 
+function logIRL(itemId, btnEl) {
+  if (!S.stats.irlLog) S.stats.irlLog = {};
+  var d = today();
+  if (!S.stats.irlLog[d]) S.stats.irlLog[d] = [];
+  if (S.stats.irlLog[d].indexOf(itemId) === -1) S.stats.irlLog[d].push(itemId);
+  saveState();
+  if (btnEl) { btnEl.textContent = '✓ Logged!'; btnEl.disabled = true; btnEl.style.color = 'var(--green)'; }
+}
+
+function hasLoggedIRLToday(itemId) {
+  var d = today();
+  return !!(S.stats.irlLog && S.stats.irlLog[d] && S.stats.irlLog[d].indexOf(itemId) !== -1);
+}
+
 function answerBox(item, showPron) {
   var breakdown = wordBreakdownHtml(item.spanish);
+  var irlDone = hasLoggedIRLToday(item.id);
   return `
     <div style="background:#FFF5EE;border:2px solid var(--primary);border-radius:12px;padding:16px;margin:12px 0;text-align:center;">
       <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:4px;">
@@ -5521,6 +5584,10 @@ function answerBox(item, showPron) {
       ${showPron && item.pron ? `<div style="font-size:0.82rem;color:var(--primary);font-style:italic;margin-bottom:4px;">${item.pron}</div>` : ''}
       <div style="font-size:0.85rem;color:var(--muted);">${item.english}</div>
       ${breakdown}
+      <button id="irl-${item.id}" onclick="logIRL('${item.id}',this)" ${irlDone ? 'disabled' : ''}
+        style="margin-top:10px;font-size:0.7rem;font-weight:700;padding:5px 12px;border-radius:99px;border:1.5px solid ${irlDone ? 'var(--green)' : 'var(--border)'};background:transparent;color:${irlDone ? 'var(--green)' : 'var(--muted)'};cursor:${irlDone ? 'default' : 'pointer'};">
+        ${irlDone ? '✓ Used IRL today' : '🌍 I used this today'}
+      </button>
     </div>
     <div class="vc-wrap">
       <div class="vc-label">🎙 Practice your pronunciation</div>
@@ -7701,6 +7768,18 @@ function renderProgress() {
         '<div style="font-size:1.3rem;font-weight:800;color:var(--primary);">' + (S.stats.comebacks || 0) + '</div>' +
         '<div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;font-weight:700;">Comebacks</div>' +
       '</div>' +
+      (function(){
+        var irlLog = S.stats.irlLog || {};
+        var totalIRL = Object.values(irlLog).reduce(function(sum, arr) { return sum + (Array.isArray(arr) ? arr.length : 0); }, 0);
+        var todayIRL = Array.isArray(irlLog[today()]) ? irlLog[today()].length : 0;
+        if (totalIRL === 0) return '';
+        return '<div class="card" style="text-align:center;padding:14px;">' +
+          '<div style="font-size:1.4rem;">🌍</div>' +
+          '<div style="font-size:1.3rem;font-weight:800;color:var(--green);">' + totalIRL + '</div>' +
+          '<div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;font-weight:700;">Used IRL</div>' +
+          (todayIRL > 0 ? '<div style="font-size:0.65rem;color:var(--green);font-weight:700;margin-top:2px;">+' + todayIRL + ' today</div>' : '') +
+        '</div>';
+      })() +
     '</div>';
 
   var domainMap =
