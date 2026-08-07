@@ -3918,9 +3918,11 @@ function startDictation() {
 /* ── Speech Verify ───────────────────────────────────── */
 var _svTarget = '';
 var _svRecognition = null;
+var _svAutoTimer = null;
 
-function startSpeechVerify(targetText) {
+function startSpeechVerify(targetText, isAuto) {
   _svTarget = targetText;
+  if (_svAutoTimer) { clearInterval(_svAutoTimer); _svAutoTimer = null; }
   if (_svRecognition) { try { _svRecognition.abort(); } catch(e) {} _svRecognition = null; }
   var panel = document.getElementById('sv-panel');
   if (!panel) return;
@@ -3929,7 +3931,7 @@ function startSpeechVerify(targetText) {
     panel.innerHTML = '<div class="sv-panel" style="font-size:0.78rem;color:var(--muted);">Speech recognition not supported in this browser.</div>';
     return;
   }
-  panel.innerHTML = '<div class="sv-panel"><div class="sv-listening"><span class="vc-dot"></span><span>Listening… say the Spanish phrase</span></div></div>';
+  panel.innerHTML = '<div class="sv-panel"><div class="sv-listening"><span class="vc-dot"></span><span>Listening… say it in Spanish</span></div></div>';
   _svRecognition = new SR();
   _svRecognition.lang = 'es-ES';
   _svRecognition.interimResults = false;
@@ -3937,11 +3939,15 @@ function startSpeechVerify(targetText) {
   _svRecognition.onresult = function(e) {
     _svRecognition = null;
     var transcript = e.results[0][0].transcript;
-    svShowResult(panel, transcript, targetText);
+    svShowResult(panel, transcript, targetText, isAuto);
   };
-  _svRecognition.onerror = function() {
+  _svRecognition.onerror = function(ev) {
     _svRecognition = null;
-    panel.innerHTML = '<div class="sv-panel" style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Couldn\'t catch that.<br><button class="sv-retry-btn" onclick="startSpeechVerify(_svTarget)">🎙️ Try again</button></div>';
+    if (ev.error === 'not-allowed') {
+      panel.innerHTML = '<div class="sv-panel" style="font-size:0.78rem;color:var(--muted);">Microphone access denied — allow it in browser settings.</div>';
+    } else {
+      panel.innerHTML = '<div class="sv-panel" style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Couldn\'t catch that. <button class="sv-retry-btn" onclick="startSpeechVerify(_svTarget)">🎙️ Try again</button></div>';
+    }
   };
   _svRecognition.onend = function() { _svRecognition = null; };
   try { _svRecognition.start(); } catch(e) {
@@ -3949,12 +3955,18 @@ function startSpeechVerify(targetText) {
   }
 }
 
-function svShowResult(panel, transcript, targetText) {
+function svShowResult(panel, transcript, targetText, isAuto) {
+  if (_svAutoTimer) { clearInterval(_svAutoTimer); _svAutoTimer = null; }
   var normT = normalizeStr(transcript);
   var normC = normalizeStr(targetText);
   var pct = Math.min(100, Math.round(wordOverlap(normT, normC) * 100));
-  var color = pct >= 85 ? 'var(--green)' : pct >= 55 ? '#D69E2E' : 'var(--red)';
-  var verdict = pct >= 85 ? 'Great match!' : pct >= 55 ? 'Close — a few words off' : 'Keep practicing';
+  var color    = pct >= 85 ? 'var(--green)' : pct >= 55 ? '#D69E2E' : 'var(--red)';
+  var verdict  = pct >= 85 ? 'Great match!' : pct >= 55 ? 'Close — a few words off' : 'Keep practicing';
+  var autoRes  = pct >= 85 ? 'correct' : pct >= 55 ? 'guessed' : 'missed';
+  var autoConf = pct >= 85 ? 4 : pct >= 55 ? 3 : 1;
+  var autoLbl  = pct >= 85 ? '✓ Got it' : pct >= 55 ? '~ Almost' : '✗ Missed';
+  var autoBg   = pct >= 85 ? '#C6F6D5' : pct >= 55 ? '#FEEBC8' : '#FED7D7';
+  var autoClr  = pct >= 85 ? '#22543D' : pct >= 55 ? '#7B341E' : '#9B2C2C';
   panel.innerHTML = '<div class="sv-panel">' +
     '<div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:4px;">You said:</div>' +
     '<div style="font-size:0.88rem;font-style:italic;color:var(--text);margin-bottom:8px;">' + esc(transcript) + '</div>' +
@@ -3963,9 +3975,37 @@ function svShowResult(panel, transcript, targetText) {
       '<span style="color:' + color + ';font-weight:700;">' + pct + '% match</span>' +
       '<span style="color:var(--muted);">' + verdict + '</span>' +
     '</div>' +
-    '<div class="dict-comparison" style="margin-bottom:6px;">' + dictWordDiff(transcript, targetText) + '</div>' +
-    '<button class="sv-retry-btn" onclick="startSpeechVerify(_svTarget)">🎙️ Try again</button>' +
+    '<div class="dict-comparison" style="margin-bottom:8px;">' + dictWordDiff(transcript, targetText) + '</div>' +
+    '<div style="display:flex;gap:6px;">' +
+      '<button id="sv-accept-btn" class="btn" style="flex:2;background:' + autoBg + ';color:' + autoClr + ';font-size:0.8rem;font-weight:700;padding:8px 10px;" onclick="svAccept(\'' + autoRes + '\',' + autoConf + ')">' + autoLbl + (isAuto ? ' <span id="sv-cd">· 2s</span>' : '') + '</button>' +
+      '<button class="sv-retry-btn" style="flex:1;" onclick="startSpeechVerify(_svTarget)">🎙️ Retry</button>' +
+    '</div>' +
   '</div>';
+  if (isAuto) {
+    var rem = 2;
+    _svAutoTimer = setInterval(function() {
+      rem--;
+      var cd = document.getElementById('sv-cd');
+      if (cd) cd.textContent = rem > 0 ? '· ' + rem + 's' : '';
+      if (rem <= 0) {
+        clearInterval(_svAutoTimer); _svAutoTimer = null;
+        svAccept(autoRes, autoConf);
+      }
+    }, 1000);
+  }
+}
+
+function svAccept(result, conf) {
+  if (_svAutoTimer) { clearInterval(_svAutoTimer); _svAutoTimer = null; }
+  recordResult(result, conf);
+}
+
+function toggleVoiceAuto() {
+  if (!modeState) return;
+  modeState.voiceAuto = !modeState.voiceAuto;
+  if (_svAutoTimer) { clearInterval(_svAutoTimer); _svAutoTimer = null; }
+  if (_svRecognition) { try { _svRecognition.abort(); } catch(e) {} _svRecognition = null; }
+  renderModeCard();
 }
 
 /* ── Voice Record & Compare ──────────────────────────── */
@@ -5121,12 +5161,19 @@ function modeShell(index, total, inner) {
   const pct = Math.round((index / total) * 100);
   const backTab = modeState?.backTab || 'speak';
   const backLabel = backTab === 'learn' ? '← Learn' : backTab === 'practice' ? '← Practice' : backTab === 'today' ? '← Today' : '← Speak';
+  const voiceModes = ['en-to-es', 'speak-memory'];
+  const showVoiceToggle = modeState && voiceModes.indexOf(modeState.mode) !== -1 && !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+  const voiceOn = modeState && modeState.voiceAuto;
+  const voiceBtn = showVoiceToggle
+    ? `<button onclick="toggleVoiceAuto()" title="${voiceOn ? 'Voice auto-mode on — tap to disable' : 'Enable voice auto-mode'}" style="padding:3px 7px;font-size:0.7rem;font-weight:700;border-radius:6px;border:1px solid ${voiceOn ? 'var(--primary)' : 'var(--border)'};background:${voiceOn ? 'var(--primary)' : 'var(--bg)'};color:${voiceOn ? '#fff' : 'var(--muted)'};cursor:pointer;white-space:nowrap;">🎙️${voiceOn ? ' ON' : ''}</button>`
+    : '';
   return `
-    <div style="margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+    <div style="margin-bottom:10px;display:flex;align-items:center;gap:6px;">
       <button class="btn btn-secondary btn-sm" onclick="switchTab('${backTab}')">${backLabel}</button>
       <div style="flex:1;background:var(--border);border-radius:99px;height:6px;overflow:hidden;">
         <div style="width:${pct}%;height:100%;background:var(--primary);border-radius:99px;transition:width 0.3s;"></div>
       </div>
+      ${voiceBtn}
       <span style="font-size:0.72rem;color:var(--muted);font-weight:700;white-space:nowrap;">${index+1}/${total}</span>
     </div>
     <div class="card">${inner}</div>`;
@@ -5466,6 +5513,11 @@ function renderModeCard() {
   }
 
   document.getElementById('main-content').innerHTML = modeShell(index, total, inner);
+
+  // Auto-start speech recognition in voice auto-mode
+  if (modeState.voiceAuto && (mode === 'en-to-es' || mode === 'speak-memory') && !modeState.revealed) {
+    setTimeout(function() { startSpeechVerify(item.spanish, true); }, 350);
+  }
 
   // Auto-play the Spanish phrase when card loads in listen-repeat mode
   if (mode === 'listen-repeat' && S.settings.autoPlayAudio && !modeState.revealed) {
