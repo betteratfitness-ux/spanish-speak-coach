@@ -4662,6 +4662,7 @@ function renderToday() {
         '<div class="potd-spanish">' + esc(potdItem.spanish) + '</div>' +
         (potdItem.pron ? '<div class="potd-pron">' + esc(potdItem.pron) + '</div>' : '') +
         '<div class="potd-english">' + esc(potdItem.english) + '</div>' +
+        (function(){ var bd = wordBreakdownHtml(potdItem.spanish); return bd ? '<div style="margin:6px 0 10px;">' + bd + '</div>' : ''; })() +
         '<div class="potd-tip">' +
           (potdDom.icon ? potdDom.icon + ' ' : '') +
           '<strong>' + esc(potdDom.name || '') + '</strong> — ' + potdTip +
@@ -5215,7 +5216,123 @@ function resultButtons(showAddReview = true) {
 }
 
 // ── Answer reveal box ─────────────────────────────────
+// ── Word-by-word breakdown ────────────────────────────
+const WORD_DICT = {
+  // Articles
+  'el':'the','la':'the','los':'the (pl.)','las':'the (pl.)','un':'a','una':'a','unos':'some','unas':'some','del':'of the','al':'to the',
+  // Subject pronouns
+  'yo':'I','tu':'you','el':'he','ella':'she','usted':'you (formal)','nosotros':'we','nosotras':'we','ellos':'they','ellas':'they','ustedes':'you all',
+  // Object / reflexive pronouns
+  'me':'me / myself','te':'you / yourself','se':'himself / herself / itself','le':'him / her / it','lo':'it / him','nos':'us / ourselves','les':'them',
+  // Possessives
+  'mi':'my','mis':'my (pl.)','tu':'your','tus':'your (pl.)','su':'his / her / your','sus':'his / her / your (pl.)','nuestro':'our','nuestra':'our',
+  // Common ser/estar
+  'soy':'I am','eres':'you are','es':'is / are','somos':'we are','son':'they are',
+  'estoy':'I am','estas':'you are','esta':'is (location/state)','estamos':'we are','estan':'they are',
+  // Tener
+  'tengo':'I have','tienes':'you have','tiene':'has / have','tenemos':'we have','tienen':'they have',
+  // Ir
+  'voy':'I go / I am going','vas':'you go','va':'goes / is going','vamos':'we go / let\'s go','van':'they go',
+  // Querer / poder / necesitar
+  'quiero':'I want','quieres':'you want','quiere':'wants','queremos':'we want','pueden':'they can',
+  'puedo':'I can','puedes':'you can','puede':'can','podemos':'we can',
+  'necesito':'I need','necesitas':'you need','necesita':'needs','necesitamos':'we need',
+  // Hacer / saber / pagar / llamar / hablar / ayudar
+  'hago':'I do / I make','hace':'does / makes','hacemos':'we do','hacen':'they do',
+  'se':'I know','sabes':'you know','sabe':'knows',
+  'pago':'I pay','paga':'pays','pagamos':'we pay',
+  'llamo':'I call / my name is','llamas':'you\'re called','llama':'is called','llamamos':'we\'re called',
+  'hablo':'I speak','hablas':'you speak','habla':'speaks','hablamos':'we speak','hablan':'they speak',
+  'ayudo':'I help','ayuda':'help / helps',
+  'busco':'I\'m looking for','busca':'looks for',
+  'espero':'I wait / I hope','espera':'waits / hopes',
+  'entiendo':'I understand','entiendes':'you understand','entiende':'understands',
+  'repita':'repeat (command)','repite':'repeat',
+  'escriba':'write (command)','escribo':'I write',
+  'escuche':'listen (command)',
+  // Infinitives
+  'ser':'to be','estar':'to be','tener':'to have','ir':'to go','hacer':'to do / make',
+  'hablar':'to speak','llamar':'to call','necesitar':'to need','poder':'to be able to',
+  'querer':'to want','venir':'to come','ver':'to see','pagar':'to pay','ayudar':'to help',
+  'entender':'to understand','buscar':'to look for','esperar':'to wait / hope',
+  // Hay / no hay
+  'hay':'there is / there are','no':'no / not',
+  // Common nouns
+  'agua':'water','comida':'food','bano':'bathroom','senor':'sir / Mr.','senora':'ma\'am / Mrs.',
+  'mesa':'table','cuenta':'bill / account','dinero':'money','tiempo':'time / weather',
+  'dia':'day','dias':'days','noche':'night','tarde':'afternoon / evening','manana':'morning / tomorrow',
+  'nombre':'name','hora':'hour / time','calle':'street','ciudad':'city','pais':'country',
+  'hospital':'hospital','farmacia':'pharmacy','medico':'doctor','medica':'doctor (f.)',
+  'emergencia':'emergency','policia':'police','doctor':'doctor','banco':'bank',
+  'cuarto':'room','habitacion':'room','precio':'price','problema':'problem',
+  'idioma':'language','espanol':'Spanish','ingles':'English',
+  'camino':'road / way','direccion':'address / direction','ayuda':'help',
+  'bano':'bathroom','servicio':'restroom / service','asiento':'seat','equipaje':'luggage',
+  'pasaporte':'passport','billete':'ticket','vuelo':'flight','tren':'train','taxi':'taxi',
+  'menu':'menu','plato':'dish / plate','vaso':'glass','taza':'cup','cafe':'coffee',
+  'leche':'milk','zumo':'juice','cerveza':'beer','vino':'wine',
+  'numero':'number','telefono':'phone','direccion':'address',
+  'izquierda':'left','derecha':'right','recto':'straight ahead','arriba':'up','abajo':'down',
+  // Common adjectives
+  'bien':'well / fine','mal':'bad / badly','bueno':'good','buena':'good','buenos':'good (pl.)','buenas':'good (pl.)',
+  'mucho':'a lot / much','mucha':'a lot','muchos':'many','muchas':'many',
+  'poco':'a little / few','poca':'a little','gracias':'thank you',
+  'grande':'big / large','pequeno':'small','nuevo':'new','nueva':'new',
+  'solo':'alone / only','sola':'alone','listo':'ready / clever','lista':'ready / clever',
+  'cerrado':'closed','abierto':'open','libre':'free / available','ocupado':'busy / occupied',
+  'caliente':'hot','frio':'cold','picante':'spicy','dulce':'sweet',
+  // Adverbs & time words
+  'tambien':'also / too','aqui':'here','alli':'there','hoy':'today','ahora':'now',
+  'siempre':'always','nunca':'never','muy':'very','mas':'more','menos':'less',
+  'pronto':'soon','despues':'after / later','antes':'before','ya':'already / now',
+  'aun':'still / yet','todavia':'still','solo':'only',
+  // Question words
+  'que':'what','como':'how','donde':'where','cuando':'when','quien':'who',
+  'cuanto':'how much','cuanta':'how much','cuantos':'how many','cuantas':'how many',
+  // Prepositions & conjunctions
+  'en':'in / at / on','de':'of / from','a':'to / at','con':'with','sin':'without',
+  'para':'for / in order to','por':'for / by / through','hasta':'until / up to',
+  'desde':'from / since','entre':'between','sobre':'on / about',
+  'y':'and','o':'or','pero':'but','que':'that / what','como':'like / how',
+  'si':'if / yes','cuando':'when','porque':'because','aunque':'although',
+  // Common phrases (single tokens)
+  'favor':'favor','por':'for / please','gracias':'thank you','hola':'hello',
+  'adios':'goodbye','perdon':'excuse me / pardon','disculpe':'excuse me (formal)',
+  'bienvenido':'welcome','bienvenida':'welcome','claro':'of course / clear',
+  'vale':'OK (Spain)','bueno':'OK / good','venga':'come on / OK (Spain)',
+  'salud':'cheers / health / bless you','uno':'one','dos':'two','tres':'three',
+};
+
+function stripAccentsLower(str) {
+  return str.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
+function wordBreakdownHtml(spanish) {
+  var tokens = spanish.replace(/[¿¡.,!?;:"'()]/g, '').split(/\s+/).filter(Boolean);
+  if (tokens.length <= 1) return '';
+  var chips = [];
+  var matchCount = 0;
+  tokens.forEach(function(tok) {
+    var key = stripAccentsLower(tok);
+    var meaning = WORD_DICT[key];
+    if (meaning) {
+      matchCount++;
+      chips.push(
+        '<span style="display:inline-flex;align-items:baseline;gap:3px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:2px 7px;white-space:nowrap;">' +
+          '<span style="font-size:0.72rem;font-weight:700;color:var(--text);">' + esc(tok) + '</span>' +
+          '<span style="font-size:0.65rem;color:var(--muted);">' + esc(meaning) + '</span>' +
+        '</span>'
+      );
+    }
+  });
+  if (matchCount < 1 || matchCount < Math.ceil(tokens.length * 0.25)) return '';
+  return '<div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">' +
+    chips.join('') +
+  '</div>';
+}
+
 function answerBox(item, showPron) {
+  var breakdown = wordBreakdownHtml(item.spanish);
   return `
     <div style="background:#FFF5EE;border:2px solid var(--primary);border-radius:12px;padding:16px;margin:12px 0;text-align:center;">
       <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:4px;">
@@ -5225,6 +5342,7 @@ function answerBox(item, showPron) {
       </div>
       ${showPron && item.pron ? `<div style="font-size:0.82rem;color:var(--primary);font-style:italic;margin-bottom:4px;">${item.pron}</div>` : ''}
       <div style="font-size:0.85rem;color:var(--muted);">${item.english}</div>
+      ${breakdown}
     </div>
     <div class="vc-wrap">
       <div class="vc-label">🎙 Practice your pronunciation</div>
