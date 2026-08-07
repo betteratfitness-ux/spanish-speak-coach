@@ -3140,15 +3140,26 @@ function getHvpSolid()        { return CONTENT.filter(function(c){ return c.hvp 
 function getHvpFuzzy()        { return CONTENT.filter(function(c){ return c.hvp && getMemoryState(c.id) === 'learning'; }).length; }
 function getHvpNew()          { return CONTENT.filter(function(c){ return c.hvp && getMemoryState(c.id) === 'unseen'; }).length; }
 
-function calcNextDue(result, confidence) {
+function calcNextDue(result, confidence, prog) {
   const now = Date.now();
   const day = 86400000;
-  if (result === 'missed') return now;
-  if (result === 'guessed') return now + day;
-  if (confidence <= 2) return now + day;
-  if (confidence === 3) return now + day * 2;
-  if (confidence === 4) return now + day * 4;
-  return now + day * 7;
+  // SM2-lite: grow interval multiplicatively on strong answers; reset on failure
+  var cur = (prog && prog.srsInterval) || 1;
+  var next;
+  if (result === 'missed' || confidence <= 1) {
+    next = 1;
+  } else if (result === 'guessed' || confidence <= 2) {
+    next = 1;
+  } else if (confidence === 3) {
+    next = Math.max(2, cur);              // hold — don't grow, don't shrink below 2
+  } else if (confidence === 4) {
+    next = Math.max(3, Math.round(cur * 2.5));
+  } else {
+    next = Math.max(4, Math.round(cur * 3.5));
+  }
+  next = Math.min(next, 90);             // cap at 90 days
+  if (prog) prog.srsInterval = next;
+  return now + next * day;
 }
 
 function addToReviewDeck(id) {
@@ -3164,6 +3175,44 @@ function getDueReviewItems() {
     const p = getItemProgress(id);
     return !p.nextDue || p.nextDue <= now;
   });
+}
+
+function getOverdueCount() {
+  const cutoff = Date.now() - 86400000; // more than a day past due
+  return S.reviewDeck.filter(id => {
+    const p = getItemProgress(id);
+    return p.nextDue && p.nextDue < cutoff;
+  }).length;
+}
+
+function getNextReviewMs() {
+  // Returns timestamp of the soonest upcoming (not yet due) review item, or null
+  const now = Date.now();
+  var soonest = null;
+  S.reviewDeck.forEach(function(id) {
+    var p = getItemProgress(id);
+    if (p.nextDue && p.nextDue > now) {
+      if (soonest === null || p.nextDue < soonest) soonest = p.nextDue;
+    }
+  });
+  return soonest;
+}
+
+function srsQueueLabel() {
+  // Returns a short string like "3 due · 12 more tomorrow"
+  var due = getDueReviewItems().length;
+  var next = getNextReviewMs();
+  var parts = [];
+  if (due > 0) parts.push(due + ' due now');
+  if (next) {
+    var daysUntil = Math.ceil((next - Date.now()) / 86400000);
+    var upcoming = S.reviewDeck.filter(function(id) {
+      var p = getItemProgress(id);
+      return p.nextDue && p.nextDue > Date.now() && p.nextDue <= Date.now() + daysUntil * 86400000;
+    }).length;
+    if (upcoming > 0) parts.push(upcoming + ' more in ' + daysUntil + ' day' + (daysUntil === 1 ? '' : 's'));
+  }
+  return parts.join(' · ');
 }
 
 function calcPracticeScore() {
@@ -3994,7 +4043,7 @@ function checkTileAnswer() {
     var item = modeState.items[modeState.index];
     var prog = getItemProgress(item.id);
     prog.lastReviewed = Date.now();
-    prog.nextDue = calcNextDue(firstTry ? 'correct' : 'guessed', firstTry ? 4 : 2);
+    prog.nextDue = calcNextDue(firstTry ? 'correct' : 'guessed', firstTry ? 4 : 2, prog);
     if (firstTry) { prog.correct += 1; modeState.score += 1; }
     else { prog.guessed += 1; addToReviewDeck(item.id); }
     modeState.results.push({ id: item.id, result: firstTry ? 'correct' : 'guessed', confidence: firstTry ? 4 : 2 });
@@ -4307,18 +4356,49 @@ function renderToday() {
       '</div>' +
     '</div>';
 
-  // Review due card — no pressure framing
-  const reviewCard = dueCount > 0
-    ? '<div class="card" style="border-left:4px solid var(--gold);margin-bottom:14px;">' +
-        '<div style="display:flex;align-items:center;justify-content:space-between;">' +
-          '<div>' +
-            '<div style="font-weight:700;font-size:0.95rem;">📚 Catch Up on Phrases</div>' +
-            '<div style="font-size:0.78rem;color:var(--muted);margin-top:2px;">' + Math.min(dueCount, 10) + ' phrase' + (dueCount !== 1 ? 's' : '') + ' ready to review — a few minutes keeps them fresh</div>' +
+  // SRS Review card
+  var overdueCount = getOverdueCount();
+  var reviewAccentColor = overdueCount > 3 ? 'var(--red)' : overdueCount > 0 ? 'var(--primary)' : 'var(--gold)';
+  var reviewCard = '';
+  if (dueCount > 0) {
+    var reviewSubLabel = overdueCount > 0
+      ? overdueCount + ' overdue · ' + (dueCount - overdueCount) + ' due today'
+      : dueCount + ' phrase' + (dueCount !== 1 ? 's' : '') + ' scheduled for today';
+    var nextLabel = '';
+    var nextMs = getNextReviewMs();
+    if (nextMs) {
+      var daysUntil = Math.ceil((nextMs - Date.now()) / 86400000);
+      var nextCount = S.reviewDeck.filter(function(id) { var p = getItemProgress(id); return p.nextDue && p.nextDue > Date.now() && p.nextDue <= Date.now() + daysUntil * 86400000; }).length;
+      if (nextCount > 0) nextLabel = '<div style="font-size:0.7rem;color:var(--muted);margin-top:3px;">' + nextCount + ' more due in ' + daysUntil + ' day' + (daysUntil === 1 ? '' : 's') + '</div>';
+    }
+    reviewCard =
+      '<div class="card" style="border-left:4px solid ' + reviewAccentColor + ';margin-bottom:14px;">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">' +
+          '<div style="flex:1;">' +
+            '<div style="font-weight:700;font-size:0.95rem;">🗂 Review Queue</div>' +
+            '<div style="font-size:0.78rem;color:var(--muted);margin-top:2px;">' + reviewSubLabel + '</div>' +
+            nextLabel +
           '</div>' +
-          '<button class="btn btn-primary btn-sm" onclick="startReviewSession()">Review</button>' +
+          '<button class="btn btn-primary btn-sm" onclick="startReviewSession()" style="white-space:nowrap;">▶ Review ' + Math.min(dueCount, 10) + '</button>' +
         '</div>' +
-      '</div>'
-    : '';
+      '</div>';
+  } else {
+    var nextMs2 = getNextReviewMs();
+    if (nextMs2) {
+      var daysUntil2 = Math.ceil((nextMs2 - Date.now()) / 86400000);
+      var nextCount2 = S.reviewDeck.filter(function(id) { var p = getItemProgress(id); return p.nextDue && p.nextDue > Date.now() && p.nextDue <= Date.now() + daysUntil2 * 86400000; }).length;
+      reviewCard =
+        '<div class="card" style="border-left:4px solid var(--green);margin-bottom:14px;padding:12px 14px;">' +
+          '<div style="display:flex;align-items:center;gap:10px;">' +
+            '<div style="font-size:1.3rem;">✅</div>' +
+            '<div>' +
+              '<div style="font-weight:700;font-size:0.88rem;">Queue clear for today</div>' +
+              '<div style="font-size:0.75rem;color:var(--muted);margin-top:2px;">' + nextCount2 + ' phrase' + (nextCount2 !== 1 ? 's' : '') + ' coming back in ' + daysUntil2 + ' day' + (daysUntil2 === 1 ? '' : 's') + '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+    }
+  }
 
   // Stars card — framed as proof earned, not target
   const starsCard =
@@ -5258,7 +5338,7 @@ function recordResult(result, confidence) {
   const prog = getItemProgress(item.id);
 
   prog.lastReviewed = Date.now();
-  prog.nextDue = calcNextDue(result, confidence);
+  prog.nextDue = calcNextDue(result, confidence, prog);
   prog.confidence = confidence;
 
   // Track speaking confidence on ALL active speaking modes
@@ -5505,7 +5585,8 @@ let reviewSession = null;
 
 function startReviewSession() {
   const due = getDueReviewItems();
-  const items = due.map(id => CONTENT.find(c => c.id === id)).filter(Boolean);
+  const all = getAllContent();
+  const items = due.map(id => all.find(c => c.id === id)).filter(Boolean);
   // Cap queue: 7 for returning users after a gap, 10 for regular sessions
   const cap = S.user.comebackActive ? 7 : 10;
   reviewSession = { items: items.slice(0, cap), index: 0, revealed: false, results: [] };
@@ -5574,7 +5655,7 @@ function recordReview(result, confidence) {
   const item = reviewSession.items[reviewSession.index];
   const prog = getItemProgress(item.id);
   prog.lastReviewed = Date.now();
-  prog.nextDue = calcNextDue(result, confidence);
+  prog.nextDue = calcNextDue(result, confidence, prog);
   prog.confidence = confidence;
   if (result === 'correct') { prog.correct += 1; S.stats.reviewCorrect = (S.stats.reviewCorrect || 0) + 1; }
   if (result === 'missed')  { prog.missed  += 1; }
@@ -8546,6 +8627,45 @@ function renderPractice() {
     '<div class="section-label" style="margin-top:20px;">Review & Spaced Repetition</div>' +
 
     (function() {
+      // SRS schedule mini-bar: today / tomorrow / this week / later
+      var deckSize = S.reviewDeck.length;
+      if (deckSize === 0) return '';
+      var now = Date.now(); var day = 86400000;
+      var buckets = { today: 0, tomorrow: 0, week: 0, later: 0 };
+      S.reviewDeck.forEach(function(id) {
+        var p = getItemProgress(id);
+        if (!p.nextDue || p.nextDue <= now) { buckets.today++; }
+        else if (p.nextDue <= now + day)     { buckets.tomorrow++; }
+        else if (p.nextDue <= now + 7*day)   { buckets.week++; }
+        else                                  { buckets.later++; }
+      });
+      var bars = [
+        { label: 'Today',    count: buckets.today,    color: buckets.today > 0 ? 'var(--primary)' : 'var(--border)' },
+        { label: 'Tomorrow', count: buckets.tomorrow, color: 'var(--gold)' },
+        { label: 'This week',count: buckets.week,     color: 'var(--green)' },
+        { label: 'Later',    count: buckets.later,    color: 'var(--border)' },
+      ].filter(function(b) { return b.count > 0; });
+      var maxCount = Math.max.apply(null, bars.map(function(b) { return b.count; }));
+      var barsHtml = bars.map(function(b) {
+        var pct = Math.max(12, Math.round((b.count / maxCount) * 100));
+        return '<div style="flex:1;text-align:center;">' +
+          '<div style="font-size:0.78rem;font-weight:800;color:var(--text);margin-bottom:3px;">' + b.count + '</div>' +
+          '<div style="height:28px;background:var(--border);border-radius:4px;overflow:hidden;position:relative;">' +
+            '<div style="position:absolute;bottom:0;left:0;right:0;height:' + pct + '%;background:' + b.color + ';border-radius:4px;transition:height 0.4s ease;"></div>' +
+          '</div>' +
+          '<div style="font-size:0.6rem;color:var(--muted);margin-top:3px;">' + b.label + '</div>' +
+        '</div>';
+      }).join('');
+      return '<div class="card" style="padding:12px 14px;margin-bottom:8px;">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">' +
+          '<div style="font-size:0.72rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;">SRS Schedule · ' + deckSize + ' cards tracked</div>' +
+          (dueCount > 0 ? '<button class="btn btn-primary btn-sm" onclick="startReviewSession()">▶ Review ' + Math.min(dueCount,10) + ' now</button>' : '<span style="font-size:0.7rem;color:var(--green);font-weight:700;">✓ All clear today</span>') +
+        '</div>' +
+        '<div style="display:flex;gap:8px;align-items:flex-end;">' + barsHtml + '</div>' +
+      '</div>';
+    })() +
+
+    (function() {
       var weakCount = getWeakItems().length;
       if (weakCount === 0) return '';
       return '<div class="practice-hub-option" onclick="startWeakSpotDrill()">' +
@@ -8557,7 +8677,7 @@ function renderPractice() {
 
     '<div class="practice-hub-option" onclick="' + (dueCount > 0 ? 'startReviewSession()' : 'switchTab(\'practice\')') + '">' +
       '<span class="practice-hub-icon">📚</span>' +
-      '<span class="practice-hub-text"><strong>Review Deck</strong><span>Phrases you missed — brought back at the right time to stick</span></span>' +
+      '<span class="practice-hub-text"><strong>Review Deck</strong><span>Intervals grow as you get stronger — missed cards come back sooner</span></span>' +
       dueBadge +
     '</div>' +
 
