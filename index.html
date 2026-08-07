@@ -65,6 +65,59 @@ body {
   letter-spacing: 0.5px;
 }
 #panic-btn:hover { background: rgba(255,255,255,0.3); }
+#search-btn {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: white;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 6px 9px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+#search-btn:hover { background: rgba(255,255,255,0.28); }
+.hdr-right { display:flex; align-items:center; gap:6px; }
+
+/* Phrase Search Overlay */
+#srch-overlay {
+  position: fixed; inset: 0; z-index: 9500;
+  background: var(--bg);
+  display: none; flex-direction: column;
+  animation: srch-in 0.18s ease;
+}
+#srch-overlay.open { display: flex; }
+@keyframes srch-in { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+#srch-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 14px;
+  background: var(--primary);
+  position: sticky; top: 0; z-index: 1;
+}
+#srch-input {
+  flex: 1; padding: 9px 14px; font-size: 1rem;
+  border: none; border-radius: 10px;
+  background: rgba(255,255,255,0.92); color: var(--text);
+  outline: none;
+}
+#srch-input::placeholder { color: var(--muted); }
+#srch-close { background: none; border: none; color: white; font-size: 1.4rem; cursor: pointer; padding: 4px; line-height: 1; }
+#srch-results { flex: 1; overflow-y: auto; padding: 10px 14px 32px; max-width: 680px; width: 100%; margin: 0 auto; }
+#srch-empty { text-align:center; padding: 40px 20px; color: var(--muted); font-size:0.9rem; }
+.srch-hit {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface); border-radius: 10px;
+  padding: 10px 12px; margin-bottom: 8px;
+  box-shadow: var(--shadow);
+}
+.srch-hit-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.srch-hit-text { flex:1; min-width:0; }
+.srch-hit-es { font-size:0.95rem; font-weight:700; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.srch-hit-en { font-size:0.75rem; color:var(--muted); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.srch-hit-pron { font-size:0.68rem; color:var(--primary); font-style:italic; margin-top:1px; }
+.srch-hit-actions { display:flex; gap:5px; flex-shrink:0; }
+.srch-act { background:var(--bg); border:1px solid var(--border); border-radius:7px; font-size:0.8rem; padding:5px 8px; cursor:pointer; line-height:1; }
+.srch-act:hover { background:var(--border); }
+.srch-section-label { font-size:0.65rem; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted); margin: 14px 0 6px; }
 
 /* TAB NAV */
 #tab-nav {
@@ -1086,12 +1139,23 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
 </div>
 
 <!-- APP -->
+<div id="srch-overlay">
+  <div id="srch-bar">
+    <input id="srch-input" type="search" placeholder="Search phrases… (English or Spanish)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" oninput="runSearch(this.value)" onkeydown="if(event.key==='Escape')closeSearch()">
+    <button id="srch-close" onclick="closeSearch()">✕</button>
+  </div>
+  <div id="srch-results"></div>
+</div>
+
 <header id="app-header">
   <div>
     <h1>🇪🇸 Spanish Speak Coach</h1>
     <div class="tagline">Speak a little every day until Spanish starts feeling natural.</div>
   </div>
-  <button id="panic-btn" onclick="showPanic()">⚡ SOS</button>
+  <div class="hdr-right">
+    <button id="search-btn" onclick="openSearch()" title="Search phrases">🔍</button>
+    <button id="panic-btn" onclick="showPanic()">⚡ SOS</button>
+  </div>
 </header>
 
 <nav id="tab-nav">
@@ -8391,6 +8455,104 @@ function showPhraseBank(filter) {
     summaryHtml +
     '<div class="pb-filter-row">' + filterBtns + '</div>' +
     cardsHtml;
+}
+
+/* ── Phrase Search ───────────────────────────────────── */
+function openSearch() {
+  var overlay = document.getElementById('srch-overlay');
+  overlay.classList.add('open');
+  var input = document.getElementById('srch-input');
+  input.value = '';
+  document.getElementById('srch-results').innerHTML = renderSearchEmpty('Start typing to search all ' + getAllContent().length + ' phrases.');
+  setTimeout(function() { input.focus(); }, 80);
+  document.addEventListener('keydown', _srchEscHandler);
+}
+
+function _srchEscHandler(e) {
+  if (e.key === 'Escape') closeSearch();
+}
+
+function closeSearch() {
+  document.getElementById('srch-overlay').classList.remove('open');
+  document.removeEventListener('keydown', _srchEscHandler);
+}
+
+function renderSearchEmpty(msg) {
+  return '<div id="srch-empty">' + esc(msg) + '</div>';
+}
+
+function runSearch(query) {
+  var q = (query || '').trim().toLowerCase();
+  var results = document.getElementById('srch-results');
+  if (!q) {
+    results.innerHTML = renderSearchEmpty('Start typing to search all ' + getAllContent().length + ' phrases.');
+    return;
+  }
+  var all = getAllContent();
+  var hits = all.filter(function(c) {
+    return c.spanish.toLowerCase().indexOf(q) !== -1 ||
+           c.english.toLowerCase().indexOf(q) !== -1 ||
+           (c.pron && c.pron.toLowerCase().indexOf(q) !== -1);
+  });
+  if (hits.length === 0) {
+    results.innerHTML = renderSearchEmpty('No phrases found for "' + query + '"');
+    return;
+  }
+  // Sort: exact-start matches first
+  hits.sort(function(a, b) {
+    var aEs = a.spanish.toLowerCase().startsWith(q) ? 0 : 1;
+    var bEs = b.spanish.toLowerCase().startsWith(q) ? 0 : 1;
+    var aEn = a.english.toLowerCase().startsWith(q) ? 0 : 1;
+    var bEn = b.english.toLowerCase().startsWith(q) ? 0 : 1;
+    return (aEs + aEn) - (bEs + bEn);
+  });
+  var stateColors = { mastered: 'var(--green)', reviewing: 'var(--primary)', learning: 'var(--gold)', unseen: 'var(--border)' };
+  var html = '<div class="srch-section-label">' + hits.length + ' result' + (hits.length === 1 ? '' : 's') + '</div>';
+  html += hits.slice(0, 40).map(function(item) {
+    var ms = getMemoryState(item.id);
+    var dotColor = stateColors[ms] || 'var(--border)';
+    var isBm = isBookmarked(item.id);
+    var bmIcon = isBm ? '⭐' : '☆';
+    var pronHtml = item.pron ? '<div class="srch-hit-pron">' + esc(item.pron) + '</div>' : '';
+    return '<div class="srch-hit">' +
+      '<div class="srch-hit-dot" style="background:' + dotColor + ';" title="' + esc(ms) + '"></div>' +
+      '<div class="srch-hit-text">' +
+        '<div class="srch-hit-es">' + esc(item.spanish) + '</div>' +
+        '<div class="srch-hit-en">' + esc(item.english) + '</div>' +
+        pronHtml +
+      '</div>' +
+      '<div class="srch-hit-actions">' +
+        '<button class="srch-act" onclick="srchSpeak(\'' + esc(item.id) + '\')" title="Hear it">🔊</button>' +
+        '<button class="srch-act" id="srch-bm-' + esc(item.id) + '" onclick="srchBookmark(\'' + esc(item.id) + '\')" title="Bookmark">' + bmIcon + '</button>' +
+        '<button class="srch-act" onclick="srchDrill(\'' + esc(item.id) + '\')" title="Drill this phrase">▶</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  if (hits.length > 40) html += '<div style="text-align:center;font-size:0.75rem;color:var(--muted);padding:8px 0;">Showing first 40 of ' + hits.length + ' results. Refine your search.</div>';
+  results.innerHTML = html;
+}
+
+function srchSpeak(id) {
+  var item = getAllContent().find(function(c) { return c.id === id; });
+  if (!item) return;
+  var u = new SpeechSynthesisUtterance(item.spanish);
+  u.lang = 'es-ES'; u.rate = S.settings.audioSpeed || 0.9;
+  speechSynthesis.cancel(); speechSynthesis.speak(u);
+}
+
+function srchBookmark(id) {
+  toggleBookmark(id);
+  var btn = document.getElementById('srch-bm-' + id);
+  if (btn) btn.textContent = isBookmarked(id) ? '⭐' : '☆';
+}
+
+function srchDrill(id) {
+  var item = getAllContent().find(function(c) { return c.id === id; });
+  if (!item) return;
+  closeSearch();
+  modeState = { mode: 'en-to-es', items: [item], index: 0, results: [], revealed: false, backTab: 'practice' };
+  switchTab('practice');
+  renderModeCard();
 }
 
 /* ── Custom Phrase Importer ──────────────────────────── */
