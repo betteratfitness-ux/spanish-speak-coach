@@ -1,0 +1,21 @@
+{
+  "name": "Spanish Speak Coach",
+  "short_name": "SpanishCoach",
+  "description": "Daily Spanish speaking practice — build fluency one rep at a time",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#FFFFFF",
+  "theme_color": "#E85D04",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "categories": ["education", "lifestyle"]
+}
