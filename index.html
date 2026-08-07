@@ -4463,6 +4463,51 @@ function dismissBackupReminder() {
 // ===================================================
 // RENDERING — TODAY TAB
 // ===================================================
+function markMastered(id) {
+  if (S.mastery[id] && S.mastery[id].mastered) return;
+  S.mastery[id] = { mastered: true, masterDate: today() };
+  saveState();
+  var item = CONTENT.find(function(c) { return c.id === id; });
+  if (item) setTimeout(function() { showCelebration('⭐', 'Mastered!', '"' + item.spanish + '" is yours. It won\'t leave your memory.'); }, 500);
+}
+
+function getAlmostMasteredPhrases() {
+  return S.reviewDeck.filter(function(id) {
+    if (S.mastery[id] && S.mastery[id].mastered) return false;
+    var p = S.progress[id];
+    return p && (p.confidence || 0) >= 4 && (p.correct || 0) >= 3;
+  });
+}
+
+function renderAlmostMasteredCard() {
+  var ids = getAlmostMasteredPhrases().slice(0, 5);
+  if (ids.length === 0) return '';
+  var previewIds = ids.slice(0, 3);
+  var items = previewIds.map(function(id) { return CONTENT.find(function(c) { return c.id === id; }); }).filter(Boolean);
+  var phraseList = items.map(function(item) {
+    return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);">' +
+      '<span style="font-size:0.8rem;font-weight:700;flex:1;color:var(--text);">' + esc(item.spanish) + '</span>' +
+      '<span style="font-size:0.72rem;color:var(--muted);flex-shrink:0;">' + esc(item.english) + '</span>' +
+    '</div>';
+  }).join('');
+  var extra = ids.length > 3 ? '<div style="font-size:0.7rem;color:var(--muted);margin-top:4px;">+ ' + (ids.length - 3) + ' more</div>' : '';
+  return '<div class="card" style="border-left:4px solid var(--green);margin-bottom:14px;background:rgba(72,199,142,0.04);">' +
+    '<div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.6px;color:var(--green);margin-bottom:6px;">⭐ Almost Mastered</div>' +
+    '<div style="font-size:0.82rem;color:var(--text);margin-bottom:8px;font-weight:600;">You\'re this close — ' + ids.length + ' phrase' + (ids.length !== 1 ? 's' : '') + ' need one more solid rep.</div>' +
+    phraseList +
+    extra +
+    '<button class="btn btn-sm" style="margin-top:10px;background:var(--green);color:white;font-weight:700;" ' +
+      'onclick="startAlmostMasteredDrill(' + JSON.stringify(ids) + ')">Finish them →</button>' +
+  '</div>';
+}
+
+function startAlmostMasteredDrill(ids) {
+  var items = ids.map(function(id) { return CONTENT.find(function(c) { return c.id === id; }); }).filter(Boolean);
+  if (!items.length) return;
+  modeState = { mode: 'speak-memory', items: items, index: 0, results: [], consec: 0, almostMasteredDrill: true };
+  showCard();
+}
+
 function renderNemesisCard() {
   var best = null, bestRate = 0;
   Object.keys(S.progress).forEach(function(id) {
@@ -4842,6 +4887,7 @@ function renderToday() {
     lessonCard +
     statsRow +
     xpGoalCard +
+    renderAlmostMasteredCard() +
     renderNemesisCard() +
     renderFreezeCard() +
     canDoCard +
@@ -5985,6 +6031,11 @@ function recordResult(result, confidence) {
   if (confidence <= 2) addToReviewDeck(item.id);
 
   modeState.results.push({ id: item.id, result, confidence });
+
+  // Almost-mastered drill: grant mastery on a strong rep
+  if (modeState.almostMasteredDrill && result === 'correct' && confidence >= 4) {
+    markMastered(item.id);
+  }
 
   // In-session hot streak
   if (result === 'missed') {
