@@ -4536,7 +4536,7 @@ function renderAlmostMasteredCard() {
   var items = previewIds.map(function(id) { return CONTENT.find(function(c) { return c.id === id; }); }).filter(Boolean);
   var phraseList = items.map(function(item) {
     return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);">' +
-      '<span style="font-size:0.8rem;font-weight:700;flex:1;color:var(--text);">' + esc(item.spanish) + '</span>' +
+      '<span style="font-size:0.8rem;font-weight:700;flex:1;color:var(--text);cursor:pointer;" onclick="showPhraseDetail(\'' + item.id + '\')">' + esc(item.spanish) + '</span>' +
       '<span style="font-size:0.72rem;color:var(--muted);flex-shrink:0;">' + esc(item.english) + '</span>' +
     '</div>';
   }).join('');
@@ -4578,7 +4578,7 @@ function renderFadingPhrasesCard() {
     var p = S.progress[item.id];
     var daysAgo = Math.round((Date.now() - p.lastReviewed) / 86400000);
     return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);">' +
-      '<span style="font-size:0.8rem;font-weight:700;flex:1;color:var(--text);">' + esc(item.spanish) + '</span>' +
+      '<span style="font-size:0.8rem;font-weight:700;flex:1;color:var(--text);cursor:pointer;" onclick="showPhraseDetail(\'' + item.id + '\')">' + esc(item.spanish) + '</span>' +
       '<span style="font-size:0.68rem;color:var(--muted);white-space:nowrap;">' + daysAgo + 'd ago</span>' +
     '</div>';
   }).join('');
@@ -4671,7 +4671,7 @@ function renderNemesisCard() {
     '<div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.6px;color:var(--red);margin-bottom:6px;">😤 Today\'s Nemesis</div>' +
     '<div style="display:flex;align-items:center;gap:10px;">' +
       '<div style="flex:1;">' +
-        '<div style="font-size:1.05rem;font-weight:800;color:var(--text);">' + esc(item.spanish) + '</div>' +
+        '<div style="font-size:1.05rem;font-weight:800;color:var(--text);cursor:pointer;" onclick="showPhraseDetail(\'' + esc(best) + '\')">' + esc(item.spanish) + '</div>' +
         '<div style="font-size:0.78rem;color:var(--muted);margin-top:2px;">' + esc(item.english) + '</div>' +
         '<div style="font-size:0.68rem;color:var(--red);margin-top:4px;font-weight:700;">' + missCount + ' miss' + (missCount !== 1 ? 'es' : '') + ' out of ' + total + ' attempts</div>' +
       '</div>' +
@@ -7862,35 +7862,94 @@ function drillPhrase(id) {
   renderModeCard();
 }
 
-function showPhrasePreview(id) {
-  document.querySelectorAll('.pg-sq.pg-active').forEach(function(sq) { sq.classList.remove('pg-active'); });
+function showPhraseDetail(id) {
   var item = CONTENT.find(function(c) { return c.id === id; });
   if (!item) return;
-  var previewEl = document.getElementById('pg-preview-' + item.domain);
-  if (!previewEl) return;
-  if (previewEl.dataset.activeId === id) {
-    previewEl.innerHTML = ''; previewEl.dataset.activeId = ''; return;
-  }
-  previewEl.dataset.activeId = id;
-  var sq = document.querySelector('[data-pg-id="' + id + '"]');
-  if (sq) sq.classList.add('pg-active');
+  var p = S.progress[id] || {};
   var ms = getMemoryState(id);
-  var conf = S.progress[id] ? S.progress[id].confidence : 0;
-  var msLabel = ms === 'mastered' ? '✓ Mastered' : ms === 'reviewing' ? '🔄 Reviewing' : ms === 'learning' ? '📖 Learning' : '🆕 New';
-  var msColor = ms === 'mastered' ? 'var(--green)' : ms === 'reviewing' ? 'var(--primary)' : 'var(--muted)';
-  previewEl.innerHTML = '<div class="pg-preview-inner">' +
-    '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px;">' +
-      '<div>' +
-        '<div style="font-size:1.05rem;font-weight:800;color:var(--text);">' + esc(item.spanish) + '</div>' +
-        '<div style="font-size:0.82rem;color:var(--muted);margin-top:2px;">' + esc(item.english) + '</div>' +
-        (item.pron ? '<div style="font-size:0.72rem;color:var(--primary);font-style:italic;margin-top:2px;">' + esc(item.pron) + '</div>' : '') +
-        '<div style="font-size:0.7rem;color:' + msColor + ';margin-top:4px;font-weight:700;">' + msLabel + (conf ? ' · Conf ' + conf + '/5' : '') + '</div>' +
+  var conf = p.confidence || 0;
+  var correct = p.correct || 0, missed = p.missed || 0, guessed = p.guessed || 0;
+  var total = correct + missed + guessed;
+  var nextDueStr = '—';
+  if (p.nextDue) {
+    var _daysUntil = Math.ceil((p.nextDue - Date.now()) / 86400000);
+    nextDueStr = _daysUntil <= 0 ? 'Due now' : _daysUntil === 1 ? 'Tomorrow' : 'In ' + _daysUntil + ' days';
+  }
+  var lastStr = '—';
+  if (p.lastReviewed) {
+    var _ago = Math.round((Date.now() - p.lastReviewed) / 86400000);
+    lastStr = _ago === 0 ? 'Today' : _ago === 1 ? 'Yesterday' : _ago + ' days ago';
+  }
+  var irlCount = Object.values(S.stats.irlLog || {}).reduce(function(n, arr) {
+    return n + (Array.isArray(arr) && arr.indexOf(id) !== -1 ? 1 : 0);
+  }, 0);
+  var msColors = { mastered:'var(--green)', reviewing:'var(--primary)', learning:'var(--gold)', unseen:'var(--muted)' };
+  var msLabels = { mastered:'⭐ Mastered', reviewing:'🔄 Solid', learning:'📖 Learning', unseen:'🆕 New' };
+  var msBadge = '<span style="background:var(--bg);border:1px solid var(--border);color:' + (msColors[ms]||'var(--muted)') + ';font-size:0.7rem;font-weight:800;padding:3px 9px;border-radius:99px;">' + (msLabels[ms]||ms) + '</span>';
+  var confBadge = conf > 0 ? '<span style="background:var(--bg);border:1px solid var(--border);font-size:0.7rem;font-weight:700;padding:3px 9px;border-radius:99px;color:var(--text);">Conf ' + conf + '/5</span>' : '';
+  var masteredDate = S.mastery[id] && S.mastery[id].mastered ? S.mastery[id].masterDate || '' : '';
+  var masteredBadge = masteredDate ? '<span style="background:rgba(72,199,142,0.12);color:var(--green);font-size:0.7rem;font-weight:800;padding:3px 9px;border-radius:99px;">✓ ' + masteredDate + '</span>' : '';
+  var statsHtml = total > 0
+    ? '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;">' +
+        ['<b style="color:var(--green)">' + correct + '</b>|Got It',
+         '<b style="color:var(--red)">'   + missed  + '</b>|Missed',
+         '<b style="color:var(--text)">'  + total   + '</b>|Total',
+         '<b style="color:var(--primary)">' + (total ? Math.round(correct/total*100) : 0) + '%</b>|Accuracy']
+        .map(function(s) { var p2 = s.split('|'); return '<div style="text-align:center;background:var(--bg);border-radius:10px;padding:10px 4px;"><div style="font-size:1.15rem;">' + p2[0] + '</div><div style="font-size:0.58rem;color:var(--muted);text-transform:uppercase;font-weight:700;margin-top:2px;">' + p2[1] + '</div></div>'; })
+        .join('') + '</div>'
+    : '<div style="font-size:0.78rem;color:var(--muted);margin-bottom:14px;padding:10px;background:var(--bg);border-radius:10px;">Not yet practiced — no stats yet.</div>';
+  var metaHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">' +
+    [['Next Review', nextDueStr, ''], ['Last Reviewed', lastStr, ''],
+     irlCount > 0 ? ['Used IRL', irlCount + ' day' + (irlCount !== 1 ? 's' : ''), 'color:var(--green)'] : null,
+     p.srsInterval ? ['SRS Interval', p.srsInterval + ' days', ''] : null]
+    .filter(Boolean)
+    .map(function(r) {
+      return '<div style="background:var(--bg);border-radius:10px;padding:10px 12px;"><div style="font-size:0.58rem;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">' + r[0] + '</div><div style="font-size:0.85rem;font-weight:700;' + r[2] + '">' + r[1] + '</div></div>';
+    }).join('') + '</div>';
+  var exampleHtml = item.example
+    ? '<div style="background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:14px;"><div style="font-size:0.58rem;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:5px;">Example</div><div style="font-size:0.88rem;font-weight:700;color:var(--text);">' + esc(item.example) + '</div>' + (item.exampleEn ? '<div style="font-size:0.78rem;color:var(--muted);margin-top:3px;">' + esc(item.exampleEn) + '</div>' : '') + '</div>'
+    : '';
+  var breakdown = wordBreakdownHtml(item.spanish);
+  var html =
+    '<div id="phrase-detail-overlay" onclick="closePhraseDetail()" style="position:fixed;inset:0;background:rgba(0,0,0,0.52);z-index:900;display:flex;align-items:flex-end;">' +
+      '<div onclick="event.stopPropagation()" style="background:var(--surface);border-radius:20px 20px 0 0;padding:20px 16px 36px;width:100%;max-height:86vh;overflow-y:auto;box-shadow:0 -4px 28px rgba(0,0,0,0.18);">' +
+        '<div style="width:38px;height:4px;background:var(--border);border-radius:99px;margin:0 auto 16px;"></div>' +
+        '<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;">' +
+          '<div style="flex:1;">' +
+            '<div style="font-size:1.55rem;font-weight:900;color:var(--text);line-height:1.2;">' + esc(item.spanish) + '</div>' +
+            (item.pron ? '<div style="font-size:0.8rem;color:var(--primary);font-style:italic;margin-top:3px;">' + esc(item.pron) + '</div>' : '') +
+            '<div style="font-size:0.88rem;color:var(--muted);margin-top:4px;">' + esc(item.english) + '</div>' +
+          '</div>' +
+          '<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">' +
+            '<button class="audio-btn" style="width:36px;height:36px;" data-speak="' + esc(item.spanish) + '" onclick="speakSpanish(this.dataset.speak,this)">🔊</button>' +
+            '<button id="pd-bm" style="width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:transparent;font-size:1rem;cursor:pointer;" onclick="toggleBookmark(\'' + id + '\');this.textContent=isBookmarked(\'' + id + '\')?\'⭐\':\'☆\';">' + (isBookmarked(id) ? '⭐' : '☆') + '</button>' +
+          '</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">' + msBadge + confBadge + masteredBadge + '</div>' +
+        statsHtml + metaHtml + exampleHtml +
+        (breakdown ? '<div style="margin-bottom:14px;">' + breakdown + '</div>' : '') +
+        '<button class="btn btn-primary btn-full" style="margin-bottom:8px;" onclick="closePhraseDetail();startPhraseDrill(\'' + id + '\')">▶ Practice this phrase</button>' +
+        '<button class="btn btn-secondary btn-full" onclick="closePhraseDetail()">Close</button>' +
       '</div>' +
-      '<button class="audio-btn" style="flex-shrink:0;width:32px;height:32px;font-size:0.85rem;" data-speak="' + esc(item.spanish) + '" onclick="speakSpanish(this.dataset.speak,this)">🔊</button>' +
-    '</div>' +
-    '<button class="btn btn-primary" style="width:100%;font-size:0.82rem;padding:9px;" onclick="drillPhrase(\'' + id + '\')">Drill this phrase →</button>' +
-  '</div>';
+    '</div>';
+  var existing = document.getElementById('phrase-detail-overlay');
+  if (existing) existing.remove();
+  document.body.insertAdjacentHTML('beforeend', html);
 }
+
+function closePhraseDetail() {
+  var el = document.getElementById('phrase-detail-overlay');
+  if (el) el.remove();
+}
+
+function startPhraseDrill(id) {
+  var item = CONTENT.find(function(c) { return c.id === id; });
+  if (!item) return;
+  modeState = { mode: 'speak-memory', items: [item, item, item], index: 0, results: [], consec: 0, backTab: 'today' };
+  showCard();
+}
+
+function showPhrasePreview(id) { showPhraseDetail(id); }
 
 function renderProgress() {
   const score = calcPracticeScore();
