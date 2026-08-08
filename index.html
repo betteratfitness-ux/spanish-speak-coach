@@ -1091,6 +1091,10 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
 .cpi-saved-en { color:var(--muted); flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .cpi-saved-es { font-weight:700; flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .cpi-del-btn { background:none; border:none; color:var(--red); font-size:1rem; cursor:pointer; padding:2px 4px; flex-shrink:0; }
+.cpi-edit-btn { background:none; border:none; color:var(--primary); font-size:0.9rem; cursor:pointer; padding:2px 4px; flex-shrink:0; }
+.cpi-field { width:100%; padding:11px 13px; font-size:0.9rem; border:2px solid var(--border); border-radius:10px; background:var(--bg); color:var(--text); font-family:inherit; outline:none; box-sizing:border-box; transition:border-color 0.15s; }
+.cpi-field:focus { border-color:var(--primary); }
+.cpi-label { font-size:0.68rem; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted); margin-bottom:4px; display:block; }
 
 /* Theme Picker */
 .theme-picker { display:flex; gap:6px; }
@@ -9793,47 +9797,132 @@ function srchDrill(id) {
 }
 
 /* ── Custom Phrase Importer ──────────────────────────── */
-function openPhraseImporter() {
+function renderSavedPhrases() {
   var existing = S.customPhrases || [];
-  var savedHtml = '';
-  if (existing.length > 0) {
-    savedHtml = '<div class="section-label" style="margin-top:18px;">Your ' + existing.length + ' custom phrase' + (existing.length === 1 ? '' : 's') + '</div>' +
-      '<div class="cpi-saved-list">' +
-      existing.map(function(p) {
-        return '<div class="cpi-saved-row">' +
-          '<span class="cpi-saved-en">' + esc(p.english) + '</span>' +
-          '<span class="cpi-saved-es">' + esc(p.spanish) + '</span>' +
-          '<button class="cpi-del-btn" onclick="deleteCustomPhrase(\'' + esc(p.id) + '\')" title="Remove">✕</button>' +
-        '</div>';
-      }).join('') +
+  if (existing.length === 0) return '<div style="font-size:0.78rem;color:var(--muted);text-align:center;padding:14px 0;">No phrases saved yet — add your first one above.</div>';
+  return '<div style="display:flex;align-items:center;justify-content:space-between;margin:18px 0 8px;">' +
+    '<div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);">' + existing.length + ' saved phrase' + (existing.length !== 1 ? 's' : '') + '</div>' +
+    '<button onclick="startCustomPhraseSession();closePhraseImporter();" class="btn btn-sm" style="background:var(--primary);color:white;font-weight:700;font-size:0.72rem;">▶ Drill All</button>' +
+  '</div>' +
+  '<div class="cpi-saved-list">' +
+  existing.map(function(p) {
+    return '<div class="cpi-saved-row">' +
+      '<div style="flex:1;min-width:0;">' +
+        '<div class="cpi-saved-es">' + esc(p.spanish) + '</div>' +
+        '<div class="cpi-saved-en" style="font-size:0.72rem;margin-top:1px;">' + esc(p.english) + '</div>' +
+        (p.pron ? '<div style="font-size:0.68rem;color:var(--primary);font-style:italic;">' + esc(p.pron) + '</div>' : '') +
+      '</div>' +
+      '<button class="cpi-edit-btn" onclick="editCustomPhrase(\'' + esc(p.id) + '\')" title="Edit">✏️</button>' +
+      '<button class="cpi-del-btn" onclick="deleteCustomPhrase(\'' + esc(p.id) + '\')" title="Remove">✕</button>' +
     '</div>';
-  }
+  }).join('') +
+  '</div>';
+}
 
+function refreshSavedPhrases() {
+  var el = document.getElementById('cpi-saved');
+  if (el) el.innerHTML = renderSavedPhrases();
+}
+
+function openPhraseImporter() {
   var overlay = document.createElement('div');
   overlay.className = 'cpi-overlay';
   overlay.id = 'cpi-overlay';
-  overlay.setAttribute('data-ref', '1');
   overlay.onclick = function(e) { if (e.target === overlay) closePhraseImporter(); };
   overlay.innerHTML =
     '<div class="cpi-sheet">' +
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">' +
-        '<div>' +
-          '<h2>My Phrases</h2>' +
-          '<div class="cpi-sub">Add any English → Spanish pairs you want to practice. One per line.</div>' +
-        '</div>' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">' +
+        '<div><h2 style="margin-bottom:2px;">My Phrases</h2><div class="cpi-sub" style="margin-bottom:0;">Practice your own vocabulary in every mode.</div></div>' +
         '<button onclick="closePhraseImporter()" style="background:none;border:none;font-size:1.3rem;color:var(--muted);cursor:pointer;padding:0 0 0 8px;line-height:1;">✕</button>' +
       '</div>' +
-      '<textarea id="cpi-input" class="cpi-textarea" placeholder="Hello | Hola&#10;I\'m hungry | Tengo hambre&#10;Thank you | Gracias" oninput="previewPhrases()"></textarea>' +
-      '<div id="cpi-preview" class="cpi-preview"></div>' +
-      '<button class="btn btn-primary btn-full" style="margin-top:12px;" onclick="importPhrases()">Add Phrases</button>' +
-      savedHtml +
+
+      '<label class="cpi-label" for="cpi-es">Spanish *</label>' +
+      '<input id="cpi-es" class="cpi-field" type="text" placeholder="¿Cuánto cuesta?" autocomplete="off" style="margin-bottom:8px;">' +
+      '<label class="cpi-label" for="cpi-en">English *</label>' +
+      '<input id="cpi-en" class="cpi-field" type="text" placeholder="How much does it cost?" autocomplete="off" style="margin-bottom:8px;">' +
+      '<label class="cpi-label" for="cpi-pron">Pronunciation <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>' +
+      '<input id="cpi-pron" class="cpi-field" type="text" placeholder="KWAHN-toh KWES-tah" autocomplete="off" style="margin-bottom:12px;">' +
+      '<input type="hidden" id="cpi-edit-id" value="">' +
+      '<button id="cpi-save-btn" class="btn btn-primary btn-full" onclick="saveSinglePhrase()">+ Save Phrase</button>' +
+
+      '<div style="text-align:center;margin:14px 0 0;">' +
+        '<button onclick="toggleBulkImport()" style="font-size:0.73rem;color:var(--muted);background:none;border:none;cursor:pointer;text-decoration:underline;">↓ Import multiple at once</button>' +
+      '</div>' +
+      '<div id="cpi-bulk-wrap" style="display:none;margin-top:10px;">' +
+        '<textarea id="cpi-input" class="cpi-textarea" placeholder="Hello | Hola&#10;I\'m hungry | Tengo hambre&#10;Thank you | Gracias" oninput="previewPhrases()"></textarea>' +
+        '<div id="cpi-preview" class="cpi-preview"></div>' +
+        '<button class="btn btn-secondary btn-full" style="margin-top:8px;" onclick="importPhrases()">Import All</button>' +
+      '</div>' +
+
+      '<div id="cpi-saved">' + renderSavedPhrases() + '</div>' +
     '</div>';
   document.body.appendChild(overlay);
+  document.getElementById('cpi-es').focus();
 }
 
 function closePhraseImporter() {
   var overlay = document.getElementById('cpi-overlay');
   if (overlay) overlay.remove();
+}
+
+function toggleBulkImport() {
+  var el = document.getElementById('cpi-bulk-wrap');
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function saveSinglePhrase() {
+  var es = (document.getElementById('cpi-es').value || '').trim();
+  var en = (document.getElementById('cpi-en').value || '').trim();
+  var pron = (document.getElementById('cpi-pron').value || '').trim();
+  var editId = document.getElementById('cpi-edit-id').value;
+  if (!es || !en) {
+    if (!es) document.getElementById('cpi-es').style.borderColor = 'var(--red)';
+    if (!en) document.getElementById('cpi-en').style.borderColor = 'var(--red)';
+    return;
+  }
+  document.getElementById('cpi-es').style.borderColor = '';
+  document.getElementById('cpi-en').style.borderColor = '';
+  if (!S.customPhrases) S.customPhrases = [];
+  if (editId) {
+    var idx = S.customPhrases.findIndex(function(p) { return p.id === editId; });
+    if (idx !== -1) {
+      S.customPhrases[idx].spanish = es;
+      S.customPhrases[idx].english = en;
+      S.customPhrases[idx].pron = pron;
+      S.customPhrases[idx].example = es;
+      S.customPhrases[idx].exampleEn = en;
+      S.customPhrases[idx].prompt = 'How do you say "' + en + '"?';
+    }
+  } else {
+    var key = en.toLowerCase() + '|' + es.toLowerCase();
+    var keys = S.customPhrases.map(function(p) { return p.english.toLowerCase() + '|' + p.spanish.toLowerCase(); });
+    if (keys.indexOf(key) !== -1) { document.getElementById('cpi-es').style.borderColor = 'var(--gold)'; return; }
+    S.customPhrases.push({ id: 'custom-' + Date.now(), domain: 'CUSTOM', level: 1, type: 'phrase',
+      spanish: es, english: en, pron: pron, example: es, exampleEn: en,
+      prompt: 'How do you say "' + en + '"?', difficulty: 2 });
+  }
+  saveState();
+  document.getElementById('cpi-es').value = '';
+  document.getElementById('cpi-en').value = '';
+  document.getElementById('cpi-pron').value = '';
+  document.getElementById('cpi-edit-id').value = '';
+  document.getElementById('cpi-save-btn').textContent = '+ Save Phrase';
+  document.getElementById('cpi-es').focus();
+  refreshSavedPhrases();
+  if (!editId) showCelebration('📝', 'Phrase Saved!', '"' + es + '" is now in your practice pool.');
+}
+
+function editCustomPhrase(id) {
+  var p = (S.customPhrases || []).find(function(p) { return p.id === id; });
+  if (!p) return;
+  document.getElementById('cpi-es').value = p.spanish;
+  document.getElementById('cpi-en').value = p.english;
+  document.getElementById('cpi-pron').value = p.pron || '';
+  document.getElementById('cpi-edit-id').value = id;
+  document.getElementById('cpi-save-btn').textContent = '✓ Save Changes';
+  var sheet = document.querySelector('.cpi-sheet');
+  if (sheet) sheet.scrollTop = 0;
+  document.getElementById('cpi-es').focus();
 }
 
 function parsePhraseLines(text) {
@@ -9890,19 +9979,19 @@ function importPhrases() {
     added++;
   });
   saveState();
-  closePhraseImporter();
   if (added > 0) {
+    document.getElementById('cpi-input').value = '';
+    document.getElementById('cpi-preview').innerHTML = '';
+    refreshSavedPhrases();
     showCelebration('📝', added + ' Phrase' + (added === 1 ? '' : 's') + ' Added!', 'They\'re now in your practice pool — you\'ll see them in all modes.');
   }
-  switchTab('practice');
 }
 
 function deleteCustomPhrase(id) {
   S.customPhrases = (S.customPhrases || []).filter(function(p) { return p.id !== id; });
   delete S.progress[id];
   saveState();
-  closePhraseImporter();
-  openPhraseImporter();
+  refreshSavedPhrases();
 }
 
 function startCustomPhraseSession() {
