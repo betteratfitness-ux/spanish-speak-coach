@@ -4656,6 +4656,29 @@ function cycleXPGoal() {
   renderTab('today');
 }
 
+function renderCustomPhrasesNudge() {
+  var custom = S.customPhrases || [];
+  if (custom.length === 0) return '';
+  var cutoff = Date.now() - 3 * 86400000;
+  var stale = custom.filter(function(c) {
+    var p = S.progress[c.id];
+    return !p || !p.lastReviewed || p.lastReviewed < cutoff;
+  });
+  if (stale.length === 0) return '';
+  var preview = stale.slice(0, 2).map(function(c) { return esc(c.spanish); }).join(', ');
+  if (stale.length > 2) preview += ' +' + (stale.length - 2) + ' more';
+  return '<div class="card" style="border-left:4px solid var(--primary);margin-bottom:14px;background:rgba(232,93,4,0.04);">' +
+    '<div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.6px;color:var(--primary);margin-bottom:5px;">📝 Your Phrases Need Practice</div>' +
+    '<div style="display:flex;align-items:center;gap:10px;">' +
+      '<div style="flex:1;">' +
+        '<div style="font-weight:700;font-size:0.9rem;">' + stale.length + ' custom phrase' + (stale.length !== 1 ? 's' : '') + ' unreviewed</div>' +
+        '<div style="font-size:0.72rem;color:var(--muted);margin-top:2px;">' + preview + '</div>' +
+      '</div>' +
+      '<button class="btn btn-primary btn-sm" style="flex-shrink:0;" onclick="startCustomPhraseSession()">Practice →</button>' +
+    '</div>' +
+  '</div>';
+}
+
 function renderNemesisCard() {
   var best = null, bestRate = 0;
   Object.keys(S.progress).forEach(function(id) {
@@ -5063,6 +5086,7 @@ function renderToday() {
     renderFadingPhrasesCard() +
     renderDomainWeaknessCard() +
     renderNemesisCard() +
+    renderCustomPhrasesNudge() +
     renderFreezeCard() +
     canDoCard +
     reviewCard +
@@ -10263,12 +10287,26 @@ const TAB_RENDERERS = {
 
 let activeTab = 'today';
 
+function updateTabBadges() {
+  var due = getDueReviewItems().length;
+  var overdue = getOverdueCount();
+  var practiceBtn = document.querySelector('.tab-btn[data-tab="practice"]');
+  if (!practiceBtn) return;
+  if (due > 0) {
+    var color = overdue > 0 ? 'var(--red)' : 'var(--primary)';
+    practiceBtn.innerHTML = '🎙️ Practice <span style="background:' + color + ';color:#fff;font-size:0.58rem;font-weight:900;padding:1px 5px;border-radius:99px;vertical-align:middle;margin-left:1px;line-height:1.6;">' + due + '</span>';
+  } else {
+    practiceBtn.innerHTML = '🎙️ Practice';
+  }
+}
+
 function switchTab(tab) {
   activeTab = tab;
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
   const renderer = TAB_RENDERERS[tab];
   document.getElementById('main-content').innerHTML = renderer ? renderer() : '';
   window.scrollTo(0, 0);
+  updateTabBadges();
 }
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
