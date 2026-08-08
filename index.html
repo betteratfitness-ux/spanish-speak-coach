@@ -5082,6 +5082,7 @@ function renderToday() {
     lessonCard +
     statsRow +
     xpGoalCard +
+    renderSmartSessionCard() +
     renderAlmostMasteredCard() +
     renderFadingPhrasesCard() +
     renderDomainWeaknessCard() +
@@ -8675,6 +8676,71 @@ function toggleSetting(key, toggleId) {
 // ===================================================
 // EMERGENCY DAY
 // ===================================================
+function buildSmartSession() {
+  var seen = {};
+  var items = [];
+  function add(item) {
+    if (!item || seen[item.id]) return;
+    seen[item.id] = true;
+    items.push(item);
+  }
+  var allC = getAllContent();
+  // 1. Overdue SRS (up to 5)
+  getDueReviewItems().slice(0, 5).forEach(function(id) {
+    add(allC.find(function(c) { return c.id === id; }));
+  });
+  // 2. Almost mastered (up to 3)
+  getAlmostMasteredPhrases().slice(0, 3).forEach(function(id) {
+    add(allC.find(function(c) { return c.id === id; }));
+  });
+  // 3. Fading phrases (up to 2)
+  getFadingPhrases().slice(0, 2).forEach(function(item) { add(item); });
+  // 4. Weak spots to fill up to 12
+  getWeakItems().forEach(function(item) {
+    if (items.length < 12) add(item);
+  });
+  // 5. New/unseen phrases if still under 8
+  if (items.length < 8) {
+    allC.forEach(function(c) {
+      if (items.length < 12 && !S.progress[c.id]) add(c);
+    });
+  }
+  return items.slice(0, 12);
+}
+
+function startSmartSession() {
+  var items = buildSmartSession();
+  if (!items.length) { switchTab('practice'); return; }
+  modeState = { mode: 'en-to-es', items: items, index: 0, results: [], revealed: false, showHint: false, backTab: 'today' };
+  renderModeCard();
+}
+
+function renderSmartSessionCard() {
+  var due = getDueReviewItems().length;
+  var almost = getAlmostMasteredPhrases().length;
+  var fading = getFadingPhrases().length;
+  var weak = getWeakItems().length;
+  var sessionItems = buildSmartSession();
+  var total = sessionItems.length;
+  if (total === 0) return '';
+  var parts = [];
+  if (due > 0)    parts.push(Math.min(due, 5)    + ' review' + (Math.min(due, 5) !== 1 ? 's' : '') + ' due');
+  if (almost > 0) parts.push(Math.min(almost, 3) + ' almost mastered');
+  if (fading > 0) parts.push(Math.min(fading, 2) + ' fading');
+  if (parts.length === 0 && weak > 0) parts.push(Math.min(weak, total) + ' weak spots');
+  if (parts.length === 0) parts.push(total + ' phrases selected');
+  return '<div class="card" style="border-left:4px solid var(--primary);margin-bottom:14px;background:rgba(232,93,4,0.05);">' +
+    '<div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.6px;color:var(--primary);margin-bottom:6px;">🎯 Today\'s Smart Session</div>' +
+    '<div style="display:flex;align-items:center;gap:10px;">' +
+      '<div style="flex:1;">' +
+        '<div style="font-weight:700;font-size:0.95rem;margin-bottom:2px;">' + total + '-card personalized drill</div>' +
+        '<div style="font-size:0.72rem;color:var(--muted);">' + parts.join(' · ') + '</div>' +
+      '</div>' +
+      '<button class="btn btn-primary" style="flex-shrink:0;padding:10px 16px;" onclick="startSmartSession()">▶ Start</button>' +
+    '</div>' +
+  '</div>';
+}
+
 function startEmergencyDay() {
   const phrases = CONTENT.filter(c => c.domain === 'D1').sort(() => Math.random() - 0.5).slice(0, 3);
   modeState = { mode: 'listen-repeat', items: phrases, index: 0, results: [], revealed: false, isEmergency: true };
